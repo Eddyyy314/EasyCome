@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Easy Come crea gestionali personalizzati per piccole attività: più ordine, meno lavoro manuale." />
+  <meta name="theme-color" content="#f3f0e8" />
+  <title>Easy Come — Gestionali semplici per attività reali</title>
+
+  <style>
+    :root {
+      --paper: #f3f0e8;
+      --white: #fffdf8;
+      --ink: #171717;
+      --muted: #62605b;
+      --line: #d8d2c7;
+      --accent: #ed5c3b;
+      --accent-dark: #c83f23;
+      --green: #1f6b4f;
+      --green-soft: #dfece5;
+      --blue: #294d78;
+      --blue-soft: #dfe8f2;
+      --radius: 18px;
+      --max: 1180px;
+      --shadow: 0 18px 50px rgba(29, 25, 19, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+
+    .container {
+      width: min(calc(100% - 36px), var(--max));
+      margin-inline: auto;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(243, 240, 232, 0.94);
+      border-bottom: 1px solid transparent;
+      backdrop-filter: blur(10px);
+      transition: border-color .2s ease;
+    }
+
+    .nav.scrolled { border-bottom-color: var(--line); }
+
+    .nav-inner {
+      height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: -0.035em;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 16px;
+      border: 3px solid var(--ink);
+      border-radius: 9px;
+    }
+
+    .brand-mark::before { left: 1px; top: 4px; }
+    .brand-mark::after { right: 1px; bottom: 4px; border-color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      color: var(--muted);
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .nav-links a:hover { color: var(--ink); }
+
+    .btn {
+      min-height: 49px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 21px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform .18s ease, background .18s ease, color .18s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .btn-primary {
+      color: white;
+      background: var(--ink);
+    }
+
+    .btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+
+    .btn-secondary { background: transparent; }
+    .btn-secondary:hover { background: var(--white); }
+
+    .btn-small {
+      min-height: 42px;
+      padding-inline: 17px;
+      font-size: .88rem;
+    }
+
+    .mobile-toggle {
+      display: none;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .hero {
+      padding: 94px 0 92px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.03fr .97fr;
+      gap: 70px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 2px;
+      background: currentColor;
+    }
+
+    h1 {
+      max-width: 760px;
+      margin: 20px 0 24px;
+      font-size: clamp(3.5rem, 7.2vw, 6.8rem);
+      line-height: .92;
+      letter-spacing: -0.075em;
+    }
+
+    .underline {
+      position: relative;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .underline::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -5px;
+      height: 8px;
+      background: var(--accent);
+      transform: rotate(-1.2deg);
+      z-index: -1;
+    }
+
+    .hero-copy {
+      max-width: 650px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 1.5vw, 1.22rem);
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 31px;
+    }
+
+    .hero-note {
+      margin-top: 23px;
+      color: var(--muted);
+      font-size: .87rem;
+    }
+
+    .workflow-card {
+      padding: 25px;
+      border: 1px solid var(--ink);
+      border-radius: 26px;
+      background: var(--white);
+      box-shadow: 12px 12px 0 var(--ink);
+      transform: rotate(1.1deg);
+    }
+
+    .workflow-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .workflow-title {
+      font-size: 1.03rem;
+      font-weight: 900;
+    }
+
+    .workflow-label {
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: var(--green);
+      background: var(--green-soft);
+      font-size: .7rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .workflow-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 17px;
+    }
+
+    .workflow-row {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      align-items: center;
+      gap: 13px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .workflow-number {
+      width: 35px;
+      height: 35px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--ink);
+      font-size: .8rem;
+      font-weight: 900;
+    }
+
+    .workflow-row:nth-child(2) .workflow-number { background: var(--blue); }
+    .workflow-row:nth-child(3) .workflow-number { background: var(--green); }
+    .workflow-row:nth-child(4) .workflow-number { background: var(--accent); }
+
+    .workflow-main strong {
+      display: block;
+      font-size: .93rem;
+    }
+
+    .workflow-main span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: .76rem;
+      line-height: 1.35;
+    }
+
+    .workflow-status {
+      padding: 6px 8px;
+      border-radius: 8px;
+      color: var(--green);
+      background: var(--green-soft);
+      font-size: .67rem;
+      font-weight: 900;
+    }
+
+    .proof-strip {
+      padding: 22px 0;
+      border-bottom: 1px solid var(--line);
+      background: var(--white);
+    }
+
+    .proof-inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px 48px;
+      color: var(--muted);
+      font-size: .87rem;
+      font-weight: 800;
+    }
+
+    .proof-inner span::before {
+      content: "✓";
+      margin-right: 8px;
+      color: var(--green);
+    }
+
+    section { padding: 105px 0; }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 48px;
+    }
+
+    .section-kicker {
+      color: var(--accent-dark);
+      font-size: .77rem;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 13px 0 18px;
+      font-size: clamp(2.35rem, 5.2vw, 4.7rem);
+      line-height: .98;
+      letter-spacing: -0.06em;
+    }
+
+    .section-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.06rem;
+      line-height: 1.7;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .service-card {
+      min-height: 290px;
+      padding: 27px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--white);
+      transition: transform .2s ease, border-color .2s ease;
+    }
+
+    .service-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--ink);
+    }
+
+    .service-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: white;
+      background: var(--blue);
+      font-weight: 900;
+    }
+
+    .service-card:nth-child(2) .service-icon { background: var(--green); }
+    .service-card:nth-child(3) .service-icon { background: var(--accent); }
+
+    .service-card h3 {
+      margin: 31px 0 12px;
+      font-size: 1.28rem;
+      letter-spacing: -.025em;
+    }
+
+    .service-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .service-list {
+      list-style: none;
+      padding: 0;
+      margin: 22px 0 0;
+      display: grid;
+      gap: 10px;
+      font-size: .83rem;
+      font-weight: 800;
+    }
+
+    .service-list li::before {
+      content: "—";
+      margin-right: 8px;
+      color: var(--accent);
+    }
+
+    .before-after {
+      background: var(--ink);
+      color: white;
+    }
+
+    .before-after .section-copy { color: #c6c2ba; }
+    .before-after .section-kicker { color: #ff957d; }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .compare-card {
+      padding: 28px;
+      border: 1px solid #393939;
+      border-radius: var(--radius);
+      background: #202020;
+    }
+
+    .compare-card.good {
+      color: var(--ink);
+      background: var(--white);
+      border-color: var(--white);
+    }
+
+    .compare-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 21px;
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
+    .compare-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #777;
+    }
+
+    .compare-card.good .compare-dot { background: var(--green); }
+
+    .compare-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 13px;
+    }
+
+    .compare-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.5;
+    }
+
+    .compare-list li::before { content: "×"; color: #ff8b76; font-weight: 900; }
+    .compare-card.good .compare-list li::before { content: "✓"; color: var(--green); }
+
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .step {
+      padding: 23px;
+      border-top: 3px solid var(--ink);
+      background: var(--white);
+      min-height: 230px;
+    }
+
+    .step:nth-child(2) { border-color: var(--blue); }
+    .step:nth-child(3) { border-color: var(--green); }
+    .step:nth-child(4) { border-color: var(--accent); }
+
+    .step-number {
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+    }
+
+    .step h3 {
+      margin: 38px 0 10px;
+      font-size: 1.15rem;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.6;
+    }
+
+    .case-layout {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 54px;
+      align-items: center;
+    }
+
+    .case-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 27px;
+    }
+
+    .case-tag {
+      padding: 8px 11px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      background: var(--white);
+      font-size: .77rem;
+      font-weight: 800;
+    }
+
+    .case-board {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .case-board-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .case-board-title { font-weight: 900; }
+
+    .case-filter {
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: .72rem;
+      font-weight: 900;
+    }
+
+    .booking-table {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      overflow: hidden;
+    }
+
+    .booking-row {
+      display: grid;
+      grid-template-columns: 1.1fr .8fr .8fr .65fr;
+      gap: 8px;
+      padding: 12px 13px;
+      border-bottom: 1px solid var(--line);
+      font-size: .76rem;
+      align-items: center;
+    }
+
+    .booking-row:last-child { border-bottom: 0; }
+    .booking-row.header { color: var(--muted); background: #f7f4ed; font-weight: 900; }
+
+    .status-pill {
+      justify-self: start;
+      padding: 5px 7px;
+      border-radius: 7px;
+      color: var(--green);
+      background: var(--green-soft);
+      font-size: .65rem;
+      font-weight: 900;
+    }
+
+    .quote-band {
+      background: var(--accent);
+      color: white;
+    }
+
+    .quote-band-inner {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .quote-band h2 { margin-top: 0; }
+    .quote-band p { margin: 0; max-width: 700px; line-height: 1.65; color: #ffe9e3; }
+
+    .quote-band .btn {
+      justify-self: end;
+      color: white;
+      border-color: white;
+    }
+
+    .quote-band .btn:hover {
+      color: var(--ink);
+      background: white;
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: .82fr 1.18fr;
+      gap: 54px;
+      align-items: start;
+    }
+
+    details {
+      border-top: 1px solid var(--line);
+    }
+
+    details:last-child { border-bottom: 1px solid var(--line); }
+
+    summary {
+      padding: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      list-style: none;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; color: var(--accent); font-size: 1.25rem; }
+    details[open] summary::after { content: "−"; }
+
+    details p {
+      margin: 0;
+      padding: 0 0 21px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .contact-box {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 50px;
+      padding: 43px;
+      border: 1px solid var(--ink);
+      border-radius: 24px;
+      background: var(--white);
+      box-shadow: 10px 10px 0 var(--ink);
+    }
+
+    .contact-copy h2 { margin-top: 0; }
+    .contact-copy p { color: var(--muted); line-height: 1.7; }
+
+    .contact-note {
+      margin-top: 22px;
+      padding: 15px;
+      border-left: 4px solid var(--green);
+      background: var(--green-soft);
+      color: #244b3d;
+      line-height: 1.5;
+      font-size: .87rem;
+    }
+
+    form { display: grid; gap: 13px; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      font-size: .8rem;
+      font-weight: 900;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+      color: var(--ink);
+      background: white;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 3px rgba(23, 23, 23, .08);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-success {
+      display: none;
+      padding: 13px 14px;
+      border-radius: 10px;
+      color: var(--green);
+      background: var(--green-soft);
+      font-size: .85rem;
+      line-height: 1.5;
+    }
+
+    .form-success.form-error {
+      color: #8b2f20;
+      background: #f4dfda;
+      border: 1px solid #e5b8ae;
+    }
+
+    .btn:disabled {
+      cursor: wait;
+      opacity: .7;
+      transform: none;
+    }
+
+    footer {
+      padding: 43px 0 34px;
+      color: var(--muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding-top: 28px;
+      border-top: 1px solid var(--line);
+      font-size: .82rem;
+    }
+
+    .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+
+    .reveal.visible { opacity: 1; transform: none; }
+
+
+
+    /* Assistente Easy Come */
+    .chat-launcher {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 120;
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      color: white;
+      background: var(--accent);
+      box-shadow: 5px 5px 0 var(--ink);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .chat-launcher:hover {
+      transform: translateY(-3px);
+      box-shadow: 7px 7px 0 var(--ink);
+    }
+
+    .chat-launcher svg { width: 27px; height: 27px; }
+
+    .chat-notification {
+      position: absolute;
+      top: -3px;
+      right: -2px;
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--paper);
+      border-radius: 50%;
+      color: white;
+      background: var(--green);
+      font-size: .62rem;
+      font-weight: 900;
+    }
+
+    .chat-panel {
+      position: fixed;
+      right: 22px;
+      bottom: 98px;
+      z-index: 119;
+      width: min(390px, calc(100vw - 28px));
+      height: min(590px, calc(100vh - 130px));
+      display: none;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+      border: 2px solid var(--ink);
+      border-radius: 22px;
+      background: var(--white);
+      box-shadow: 9px 9px 0 var(--ink);
+    }
+
+    .chat-panel.open { display: grid; }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 17px;
+      color: white;
+      background: var(--ink);
+    }
+
+    .chat-agent {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .chat-avatar {
+      width: 39px;
+      height: 39px;
+      flex: 0 0 39px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: white;
+      background: var(--accent);
+      font-weight: 900;
+    }
+
+    .chat-agent strong { display: block; font-size: .9rem; }
+
+    .chat-agent span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 3px;
+      color: #cfcfcf;
+      font-size: .69rem;
+    }
+
+    .online-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #74d6a6;
+    }
+
+    .chat-close {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      border: 1px solid #4a4a4a;
+      border-radius: 50%;
+      color: white;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .chat-messages {
+      overflow-y: auto;
+      padding: 17px;
+      background: #f8f5ee;
+      scroll-behavior: smooth;
+    }
+
+    .chat-message {
+      width: fit-content;
+      max-width: 86%;
+      margin-bottom: 10px;
+      padding: 11px 13px;
+      border: 1px solid var(--line);
+      border-radius: 15px 15px 15px 4px;
+      background: white;
+      font-size: .84rem;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .chat-message.user {
+      margin-left: auto;
+      color: white;
+      border-color: var(--ink);
+      border-radius: 15px 15px 4px 15px;
+      background: var(--ink);
+    }
+
+    .chat-time {
+      display: block;
+      margin-top: 5px;
+      color: #8a867f;
+      font-size: .61rem;
+    }
+
+    .chat-message.user .chat-time { color: #c9c9c9; }
+
+    .chat-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: 6px 0 14px;
+    }
+
+    .chat-chip,
+    .chat-quote-link {
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--white);
+      cursor: pointer;
+      font-size: .72rem;
+      font-weight: 800;
+    }
+
+    .chat-chip { padding: 8px 10px; }
+    .chat-chip:hover { color: white; background: var(--ink); }
+
+    .chat-quote-link {
+      display: inline-flex;
+      margin-top: 9px;
+      padding: 8px 11px;
+      color: white;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .typing-indicator {
+      display: none;
+      width: fit-content;
+      margin-bottom: 10px;
+      padding: 11px 14px;
+      border: 1px solid var(--line);
+      border-radius: 15px 15px 15px 4px;
+      background: white;
+    }
+
+    .typing-indicator.show { display: flex; gap: 4px; }
+
+    .typing-indicator span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #96918a;
+      animation: chatTyping 1s infinite ease-in-out;
+    }
+
+    .typing-indicator span:nth-child(2) { animation-delay: .13s; }
+    .typing-indicator span:nth-child(3) { animation-delay: .26s; }
+
+    @keyframes chatTyping {
+      0%, 60%, 100% { transform: translateY(0); opacity: .45; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    .chat-footer {
+      padding: 12px;
+      border-top: 1px solid var(--line);
+      background: var(--white);
+    }
+
+    .chat-form {
+      display: grid;
+      grid-template-columns: 1fr 44px;
+      gap: 8px;
+    }
+
+    .chat-input {
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: white;
+      font-size: .82rem;
+    }
+
+    .chat-input:focus { border-color: var(--ink); }
+
+    .chat-send {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--ink);
+      border-radius: 12px;
+      color: white;
+      background: var(--ink);
+      cursor: pointer;
+    }
+
+    .chat-send svg { width: 19px; height: 19px; }
+
+    .chat-disclaimer {
+      margin-top: 8px;
+      color: var(--muted);
+      text-align: center;
+      font-size: .62rem;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 980px) {
+      .nav-links {
+        position: fixed;
+        inset: 78px 18px auto;
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        padding: 16px;
+        border: 1px solid var(--ink);
+        border-radius: 16px;
+        background: var(--paper);
+        box-shadow: var(--shadow);
+      }
+
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: 11px; }
+      .mobile-toggle { display: block; }
+      .nav-cta { display: none; }
+
+      .hero-grid,
+      .case-layout,
+      .quote-band-inner,
+      .faq-grid,
+      .contact-box {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-grid { gap: 50px; }
+      .workflow-card { transform: none; }
+      .quote-band .btn { justify-self: start; }
+      .services-grid { grid-template-columns: 1fr 1fr; }
+      .service-card:last-child { grid-column: span 2; }
+      .process-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .container { width: min(calc(100% - 24px), var(--max)); }
+      .nav-inner { height: 70px; }
+      .nav-links { inset-top: 70px; }
+      .hero { padding: 55px 0 70px; }
+      h1 { font-size: clamp(3.2rem, 17vw, 4.7rem); }
+      section { padding: 78px 0; }
+      .hero-actions { display: grid; }
+      .btn { width: 100%; }
+      .services-grid, .process-grid, .compare-grid { grid-template-columns: 1fr; }
+      .service-card:last-child { grid-column: auto; }
+      .workflow-row { grid-template-columns: 38px 1fr; }
+      .workflow-status { grid-column: 2; justify-self: start; }
+      .booking-row { grid-template-columns: 1fr 1fr; }
+      .booking-row > :nth-child(3), .booking-row > :nth-child(4) { display: none; }
+      .contact-box { padding: 24px; box-shadow: 6px 6px 0 var(--ink); }
+      .field-row { grid-template-columns: 1fr; }
+      .footer-inner { align-items: flex-start; flex-direction: column; }
+      .chat-launcher { right: 14px; bottom: 14px; width: 58px; height: 58px; }
+      .chat-panel { right: 14px; bottom: 84px; height: min(570px, calc(100vh - 105px)); box-shadow: 6px 6px 0 var(--ink); }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="#home" class="brand" aria-label="Easy Come home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Easy Come</span>
+      </a>
+
+      <div class="nav-links" id="navLinks">
+        <a href="#servizi">Cosa facciamo</a>
+        <a href="#metodo">Come funziona</a>
+        <a href="#esempio">Un esempio</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contatti">Preventivo</a>
+      </div>
+
+      <a href="#contatti" class="btn btn-primary btn-small nav-cta">Richiedi un preventivo</a>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Apri menu">☰</button>
+    </div>
+  </nav>
+
+  <main>
+    <header class="hero" id="home">
+      <div class="container hero-grid">
+        <div class="reveal">
+          <div class="eyebrow">Gestionali su misura</div>
+          <h1>Più ordine.<br><span class="underline">Meno caos.</span></h1>
+          <p class="hero-copy">
+            Easy Come crea gestionali semplici per piccole attività. Mettiamo insieme
+            prenotazioni, clienti, pagamenti, calendario e attività quotidiane in un solo posto,
+            costruito sul tuo modo di lavorare.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#contatti" class="btn btn-primary">Richiedi un preventivo</a>
+            <a href="#esempio" class="btn btn-secondary">Guarda un esempio</a>
+          </div>
+
+          <div class="hero-note">Nessun pacchetto standard: il progetto viene valutato in base a ciò che ti serve davvero.</div>
+        </div>
+
+        <div class="workflow-card reveal" aria-label="Esempio di flusso automatizzato">
+          <div class="workflow-top">
+            <div class="workflow-title">Da una richiesta a una prenotazione</div>
+            <div class="workflow-label">Tutto collegato</div>
+          </div>
+
+          <div class="workflow-list">
+            <div class="workflow-row">
+              <div class="workflow-number">1</div>
+              <div class="workflow-main">
+                <strong>Arriva la richiesta</strong>
+                <span>Il cliente compila il modulo dal sito.</span>
+              </div>
+              <div class="workflow-status">Ricevuta</div>
+            </div>
+
+            <div class="workflow-row">
+              <div class="workflow-number">2</div>
+              <div class="workflow-main">
+                <strong>Si aggiorna il gestionale</strong>
+                <span>I dati entrano senza copiarli a mano.</span>
+              </div>
+              <div class="workflow-status">Inserita</div>
+            </div>
+
+            <div class="workflow-row">
+              <div class="workflow-number">3</div>
+              <div class="workflow-main">
+                <strong>Controllo disponibilità</strong>
+                <span>Calendario e risorse vengono verificati.</span>
+              </div>
+              <div class="workflow-status">Disponibile</div>
+            </div>
+
+            <div class="workflow-row">
+              <div class="workflow-number">4</div>
+              <div class="workflow-main">
+                <strong>Conferma al cliente</strong>
+                <span>La pratica è pronta e ordinata.</span>
+              </div>
+              <div class="workflow-status">Confermata</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="proof-strip">
+      <div class="container proof-inner">
+        <span>Meno inserimenti manuali</span>
+        <span>Meno errori</span>
+        <span>Dati sempre ordinati</span>
+        <span>Accesso anche da telefono</span>
+      </div>
+    </div>
+
+    <section id="servizi">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-kicker">Cosa facciamo</div>
+          <h2>Un gestionale costruito intorno alla tua attività.</h2>
+          <p class="section-copy">
+            Non ti costringiamo ad adattarti a un software pieno di funzioni inutili.
+            Partiamo dai problemi quotidiani e realizziamo solo ciò che serve davvero.
+          </p>
+        </div>
+
+        <div class="services-grid">
+          <article class="service-card reveal">
+            <div class="service-icon">01</div>
+            <h3>Gestione operativa</h3>
+            <p>Clienti, prenotazioni, appuntamenti, ordini, pagamenti, scadenze e documenti in un unico ambiente.</p>
+            <ul class="service-list">
+              <li>Dashboard semplice</li>
+              <li>Ricerca rapida</li>
+              <li>Storico sempre disponibile</li>
+            </ul>
+          </article>
+
+          <article class="service-card reveal">
+            <div class="service-icon">02</div>
+            <h3>Automazioni utili</h3>
+            <p>Colleghiamo i passaggi ripetitivi per evitare copia e incolla, dimenticanze e aggiornamenti doppi.</p>
+            <ul class="service-list">
+              <li>Inserimento automatico</li>
+              <li>Conferme e notifiche</li>
+              <li>Calendari aggiornati</li>
+            </ul>
+          </article>
+
+          <article class="service-card reveal">
+            <div class="service-icon">03</div>
+            <h3>Collegamento con ciò che usi</h3>
+            <p>Quando possibile integriamo sito, moduli, email, fogli Excel e strumenti già presenti nella tua attività.</p>
+            <ul class="service-list">
+              <li>Sito e moduli</li>
+              <li>Email e messaggi</li>
+              <li>File e archivi esistenti</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="before-after">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-kicker">Il cambiamento</div>
+          <h2>Da mille strumenti a un flusso chiaro.</h2>
+          <p class="section-copy">L'obiettivo non è aggiungere un altro programma. È togliere passaggi inutili dal lavoro di ogni giorno.</p>
+        </div>
+
+        <div class="compare-grid">
+          <div class="compare-card reveal">
+            <div class="compare-title"><span class="compare-dot"></span> Prima</div>
+            <ul class="compare-list">
+              <li>Richieste sparse tra chat, email e telefonate</li>
+              <li>Dati copiati più volte in file diversi</li>
+              <li>Calendari non sempre aggiornati</li>
+              <li>Difficoltà nel trovare informazioni vecchie</li>
+            </ul>
+          </div>
+
+          <div class="compare-card good reveal">
+            <div class="compare-title"><span class="compare-dot"></span> Con Easy Come</div>
+            <ul class="compare-list">
+              <li>Informazioni raccolte nello stesso posto</li>
+              <li>Passaggi automatici dove possibile</li>
+              <li>Situazione chiara e aggiornata</li>
+              <li>Meno tempo perso nella gestione</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="metodo">
+      <div class="container">
+        <div class="section-head reveal">
+          <div class="section-kicker">Come lavoriamo</div>
+          <h2>Prima capiamo il lavoro. Poi costruiamo il sistema.</h2>
+        </div>
+
+        <div class="process-grid">
+          <article class="step reveal">
+            <div class="step-number">FASE 01</div>
+            <h3>Ci racconti il problema</h3>
+            <p>Vediamo come gestisci oggi clienti, prenotazioni, incassi e attività.</p>
+          </article>
+
+          <article class="step reveal">
+            <div class="step-number">FASE 02</div>
+            <h3>Definiamo la soluzione</h3>
+            <p>Selezioniamo le funzioni davvero necessarie e il flusso più semplice.</p>
+          </article>
+
+          <article class="step reveal">
+            <div class="step-number">FASE 03</div>
+            <h3>Realizziamo il gestionale</h3>
+            <p>Costruiamo, colleghiamo e testiamo il sistema sulla tua attività.</p>
+          </article>
+
+          <article class="step reveal">
+            <div class="step-number">FASE 04</div>
+            <h3>Lo miglioriamo nel tempo</h3>
+            <p>Nuove funzioni e automazioni possono essere aggiunte quando servono.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="esempio">
+      <div class="container case-layout">
+        <div class="reveal">
+          <div class="section-kicker">Un esempio concreto</div>
+          <h2>Un gestionale per prenotazioni e disponibilità.</h2>
+          <p class="section-copy">
+            Una struttura ricettiva può ricevere le richieste dal sito, registrare il cliente,
+            controllare le disponibilità e tenere sotto controllo arrivi, partenze e pagamenti
+            senza aggiornare manualmente più file.
+          </p>
+
+          <div class="case-tags">
+            <span class="case-tag">Prenotazioni</span>
+            <span class="case-tag">Calendario</span>
+            <span class="case-tag">Clienti</span>
+            <span class="case-tag">Pagamenti</span>
+            <span class="case-tag">Riepiloghi</span>
+          </div>
+        </div>
+
+        <div class="case-board reveal">
+          <div class="case-board-top">
+            <div>
+              <div class="case-board-title">Prenotazioni della settimana</div>
+              <div class="hero-note" style="margin-top:5px">Esempio di schermata personalizzata</div>
+            </div>
+            <div class="case-filter">18–24 agosto</div>
+          </div>
+
+          <div class="booking-table">
+            <div class="booking-row header">
+              <span>Cliente</span><span>Arrivo</span><span>Partenza</span><span>Stato</span>
+            </div>
+            <div class="booking-row">
+              <strong>Marco Rossi</strong><span>18 ago</span><span>21 ago</span><span class="status-pill">Confermata</span>
+            </div>
+            <div class="booking-row">
+              <strong>Giulia Bianchi</strong><span>19 ago</span><span>24 ago</span><span class="status-pill">Confermata</span>
+            </div>
+            <div class="booking-row">
+              <strong>Luca Ferri</strong><span>22 ago</span><span>25 ago</span><span class="status-pill">In attesa</span>
+            </div>
+            <div class="booking-row">
+              <strong>Anna Romano</strong><span>23 ago</span><span>27 ago</span><span class="status-pill">Confermata</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="quote-band">
+      <div class="container quote-band-inner reveal">
+        <div>
+          <h2>Ogni attività è diversa. Anche il preventivo.</h2>
+          <p>Raccontaci cosa vuoi semplificare: valuteremo le funzioni necessarie e ti proporremo una soluzione costruita sul tuo caso.</p>
+        </div>
+        <a href="#contatti" class="btn">Richiedi il tuo preventivo</a>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="container faq-grid">
+        <div class="reveal">
+          <div class="section-kicker">Domande frequenti</div>
+          <h2>Le cose importanti, prima di iniziare.</h2>
+        </div>
+
+        <div class="reveal">
+          <details open>
+            <summary>Quanto costa un gestionale?</summary>
+            <p>Dipende dal numero di funzioni, dalle automazioni e dagli strumenti da collegare. Per questo non proponiamo prezzi standard: dopo una prima analisi prepariamo un preventivo chiaro.</p>
+          </details>
+          <details>
+            <summary>Devo cambiare tutti gli strumenti che uso?</summary>
+            <p>No. Quando è possibile partiamo da ciò che utilizzi già e colleghiamo i vari strumenti in modo graduale.</p>
+          </details>
+          <details>
+            <summary>Posso usarlo da smartphone?</summary>
+            <p>Sì. Il gestionale viene progettato per essere utilizzabile da computer, tablet e telefono.</p>
+          </details>
+          <details>
+            <summary>Posso aggiungere funzioni in futuro?</summary>
+            <p>Sì. Il progetto può partire dalle funzioni essenziali e crescere nel tempo insieme all'attività.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section id="contatti">
+      <div class="container">
+        <div class="contact-box reveal">
+          <div class="contact-copy">
+            <div class="section-kicker">Richiedi un preventivo</div>
+            <h2>Raccontaci cosa vuoi semplificare.</h2>
+            <p>
+              Non serve conoscere termini tecnici. Descrivi semplicemente come lavori oggi,
+              quali strumenti usi e quali attività ti fanno perdere più tempo.
+            </p>
+            <div class="contact-note">
+              Dopo la richiesta potremo valutare il progetto e preparare un preventivo basato sulle funzioni realmente necessarie.
+            </div>
+          </div>
+
+          <form id="leadForm" action="https://formspree.io/f/xjgnlaew" method="POST" accept-charset="UTF-8">
+            <input type="hidden" name="_subject" value="Nuova richiesta di preventivo — Easy Come" />
+            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" />
+            <div class="field-row">
+              <label>
+                Nome e cognome
+                <input type="text" name="nome" placeholder="Il tuo nome" required />
+              </label>
+
+              <label>
+                Attività
+                <input type="text" name="attivita" placeholder="Nome o tipologia di attività" required />
+              </label>
+            </div>
+
+            <div class="field-row">
+              <label>
+                Email
+                <input type="email" name="email" placeholder="nome@email.it" required />
+              </label>
+
+              <label>
+                Numero di telefono
+                <input type="tel" name="telefono" placeholder="Facoltativo" />
+              </label>
+            </div>
+
+            <label>
+              Cosa vuoi gestire meglio?
+              <select name="esigenza">
+                <option>Prenotazioni e disponibilità</option>
+                <option>Clienti e appuntamenti</option>
+                <option>Ordini, lavori o interventi</option>
+                <option>Pagamenti e scadenze</option>
+                <option>Più attività collegate tra loro</option>
+                <option>Non lo so ancora</option>
+              </select>
+            </label>
+
+            <label>
+              Raccontaci come lavori oggi
+              <textarea name="messaggio" placeholder="Esempio: ricevo le richieste su WhatsApp, poi le copio in Excel e aggiorno manualmente il calendario..." required></textarea>
+            </label>
+
+            <button class="btn btn-primary" type="submit">Invia la richiesta di preventivo</button>
+
+            <div class="form-success" id="formSuccess" role="status" aria-live="polite">
+              Richiesta inviata correttamente. Ti ricontatteremo per capire meglio le tue esigenze e preparare il preventivo.
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button class="chat-launcher" id="chatLauncher" aria-label="Apri l'assistente Easy Come" aria-expanded="false">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M5 18.5 3.8 21l3.1-1.2c1.5.8 3.2 1.2 5.1 1.2 5 0 9-3.6 9-8s-4-8-9-8-9 3.6-9 8c0 2.1.8 4 2 5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M8 13h.01M12 13h.01M16 13h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    </svg>
+    <span class="chat-notification" id="chatNotification">1</span>
+  </button>
+
+  <aside class="chat-panel" id="chatPanel" aria-label="Assistente Easy Come" aria-hidden="true">
+    <div class="chat-header">
+      <div class="chat-agent">
+        <div class="chat-avatar">EC</div>
+        <div>
+          <strong>Assistente Easy Come</strong>
+          <span><i class="online-dot"></i> Risposte immediate</span>
+        </div>
+      </div>
+      <button class="chat-close" id="chatClose" aria-label="Chiudi assistente">✕</button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages" aria-live="polite">
+      <div class="chat-message">
+        Ciao! Sono l'assistente Easy Come. Rispondo alle domande generali sui nostri gestionali e sulle automazioni. Per richieste molto specifiche ti accompagno direttamente a una valutazione reale.
+        <span class="chat-time">Ora</span>
+      </div>
+
+      <div class="chat-suggestions" id="chatSuggestions">
+        <button class="chat-chip" type="button">Quanto costa?</button>
+        <button class="chat-chip" type="button">Cosa potete automatizzare?</button>
+        <button class="chat-chip" type="button">Quanto tempo serve?</button>
+        <button class="chat-chip" type="button">Funziona da telefono?</button>
+      </div>
+
+      <div class="typing-indicator" id="typingIndicator" aria-label="L'assistente sta scrivendo">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <div class="chat-footer">
+      <form class="chat-form" id="chatForm">
+        <input class="chat-input" id="chatInput" type="text" autocomplete="off" maxlength="300" placeholder="Scrivi una domanda..." aria-label="Scrivi una domanda" />
+        <button class="chat-send" type="submit" aria-label="Invia domanda">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="m4 4 17 8-17 8 3-8-3-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M7 12h14" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+      </form>
+      <div class="chat-disclaimer">Risponde alle domande generali senza inventare dettagli. I casi specifici vengono inviati a Easy Come per una valutazione reale.</div>
+    </div>
+  </aside>
+
+  <footer>
+    <div class="container footer-inner">
+      <a href="#home" class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Easy Come</span>
+      </a>
+      <div>© <span id="year"></span> Easy Come. Gestionali semplici per attività reali.</div>
+      <div class="footer-links">
+        <a href="#servizi">Servizi</a>
+        <a href="#esempio">Esempio</a>
+        <a href="#contatti">Preventivo</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById("nav");
+    const navLinks = document.getElementById("navLinks");
+    const mobileToggle = document.getElementById("mobileToggle");
+    const leadForm = document.getElementById("leadForm");
+    const formSuccess = document.getElementById("formSuccess");
+
+    window.addEventListener("scroll", () => {
+      nav.classList.toggle("scrolled", window.scrollY > 10);
+    });
+
+    mobileToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("open");
+      mobileToggle.textContent = navLinks.classList.contains("open") ? "✕" : "☰";
+    });
+
+    navLinks.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", () => {
+        navLinks.classList.remove("open");
+        mobileToggle.textContent = "☰";
+      });
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.11 });
+
+    document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+
+    leadForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const submitButton = leadForm.querySelector('button[type="submit"]');
+      const originalLabel = submitButton.textContent;
+      submitButton.disabled = true;
+      submitButton.textContent = "Invio in corso…";
+      formSuccess.style.display = "none";
+      formSuccess.classList.remove("form-error");
+
+      try {
+        const response = await fetch(leadForm.action, {
+          method: "POST",
+          body: new FormData(leadForm),
+          headers: { "Accept": "application/json" }
+        });
+
+        if (!response.ok) {
+          const error = new Error("Invio non riuscito");
+          error.status = response.status;
+          throw error;
+        }
+
+        leadForm.reset();
+        formSuccess.textContent = "Richiesta inviata correttamente. Ti ricontatteremo per capire meglio le tue esigenze e preparare il preventivo.";
+        formSuccess.style.display = "block";
+        formSuccess.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (error) {
+        formSuccess.textContent = error.status === 429
+          ? "Sono state inviate troppe richieste in poco tempo. Attendi qualche minuto e riprova."
+          : "Non siamo riusciti a inviare la richiesta. Controlla la connessione e riprova tra poco.";
+        formSuccess.classList.add("form-error");
+        formSuccess.style.display = "block";
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = originalLabel;
+      }
+    });
+
+
+    // Assistente Easy Come: motore conversazionale locale, senza servizi esterni.
+    const chatLauncher = document.getElementById("chatLauncher");
+    const chatPanel = document.getElementById("chatPanel");
+    const chatClose = document.getElementById("chatClose");
+    const chatNotification = document.getElementById("chatNotification");
+    const chatMessages = document.getElementById("chatMessages");
+    const chatForm = document.getElementById("chatForm");
+    const chatInput = document.getElementById("chatInput");
+    const typingIndicator = document.getElementById("typingIndicator");
+    const quoteTextarea = leadForm.querySelector('textarea[name="messaggio"]');
+
+    const conversation = {
+      lastIntent: null,
+      lastQuestion: "",
+      turns: 0
+    };
+
+    const normalizeText = (value) => value
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9€\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const tokenise = (value) => normalizeText(value)
+      .split(" ")
+      .filter(token => token.length > 1);
+
+    const commonWords = new Set([
+      "che", "cosa", "come", "con", "per", "una", "uno", "del", "della", "delle",
+      "degli", "dei", "nel", "nella", "nelle", "sono", "avete", "potete", "posso",
+      "fare", "fate", "questo", "questa", "anche", "piu", "molto", "serve", "vorrei"
+    ]);
+
+    const intents = [
+      {
+        id: "greeting",
+        phrases: ["ciao", "salve", "buongiorno", "buonasera", "hey", "ehi"],
+        keywords: ["ciao", "salve", "buongiorno", "buonasera", "hey", "ehi"],
+        responses: [
+          "Ciao! Raccontami pure cosa vuoi semplificare nella tua attività. Posso aiutarti su gestionali, automazioni, funzionamento, tempi e preventivi.",
+          "Ciao! Sono qui per spiegarti come lavora Easy Come. Puoi chiedermi, ad esempio, cosa possiamo automatizzare o come nasce un gestionale su misura."
+        ]
+      },
+      {
+        id: "thanks",
+        phrases: ["grazie", "perfetto", "tutto chiaro", "va bene", "ottimo"],
+        keywords: ["grazie", "perfetto", "chiaro", "ottimo"],
+        responses: [
+          "Volentieri! Quando vuoi puoi raccontarmi il passaggio che oggi ti fa perdere più tempo.",
+          "Perfetto. Per una valutazione concreta basta descrivere come lavori oggi e cosa vorresti automatizzare."
+        ]
+      },
+      {
+        id: "services",
+        phrases: ["cosa fate", "che servizi offrite", "cos e easy come", "come funziona easy come", "di cosa vi occupate"],
+        keywords: ["servizi", "gestionale", "easy", "come", "azienda", "software", "piattaforma"],
+        responses: [
+          "Easy Come realizza gestionali personalizzati per piccole attività. Riuniamo in un unico sistema ciò che oggi viene gestito tra fogli, chat, email e agenda: clienti, prenotazioni, appuntamenti, disponibilità, lavori, pagamenti e riepiloghi.",
+          "Partiamo dal modo in cui lavori oggi e costruiamo un sistema semplice attorno alla tua attività. L'obiettivo è ridurre passaggi manuali, errori e informazioni sparse."
+        ]
+      },
+      {
+        id: "price",
+        phrases: ["quanto costa", "che prezzo ha", "avete dei prezzi", "quanto viene", "costo del gestionale"],
+        keywords: ["costo", "costa", "prezzo", "prezzi", "budget", "tariffa", "euro", "€"],
+        responses: [
+          "Non esiste un prezzo standard: dipende dalle funzioni, dalle automazioni e dagli strumenti da collegare. Dopo una breve analisi ricevi un preventivo chiaro e costruito sul progetto reale.",
+          "Il costo viene definito solo dopo aver capito cosa deve fare il gestionale. In questo modo non paghi funzioni inutili e il preventivo resta legato alle tue esigenze."
+        ],
+        action: "Richiedi un preventivo"
+      },
+      {
+        id: "quote",
+        phrases: ["come richiedo un preventivo", "voglio un preventivo", "richiedere preventivo", "essere ricontattato", "parlare con voi"],
+        keywords: ["preventivo", "contatto", "ricontattare", "chiamata", "appuntamento", "parlare", "scrivere"],
+        responses: [
+          "Compila il modulo indicando la tua attività, gli strumenti che usi oggi e cosa vuoi semplificare. La richiesta arriva direttamente a Easy Come e verrà valutata prima di preparare il preventivo.",
+          "Puoi usare il modulo qui sotto. Non servono termini tecnici: è sufficiente descrivere il lavoro manuale che vuoi eliminare."
+        ],
+        action: "Vai al modulo"
+      },
+      {
+        id: "timeline",
+        phrases: ["quanto tempo serve", "quanto ci vuole", "tempi di realizzazione", "quando e pronto", "tempo di consegna"],
+        keywords: ["tempo", "tempi", "giorni", "settimane", "consegna", "pronto", "realizzazione", "sviluppo"],
+        responses: [
+          "I tempi dipendono dalla complessità. Un sistema essenziale richiede meno lavoro di un progetto con più ruoli, automazioni e integrazioni. Dopo l'analisi indichiamo fasi e tempi realistici nel preventivo.",
+          "Prima definiamo le funzioni indispensabili, poi organizziamo il progetto per fasi. La stima precisa viene data solo dopo aver verificato il flusso di lavoro."
+        ]
+      },
+      {
+        id: "process",
+        phrases: ["come lavorate", "come si inizia", "come nasce il gestionale", "quali sono i passaggi", "da dove partiamo"],
+        keywords: ["iniziare", "partire", "procedura", "passaggi", "analisi", "progetto", "metodo"],
+        responses: [
+          "Il percorso è semplice: analizziamo come lavori, scegliamo le funzioni davvero utili, costruiamo e testiamo il sistema, poi ti aiutiamo a usarlo. In seguito può essere ampliato.",
+          "Si parte da una conversazione sul lavoro quotidiano, non dalla tecnologia. Solo dopo definiamo moduli, automazioni e collegamenti necessari."
+        ]
+      },
+      {
+        id: "automation",
+        phrases: ["cosa potete automatizzare", "quali automazioni fate", "si puo automatizzare", "lavoro automatico"],
+        keywords: ["automatizzare", "automazione", "automatico", "ripetitivo", "manualmente", "notifica", "conferma", "aggiornare"],
+        responses: [
+          "Possiamo automatizzare registrazione delle richieste, aggiornamento di calendari e archivi, conferme, promemoria, assegnazioni, riepiloghi e passaggi tra strumenti diversi. La fattibilità precisa dipende da come lavora la tua attività.",
+          "In generale automatizziamo i passaggi ripetitivi: inserire gli stessi dati più volte, controllare disponibilità, inviare conferme e aggiornare più file separati."
+        ]
+      },
+      {
+        id: "integrations",
+        phrases: ["cosa si puo collegare", "si integra con", "potete collegarlo", "strumenti compatibili"],
+        keywords: ["integrare", "integrazione", "collegare", "collegamento", "excel", "whatsapp", "email", "form", "modulo", "sito", "onedrive", "make", "zapier", "formspree", "calendar"],
+        responses: [
+          "Quando è tecnicamente possibile colleghiamo sito, moduli, email, file Excel, calendari e servizi di automazione. Prima verifichiamo accessi, limiti e compatibilità degli strumenti già usati.",
+          "Non è sempre necessario sostituire tutto. Possiamo mantenere alcuni strumenti esistenti e collegarli al nuovo flusso, dopo una verifica tecnica."
+        ]
+      },
+      {
+        id: "devices",
+        phrases: ["funziona da telefono", "si usa da smartphone", "posso usarlo da pc", "funziona online", "si usa fuori sede"],
+        keywords: ["telefono", "smartphone", "tablet", "mobile", "computer", "pc", "online", "ovunque", "remoto"],
+        responses: [
+          "Sì. Il gestionale può essere progettato per funzionare da computer, tablet e smartphone, così le informazioni restano accessibili anche fuori sede.",
+          "L'interfaccia può adattarsi ai diversi dispositivi. Le funzioni principali vengono organizzate per essere semplici anche da telefono."
+        ]
+      },
+      {
+        id: "customisation",
+        phrases: ["e personalizzato", "si puo modificare", "posso aggiungere funzioni", "e su misura", "puo crescere"],
+        keywords: ["personalizzato", "personalizzare", "misura", "modificare", "funzione", "funzioni", "aggiungere", "crescere", "modulo"],
+        responses: [
+          "Sì. Il gestionale viene costruito sulle funzioni realmente necessarie e può crescere nel tempo. Si può partire da una base essenziale e aggiungere nuovi moduli in seguito.",
+          "Non imponiamo un software identico a tutti: struttura, campi, schermate e automazioni vengono adattati al flusso dell'attività."
+        ]
+      },
+      {
+        id: "industries",
+        phrases: ["per quali attivita", "quali settori", "va bene per la mia attivita", "a chi e rivolto"],
+        keywords: ["settore", "attivita", "ristorante", "camper", "hotel", "b&b", "parrucchiere", "estetista", "artigiano", "studio", "negozio", "palestra", "impresa"],
+        responses: [
+          "Easy Come è pensato soprattutto per piccole attività che gestiscono clienti, prenotazioni, appuntamenti, ordini, lavori o disponibilità. La soluzione viene adattata al settore e al metodo di lavoro reale.",
+          "Può essere utile a strutture ricettive, professionisti, artigiani, centri servizi, ristorazione e molte altre attività. Per casi particolari facciamo prima una valutazione."
+        ]
+      },
+      {
+        id: "bookings",
+        phrases: ["gestire prenotazioni", "calendario disponibilita", "assegnazione automatica", "prenotazioni online"],
+        keywords: ["prenotazione", "prenotazioni", "disponibilita", "calendario", "posto", "camera", "piazzola", "appuntamento", "agenda"],
+        responses: [
+          "Possiamo creare un flusso in cui la richiesta entra nel sistema, aggiorna disponibilità e calendario, registra il cliente e mantiene lo stato della prenotazione. Regole e assegnazioni dipendono dall'attività.",
+          "Prenotazioni e disponibilità possono essere riunite in una sola vista, evitando aggiornamenti manuali su più strumenti."
+        ]
+      },
+      {
+        id: "customers",
+        phrases: ["gestione clienti", "archivio clienti", "scheda cliente", "crm"],
+        keywords: ["cliente", "clienti", "crm", "anagrafica", "contatti", "storico", "scheda"],
+        responses: [
+          "Il gestionale può raccogliere anagrafiche, contatti, richieste, storico delle attività e note in schede semplici da consultare. I campi vengono scelti in base a ciò che ti serve davvero.",
+          "Possiamo centralizzare le informazioni dei clienti e collegarle a prenotazioni, lavori, pagamenti o comunicazioni."
+        ]
+      },
+      {
+        id: "orders",
+        phrases: ["gestione ordini", "gestire lavori", "gestire interventi", "stato avanzamento"],
+        keywords: ["ordine", "ordini", "lavoro", "lavori", "intervento", "interventi", "commessa", "stato", "assegnazione"],
+        responses: [
+          "Possiamo organizzare ordini, lavori o interventi per stato, data, cliente e responsabile, con una vista chiara delle attività da completare.",
+          "Il flusso può mostrare cosa è da fare, in corso o completato, collegando ogni attività al cliente e alle relative scadenze."
+        ]
+      },
+      {
+        id: "payments",
+        phrases: ["gestire pagamenti", "controllare incassi", "scadenze di pagamento", "fatture"],
+        keywords: ["pagamento", "pagamenti", "incasso", "incassi", "scadenza", "scadenze", "fattura", "fatture", "saldo", "acconto"],
+        responses: [
+          "Il sistema può tenere traccia di acconti, saldi, scadenze e stato dei pagamenti. Per funzioni fiscali o fatturazione elettronica serve invece verificare gli strumenti da integrare.",
+          "Possiamo creare riepiloghi di pagamenti ricevuti, da ricevere e scaduti, collegati ai clienti o alle prenotazioni."
+        ]
+      },
+      {
+        id: "reports",
+        phrases: ["avere statistiche", "creare report", "vedere risultati", "dashboard"],
+        keywords: ["statistiche", "report", "dashboard", "riepilogo", "andamento", "numeri", "dati", "totale"],
+        responses: [
+          "Sì. Possiamo creare dashboard e riepiloghi con le informazioni utili all'attività, come prenotazioni, lavori, incassi, scadenze o disponibilità.",
+          "I report vengono costruiti sui dati che vuoi controllare davvero, evitando schermate piene di indicatori inutili."
+        ]
+      },
+      {
+        id: "users",
+        phrases: ["piu utenti", "accessi diversi", "account dipendenti", "permessi"],
+        keywords: ["utenti", "utente", "accessi", "accesso", "ruoli", "permessi", "dipendenti", "staff", "collaboratori"],
+        responses: [
+          "Il gestionale può prevedere più utenti e livelli di accesso diversi. Ad esempio, ogni collaboratore può vedere o modificare solo le sezioni necessarie al proprio ruolo.",
+          "Ruoli e permessi vengono definiti durante l'analisi, in base a chi deve consultare o aggiornare i dati."
+        ]
+      },
+      {
+        id: "migration",
+        phrases: ["importare dati", "spostare dati da excel", "migrazione dati", "dati esistenti"],
+        keywords: ["importare", "importazione", "migrare", "migrazione", "trasferire", "storico", "dati", "excel", "file"],
+        responses: [
+          "In molti casi possiamo importare dati già presenti in file o archivi. Prima bisogna controllare formato, qualità e completezza delle informazioni per evitare duplicati o errori.",
+          "Non è necessario ripartire sempre da zero: valutiamo se e come trasferire clienti, prenotazioni o altri dati esistenti."
+        ]
+      },
+      {
+        id: "support",
+        phrases: ["fate assistenza", "supporto dopo il lancio", "manutenzione", "se c e un problema"],
+        keywords: ["assistenza", "supporto", "problema", "errore", "manutenzione", "aggiornamento", "modifica", "aiuto"],
+        responses: [
+          "Il progetto può includere assistenza dopo il lancio, correzioni e modifiche successive. Il livello di supporto viene definito chiaramente nel preventivo.",
+          "Dopo la consegna possiamo continuare a seguire il sistema e aggiungere miglioramenti quando cambiano le esigenze dell'attività."
+        ]
+      },
+      {
+        id: "training",
+        phrases: ["spiegate come usarlo", "fate formazione", "e difficile da usare", "imparare a usarlo"],
+        keywords: ["formazione", "spiegare", "imparare", "usare", "semplice", "difficile", "tutorial"],
+        responses: [
+          "Il gestionale viene progettato per essere semplice e la consegna può includere una spiegazione pratica delle funzioni. L'obiettivo è renderlo utilizzabile senza competenze tecniche.",
+          "Sì. Ti aiutiamo a partire e organizziamo schermate e passaggi in modo coerente con il lavoro che già conosci."
+        ]
+      },
+      {
+        id: "security",
+        phrases: ["i dati sono sicuri", "come gestite la privacy", "fate backup", "protezione dati"],
+        keywords: ["sicurezza", "privacy", "backup", "password", "protezione", "gdpr", "dati", "accessi"],
+        responses: [
+          "Sicurezza, accessi e backup dipendono dalla tecnologia e dai dati trattati. Durante l'analisi definiamo chi può vedere le informazioni e quali misure sono necessarie. Non diamo garanzie generiche senza conoscere il progetto.",
+          "La protezione dei dati viene valutata caso per caso, soprattutto quando sono presenti dati personali o accessi di più utenti."
+        ]
+      },
+      {
+        id: "website",
+        phrases: ["fate anche il sito", "collegare il sito", "modulo sul sito", "prenotazione dal sito"],
+        keywords: ["sito", "website", "pagina", "landing", "modulo", "form", "online"],
+        responses: [
+          "Possiamo collegare il gestionale a moduli e funzioni del sito, per esempio richieste o prenotazioni. La realizzazione completa del sito va valutata come parte del progetto.",
+          "Il sito può diventare il punto di ingresso dei dati: una richiesta compilata online può arrivare direttamente nel gestionale."
+        ]
+      },
+      {
+        id: "remote",
+        phrases: ["lavorate in tutta italia", "dove siete", "lavorate a distanza", "serve incontrarsi"],
+        keywords: ["italia", "distanza", "remoto", "online", "incontro", "sede", "dove"],
+        responses: [
+          "L'analisi e lo sviluppo possono essere gestiti anche a distanza. Per capire il progetto sono sufficienti call, esempi dei flussi attuali e accesso agli strumenti da collegare quando necessario.",
+          "Non è indispensabile essere nella stessa città: il lavoro può essere organizzato online."
+        ]
+      },
+      {
+        id: "demo",
+        phrases: ["posso vedere una demo", "avete un esempio", "posso provarlo", "mostrate il gestionale"],
+        keywords: ["demo", "prova", "esempio", "vedere", "mostrare", "anteprima"],
+        responses: [
+          "Possiamo mostrarti esempi di flussi e impostare una proposta coerente con la tua attività. Una demo generica non rappresenta sempre bene un gestionale su misura.",
+          "Nel sito trovi un esempio semplificato. Per una dimostrazione utile conviene prima capire quali informazioni e passaggi deve gestire il tuo sistema."
+        ],
+        action: "Raccontaci il progetto"
+      }
+    ];
+
+    const offTopicTerms = [
+      "meteo", "che tempo fa", "previsioni del tempo", "partita", "calcio", "ricetta", "politica",
+      "film", "musica", "oroscopo", "traduci", "compiti", "matematica", "vacanza",
+      "hotel vicino", "ristorante vicino"
+    ];
+
+    const detailSignals = [
+      "esattamente", "garantite", "garanzia", "preventivo preciso", "prezzo preciso",
+      "quanto mi costa", "quanto costerebbe", "entro quando", "fattibilita", "architettura",
+      "database", "api", "webhook", "codice", "server", "hosting", "normativa",
+      "commercialista", "fatturazione elettronica", "firma digitale", "spid"
+    ];
+
+    function phraseScore(normalized, phrase) {
+      const cleanPhrase = normalizeText(phrase);
+      if (normalized === cleanPhrase) return 12;
+      if (normalized.includes(cleanPhrase)) return cleanPhrase.split(" ").length >= 3 ? 8 : 5;
+      return 0;
+    }
+
+    function keywordScore(tokens, normalized, keyword) {
+      const cleanKeyword = normalizeText(keyword);
+      if (!cleanKeyword) return 0;
+      if (cleanKeyword.includes(" ")) return normalized.includes(cleanKeyword) ? 4 : 0;
+      if (tokens.includes(cleanKeyword)) return 3;
+      if (cleanKeyword.length >= 5 && tokens.some(token => token.startsWith(cleanKeyword.slice(0, -1)))) return 1;
+      return 0;
+    }
+
+    function classifyQuestion(question) {
+      const normalized = normalizeText(question);
+      const tokens = tokenise(question);
+      const ranked = intents.map(intent => {
+        let score = 0;
+        intent.phrases.forEach(phrase => { score += phraseScore(normalized, phrase); });
+        intent.keywords.forEach(keyword => { score += keywordScore(tokens, normalized, keyword); });
+
+        if (conversation.lastIntent === intent.id && /^(e |ed |anche |quindi |ma |invece |poi )/.test(normalized)) {
+          score += 2;
+        }
+
+        return { intent, score };
+      }).sort((a, b) => b.score - a.score);
+
+      return {
+        normalized,
+        tokens,
+        best: ranked[0],
+        second: ranked[1]
+      };
+    }
+
+    function isOffTopic(normalized) {
+      return offTopicTerms.some(term => normalized.includes(term));
+    }
+
+    function isSpecificRequest(question, classification) {
+      const { normalized, tokens, best } = classification;
+      const meaningfulTokens = tokens.filter(token => !commonWords.has(token));
+      const containsNumber = /\b\d+(?:[.,]\d+)?\b/.test(normalized);
+      const hasDetailSignal = detailSignals.some(signal => normalized.includes(normalizeText(signal)));
+      const describesWorkflow = ["quando", "se", "poi", "dopo", "automaticamente", "in base a", "deve"].filter(term => normalized.includes(term)).length >= 3;
+      const manyRequirements = (normalized.match(/\b(e|poi|anche|inoltre)\b/g) || []).length >= 4;
+      const asksExactFeasibility = /(potete|si puo|riuscite)\s+(?:\w+\s+){0,4}(collegare|creare|fare|gestire|automatizzare)/.test(normalized)
+        && meaningfulTokens.length > 12;
+      const numberedWorkflow = containsNumber && (describesWorkflow || asksExactFeasibility || meaningfulTokens.length > 16);
+      const exactCommercialQuestion = best.intent.id === "price" && (containsNumber || normalized.includes("preciso") || meaningfulTokens.length > 15);
+
+      return hasDetailSignal || exactCommercialQuestion || numberedWorkflow || (meaningfulTokens.length > 28 && describesWorkflow) || manyRequirements || asksExactFeasibility;
+    }
+
+    function pickResponse(intent) {
+      const index = (conversation.turns + intent.id.length) % intent.responses.length;
+      return intent.responses[index];
+    }
+
+    function getBotAnswer(question) {
+      const classification = classifyQuestion(question);
+      const { normalized, best, second } = classification;
+
+      if (isOffTopic(normalized)) {
+        return {
+          answer: "Posso aiutarti solo con domande su Easy Come, gestionali e automazioni per attività. Per il resto è meglio usare un assistente generalista.",
+          intent: "off-topic"
+        };
+      }
+
+      if (isSpecificRequest(question, classification)) {
+        return {
+          answer: "Questa richiesta è abbastanza specifica e non voglio darti una risposta approssimativa. La fattibilità, i tempi e il costo vanno verificati sul tuo flusso reale. Ho preparato il passaggio al modulo: puoi inviare la domanda così com'è e ricevere una valutazione concreta.",
+          intent: "specific",
+          action: "Invia questa richiesta",
+          prefill: question
+        };
+      }
+
+      if (!best || best.score < 3) {
+        return {
+          answer: "Posso rispondere alle domande generali su servizi, automazioni, tempi, dispositivi, integrazioni e preventivi. Per capire il tuo caso, prova a dirmi quale attività vuoi gestire meglio.",
+          intent: "fallback",
+          action: "Descrivi il tuo progetto",
+          prefill: question.length > 18 ? question : ""
+        };
+      }
+
+      let answer = pickResponse(best.intent);
+      let action = best.intent.action || null;
+
+      // Risponde a due domande generali presenti nello stesso messaggio senza diventare prolisso.
+      if (second && second.score >= 6 && second.intent.id !== best.intent.id && !["greeting", "thanks"].includes(second.intent.id)) {
+        answer += " " + pickResponse(second.intent);
+        action = action || second.intent.action || null;
+      }
+
+      return {
+        answer,
+        intent: best.intent.id,
+        action
+      };
+    }
+
+    function currentTime() {
+      return new Intl.DateTimeFormat("it-IT", {
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date());
+    }
+
+    function scrollChatToBottom() {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendChatMessage(text, sender = "bot", options = {}) {
+      const message = document.createElement("div");
+      message.className = `chat-message ${sender === "user" ? "user" : ""}`.trim();
+
+      const content = document.createElement("div");
+      content.textContent = text;
+      message.appendChild(content);
+
+      if (options.action) {
+        const link = document.createElement("a");
+        link.href = "#contatti";
+        link.className = "chat-quote-link";
+        link.textContent = options.action;
+        link.addEventListener("click", () => {
+          if (options.prefill && quoteTextarea) {
+            const prefix = "Domanda inviata tramite l'assistente Easy Come:\n";
+            quoteTextarea.value = `${prefix}${options.prefill}`;
+          }
+          closeChat();
+          window.setTimeout(() => {
+            if (quoteTextarea) quoteTextarea.focus({ preventScroll: true });
+          }, 500);
+        });
+        message.appendChild(link);
+      }
+
+      const time = document.createElement("span");
+      time.className = "chat-time";
+      time.textContent = currentTime();
+      message.appendChild(time);
+
+      chatMessages.insertBefore(message, typingIndicator);
+      scrollChatToBottom();
+    }
+
+    function respondToQuestion(question) {
+      const cleanedQuestion = question.trim();
+      if (!cleanedQuestion) return;
+
+      appendChatMessage(cleanedQuestion, "user");
+      chatInput.value = "";
+      chatInput.disabled = true;
+      typingIndicator.classList.add("show");
+      scrollChatToBottom();
+
+      const result = getBotAnswer(cleanedQuestion);
+      conversation.lastQuestion = cleanedQuestion;
+      conversation.lastIntent = result.intent;
+      conversation.turns += 1;
+
+      const readingDelay = Math.min(900, Math.max(380, result.answer.length * 3));
+      window.setTimeout(() => {
+        typingIndicator.classList.remove("show");
+        appendChatMessage(result.answer, "bot", {
+          action: result.action,
+          prefill: result.prefill
+        });
+        chatInput.disabled = false;
+        chatInput.focus();
+      }, readingDelay);
+    }
+
+    function openChat() {
+      chatPanel.classList.add("open");
+      chatPanel.setAttribute("aria-hidden", "false");
+      chatLauncher.setAttribute("aria-expanded", "true");
+      chatNotification.style.display = "none";
+      window.setTimeout(() => chatInput.focus(), 80);
+    }
+
+    function closeChat() {
+      chatPanel.classList.remove("open");
+      chatPanel.setAttribute("aria-hidden", "true");
+      chatLauncher.setAttribute("aria-expanded", "false");
+    }
+
+    chatLauncher.addEventListener("click", () => {
+      chatPanel.classList.contains("open") ? closeChat() : openChat();
+    });
+
+    chatClose.addEventListener("click", closeChat);
+
+    chatForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      respondToQuestion(chatInput.value);
+    });
+
+    document.querySelectorAll(".chat-chip").forEach(chip => {
+      chip.addEventListener("click", () => respondToQuestion(chip.textContent));
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && chatPanel.classList.contains("open")) closeChat();
+    });
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
