@@ -1,13 +1,17 @@
 <!DOCTYPE html>
+
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Easy Come crea gestionali personalizzati per piccole attività: più ordine, meno lavoro manuale." />
-  <meta name="theme-color" content="#f3f0e8" />
-  <title>Easy Come — Gestionali semplici per attività reali</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Easy Come automatizza i processi delle piccole imprese con gestionali, integrazioni e assistenti digitali su misura." name="description"/>
+<meta content="#f3f0e8" name="theme-color"/>
+<title>Easy Come — Automazione per piccole imprese</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Syne:wght@700;800&amp;display=swap" rel="stylesheet"/>
 
-  <style>
+<style>
     :root {
       --paper: #f3f0e8;
       --white: #fffdf8;
@@ -32,7 +36,7 @@
       margin: 0;
       color: var(--ink);
       background: var(--paper);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: "Manrope", Arial, Helvetica, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -177,11 +181,11 @@
     }
 
     h1 {
-      max-width: 760px;
+      max-width: 680px;
       margin: 20px 0 24px;
-      font-size: clamp(3.5rem, 7.2vw, 6.8rem);
-      line-height: .92;
-      letter-spacing: -0.075em;
+      font-size: clamp(2.85rem, 5.7vw, 5.35rem);
+      line-height: .96;
+      letter-spacing: -0.065em;
     }
 
     .underline {
@@ -1071,7 +1075,7 @@
       .nav-inner { height: 70px; }
       .nav-links { inset-top: 70px; }
       .hero { padding: 55px 0 70px; }
-      h1 { font-size: clamp(3.2rem, 17vw, 4.7rem); }
+      h1 { font-size: clamp(2.45rem, 12.2vw, 3.55rem); line-height: 1; }
       section { padding: 78px 0; }
       .hero-actions { display: grid; }
       .btn { width: 100%; }
@@ -1089,445 +1093,368 @@
     }
   </style>
 </head>
-
 <body>
-  <nav class="nav" id="nav">
-    <div class="container nav-inner">
-      <a href="#home" class="brand" aria-label="Easy Come home">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span>Easy Come</span>
-      </a>
-
-      <div class="nav-links" id="navLinks">
-        <a href="#servizi">Cosa facciamo</a>
-        <a href="#metodo">Come funziona</a>
-        <a href="#esempio">Un esempio</a>
-        <a href="#faq">FAQ</a>
-        <a href="#contatti">Preventivo</a>
-      </div>
-
-      <a href="#contatti" class="btn btn-primary btn-small nav-cta">Richiedi un preventivo</a>
-      <button class="mobile-toggle" id="mobileToggle" aria-label="Apri menu">☰</button>
-    </div>
-  </nav>
-
-  <main>
-    <header class="hero" id="home">
-      <div class="container hero-grid">
-        <div class="reveal">
-          <div class="eyebrow">Gestionali su misura</div>
-          <h1>Più ordine.<br><span class="underline">Meno caos.</span></h1>
-          <p class="hero-copy">
-            Easy Come crea gestionali semplici per piccole attività. Mettiamo insieme
-            prenotazioni, clienti, pagamenti, calendario e attività quotidiane in un solo posto,
-            costruito sul tuo modo di lavorare.
-          </p>
-
-          <div class="hero-actions">
-            <a href="#contatti" class="btn btn-primary">Richiedi un preventivo</a>
-            <a href="#esempio" class="btn btn-secondary">Guarda un esempio</a>
-          </div>
-
-          <div class="hero-note">Nessun pacchetto standard: il progetto viene valutato in base a ciò che ti serve davvero.</div>
-        </div>
-
-        <div class="workflow-card reveal" aria-label="Esempio di flusso automatizzato">
-          <div class="workflow-top">
-            <div class="workflow-title">Da una richiesta a una prenotazione</div>
-            <div class="workflow-label">Tutto collegato</div>
-          </div>
-
-          <div class="workflow-list">
-            <div class="workflow-row">
-              <div class="workflow-number">1</div>
-              <div class="workflow-main">
-                <strong>Arriva la richiesta</strong>
-                <span>Il cliente compila il modulo dal sito.</span>
-              </div>
-              <div class="workflow-status">Ricevuta</div>
-            </div>
-
-            <div class="workflow-row">
-              <div class="workflow-number">2</div>
-              <div class="workflow-main">
-                <strong>Si aggiorna il gestionale</strong>
-                <span>I dati entrano senza copiarli a mano.</span>
-              </div>
-              <div class="workflow-status">Inserita</div>
-            </div>
-
-            <div class="workflow-row">
-              <div class="workflow-number">3</div>
-              <div class="workflow-main">
-                <strong>Controllo disponibilità</strong>
-                <span>Calendario e risorse vengono verificati.</span>
-              </div>
-              <div class="workflow-status">Disponibile</div>
-            </div>
-
-            <div class="workflow-row">
-              <div class="workflow-number">4</div>
-              <div class="workflow-main">
-                <strong>Conferma al cliente</strong>
-                <span>La pratica è pronta e ordinata.</span>
-              </div>
-              <div class="workflow-status">Confermata</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <div class="proof-strip">
-      <div class="container proof-inner">
-        <span>Meno inserimenti manuali</span>
-        <span>Meno errori</span>
-        <span>Dati sempre ordinati</span>
-        <span>Accesso anche da telefono</span>
-      </div>
-    </div>
-
-    <section id="servizi">
-      <div class="container">
-        <div class="section-head reveal">
-          <div class="section-kicker">Cosa facciamo</div>
-          <h2>Un gestionale costruito intorno alla tua attività.</h2>
-          <p class="section-copy">
-            Non ti costringiamo ad adattarti a un software pieno di funzioni inutili.
-            Partiamo dai problemi quotidiani e realizziamo solo ciò che serve davvero.
-          </p>
-        </div>
-
-        <div class="services-grid">
-          <article class="service-card reveal">
-            <div class="service-icon">01</div>
-            <h3>Gestione operativa</h3>
-            <p>Clienti, prenotazioni, appuntamenti, ordini, pagamenti, scadenze e documenti in un unico ambiente.</p>
-            <ul class="service-list">
-              <li>Dashboard semplice</li>
-              <li>Ricerca rapida</li>
-              <li>Storico sempre disponibile</li>
-            </ul>
-          </article>
-
-          <article class="service-card reveal">
-            <div class="service-icon">02</div>
-            <h3>Automazioni utili</h3>
-            <p>Colleghiamo i passaggi ripetitivi per evitare copia e incolla, dimenticanze e aggiornamenti doppi.</p>
-            <ul class="service-list">
-              <li>Inserimento automatico</li>
-              <li>Conferme e notifiche</li>
-              <li>Calendari aggiornati</li>
-            </ul>
-          </article>
-
-          <article class="service-card reveal">
-            <div class="service-icon">03</div>
-            <h3>Collegamento con ciò che usi</h3>
-            <p>Quando possibile integriamo sito, moduli, email, fogli Excel e strumenti già presenti nella tua attività.</p>
-            <ul class="service-list">
-              <li>Sito e moduli</li>
-              <li>Email e messaggi</li>
-              <li>File e archivi esistenti</li>
-            </ul>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="before-after">
-      <div class="container">
-        <div class="section-head reveal">
-          <div class="section-kicker">Il cambiamento</div>
-          <h2>Da mille strumenti a un flusso chiaro.</h2>
-          <p class="section-copy">L'obiettivo non è aggiungere un altro programma. È togliere passaggi inutili dal lavoro di ogni giorno.</p>
-        </div>
-
-        <div class="compare-grid">
-          <div class="compare-card reveal">
-            <div class="compare-title"><span class="compare-dot"></span> Prima</div>
-            <ul class="compare-list">
-              <li>Richieste sparse tra chat, email e telefonate</li>
-              <li>Dati copiati più volte in file diversi</li>
-              <li>Calendari non sempre aggiornati</li>
-              <li>Difficoltà nel trovare informazioni vecchie</li>
-            </ul>
-          </div>
-
-          <div class="compare-card good reveal">
-            <div class="compare-title"><span class="compare-dot"></span> Con Easy Come</div>
-            <ul class="compare-list">
-              <li>Informazioni raccolte nello stesso posto</li>
-              <li>Passaggi automatici dove possibile</li>
-              <li>Situazione chiara e aggiornata</li>
-              <li>Meno tempo perso nella gestione</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="metodo">
-      <div class="container">
-        <div class="section-head reveal">
-          <div class="section-kicker">Come lavoriamo</div>
-          <h2>Prima capiamo il lavoro. Poi costruiamo il sistema.</h2>
-        </div>
-
-        <div class="process-grid">
-          <article class="step reveal">
-            <div class="step-number">FASE 01</div>
-            <h3>Ci racconti il problema</h3>
-            <p>Vediamo come gestisci oggi clienti, prenotazioni, incassi e attività.</p>
-          </article>
-
-          <article class="step reveal">
-            <div class="step-number">FASE 02</div>
-            <h3>Definiamo la soluzione</h3>
-            <p>Selezioniamo le funzioni davvero necessarie e il flusso più semplice.</p>
-          </article>
-
-          <article class="step reveal">
-            <div class="step-number">FASE 03</div>
-            <h3>Realizziamo il gestionale</h3>
-            <p>Costruiamo, colleghiamo e testiamo il sistema sulla tua attività.</p>
-          </article>
-
-          <article class="step reveal">
-            <div class="step-number">FASE 04</div>
-            <h3>Lo miglioriamo nel tempo</h3>
-            <p>Nuove funzioni e automazioni possono essere aggiunte quando servono.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="esempio">
-      <div class="container case-layout">
-        <div class="reveal">
-          <div class="section-kicker">Un esempio concreto</div>
-          <h2>Un gestionale per prenotazioni e disponibilità.</h2>
-          <p class="section-copy">
-            Una struttura ricettiva può ricevere le richieste dal sito, registrare il cliente,
-            controllare le disponibilità e tenere sotto controllo arrivi, partenze e pagamenti
-            senza aggiornare manualmente più file.
-          </p>
-
-          <div class="case-tags">
-            <span class="case-tag">Prenotazioni</span>
-            <span class="case-tag">Calendario</span>
-            <span class="case-tag">Clienti</span>
-            <span class="case-tag">Pagamenti</span>
-            <span class="case-tag">Riepiloghi</span>
-          </div>
-        </div>
-
-        <div class="case-board reveal">
-          <div class="case-board-top">
-            <div>
-              <div class="case-board-title">Prenotazioni della settimana</div>
-              <div class="hero-note" style="margin-top:5px">Esempio di schermata personalizzata</div>
-            </div>
-            <div class="case-filter">18–24 agosto</div>
-          </div>
-
-          <div class="booking-table">
-            <div class="booking-row header">
-              <span>Cliente</span><span>Arrivo</span><span>Partenza</span><span>Stato</span>
-            </div>
-            <div class="booking-row">
-              <strong>Marco Rossi</strong><span>18 ago</span><span>21 ago</span><span class="status-pill">Confermata</span>
-            </div>
-            <div class="booking-row">
-              <strong>Giulia Bianchi</strong><span>19 ago</span><span>24 ago</span><span class="status-pill">Confermata</span>
-            </div>
-            <div class="booking-row">
-              <strong>Luca Ferri</strong><span>22 ago</span><span>25 ago</span><span class="status-pill">In attesa</span>
-            </div>
-            <div class="booking-row">
-              <strong>Anna Romano</strong><span>23 ago</span><span>27 ago</span><span class="status-pill">Confermata</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="quote-band">
-      <div class="container quote-band-inner reveal">
-        <div>
-          <h2>Ogni attività è diversa. Anche il preventivo.</h2>
-          <p>Raccontaci cosa vuoi semplificare: valuteremo le funzioni necessarie e ti proporremo una soluzione costruita sul tuo caso.</p>
-        </div>
-        <a href="#contatti" class="btn">Richiedi il tuo preventivo</a>
-      </div>
-    </section>
-
-    <section id="faq">
-      <div class="container faq-grid">
-        <div class="reveal">
-          <div class="section-kicker">Domande frequenti</div>
-          <h2>Le cose importanti, prima di iniziare.</h2>
-        </div>
-
-        <div class="reveal">
-          <details open>
-            <summary>Quanto costa un gestionale?</summary>
-            <p>Dipende dal numero di funzioni, dalle automazioni e dagli strumenti da collegare. Per questo non proponiamo prezzi standard: dopo una prima analisi prepariamo un preventivo chiaro.</p>
-          </details>
-          <details>
-            <summary>Devo cambiare tutti gli strumenti che uso?</summary>
-            <p>No. Quando è possibile partiamo da ciò che utilizzi già e colleghiamo i vari strumenti in modo graduale.</p>
-          </details>
-          <details>
-            <summary>Posso usarlo da smartphone?</summary>
-            <p>Sì. Il gestionale viene progettato per essere utilizzabile da computer, tablet e telefono.</p>
-          </details>
-          <details>
-            <summary>Posso aggiungere funzioni in futuro?</summary>
-            <p>Sì. Il progetto può partire dalle funzioni essenziali e crescere nel tempo insieme all'attività.</p>
-          </details>
-        </div>
-      </div>
-    </section>
-
-    <section id="contatti">
-      <div class="container">
-        <div class="contact-box reveal">
-          <div class="contact-copy">
-            <div class="section-kicker">Richiedi un preventivo</div>
-            <h2>Raccontaci cosa vuoi semplificare.</h2>
-            <p>
-              Non serve conoscere termini tecnici. Descrivi semplicemente come lavori oggi,
-              quali strumenti usi e quali attività ti fanno perdere più tempo.
-            </p>
-            <div class="contact-note">
-              Dopo la richiesta potremo valutare il progetto e preparare un preventivo basato sulle funzioni realmente necessarie.
-            </div>
-          </div>
-
-          <form id="leadForm" action="https://formspree.io/f/xjgnlaew" method="POST" accept-charset="UTF-8">
-            <input type="hidden" name="_subject" value="Nuova richiesta di preventivo — Easy Come" />
-            <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" />
-            <div class="field-row">
-              <label>
+<nav class="nav" id="nav">
+<div class="container nav-inner">
+<a aria-label="Easy Come home" class="brand" href="#home">
+<span aria-hidden="true" class="brand-mark"></span>
+<span>Easy Come</span>
+</a>
+<div class="nav-links" id="navLinks">
+<a href="#servizi">Soluzioni</a>
+<a href="#metodo">Come lavoriamo</a>
+<a href="#esempio">Esempio</a>
+<a href="#faq">FAQ</a>
+<a href="#contatti">Preventivo</a>
+</div>
+<a class="btn btn-primary btn-small nav-cta" href="#contatti">Richiedi un preventivo</a>
+<button aria-label="Apri menu" class="mobile-toggle" id="mobileToggle">☰</button>
+</div>
+</nav>
+<main>
+<header class="hero" id="home">
+<div class="container hero-grid">
+<div class="reveal">
+<div class="eyebrow">Automazione per piccole imprese</div>
+<h1>Più ordine.<br/><span class="underline">Meno caos.</span></h1>
+<p class="hero-copy">Automatizziamo attività ripetitive, colleghiamo i tuoi strumenti e creiamo gestionali su misura.</p>
+<div class="hero-actions">
+<a class="btn btn-primary" href="#contatti">Richiedi un preventivo</a>
+<a class="btn btn-secondary" href="#esempio">Guarda un esempio</a>
+</div>
+<div class="hero-note">Partiamo da un problema concreto. Costruiamo solo ciò che serve.</div>
+</div>
+<div aria-label="Esempio di flusso automatizzato" class="workflow-card reveal">
+<div class="workflow-top">
+<div class="workflow-title">Una richiesta. Tutto automatico.</div>
+<div class="workflow-label">Tutto collegato</div>
+</div>
+<div class="workflow-list">
+<div class="workflow-row">
+<div class="workflow-number">1</div>
+<div class="workflow-main">
+<strong>Il cliente scrive</strong>
+<span>Dal sito o da un modulo.</span>
+</div>
+<div class="workflow-status">Ricevuta</div>
+</div>
+<div class="workflow-row">
+<div class="workflow-number">2</div>
+<div class="workflow-main">
+<strong>I dati vengono salvati</strong>
+<span>Senza copia e incolla.</span>
+</div>
+<div class="workflow-status">Inseriti</div>
+</div>
+<div class="workflow-row">
+<div class="workflow-number">3</div>
+<div class="workflow-main">
+<strong>Parte il flusso</strong>
+<span>Controlli, assegnazioni e notifiche.</span>
+</div>
+<div class="workflow-status">Avviato</div>
+</div>
+<div class="workflow-row">
+<div class="workflow-number">4</div>
+<div class="workflow-main">
+<strong>Tu controlli tutto</strong>
+<span>Da una dashboard semplice.</span>
+</div>
+<div class="workflow-status">Completato</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<div class="proof-strip">
+<div class="container proof-inner">
+<span>Meno attività ripetitive</span>
+<span>Meno errori</span>
+<span>Strumenti collegati</span>
+<span>Più tempo</span>
+</div>
+</div>
+<section id="servizi">
+<div class="container">
+<div class="section-head reveal">
+<div class="section-kicker">Cosa automatizziamo</div>
+<h2>Soluzioni semplici. Risultati concreti.</h2>
+<p class="section-copy">Eliminiamo passaggi manuali e colleghiamo ciò che già usi.</p>
+</div>
+<div class="services-grid">
+<article class="service-card reveal">
+<div class="service-icon">01</div>
+<h3>Automazione dei processi</h3>
+<p>Richieste, dati, promemoria e aggiornamenti lavorano da soli.</p>
+<ul class="service-list">
+<li>Inserimento dati</li>
+<li>Notifiche automatiche</li>
+<li>Flussi tra strumenti</li>
+</ul>
+</article>
+<article class="service-card reveal">
+<div class="service-icon">02</div>
+<h3>Gestionali su misura</h3>
+<p>Il centro operativo della tua attività, costruito sul tuo modo di lavorare.</p>
+<ul class="service-list">
+<li>Clienti e attività</li>
+<li>Prenotazioni e ordini</li>
+<li>Dashboard e report</li>
+</ul>
+</article>
+<article class="service-card reveal">
+<div class="service-icon">03</div>
+<h3>Integrazioni e assistenti</h3>
+<p>Colleghiamo sito, email, Excel e strumenti digitali. Aggiungiamo chatbot quando servono.</p>
+<ul class="service-list">
+<li>Sito e moduli</li>
+<li>Email e file</li>
+<li>Assistenti per clienti</li>
+</ul>
+</article>
+</div>
+</div>
+</section>
+<section class="before-after">
+<div class="container">
+<div class="section-head reveal">
+<div class="section-kicker">Il cambiamento</div>
+<h2>Dal lavoro manuale a un flusso automatico.</h2>
+<p class="section-copy">Meno passaggi. Più controllo.</p>
+</div>
+<div class="compare-grid">
+<div class="compare-card reveal">
+<div class="compare-title"><span class="compare-dot"></span> Prima</div>
+<ul class="compare-list">
+<li>Dati copiati a mano</li>
+<li>Messaggi sparsi</li>
+<li>File non aggiornati</li>
+<li>Tempo perso</li>
+</ul>
+</div>
+<div class="compare-card good reveal">
+<div class="compare-title"><span class="compare-dot"></span> Con Easy Come</div>
+<ul class="compare-list">
+<li>Dati inseriti una volta</li>
+<li>Strumenti collegati</li>
+<li>Aggiornamenti automatici</li>
+<li>Situazione chiara</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section id="metodo">
+<div class="container">
+<div class="section-head reveal">
+<div class="section-kicker">Come lavoriamo</div>
+<h2>Partiamo dal tuo lavoro.</h2>
+</div>
+<div class="process-grid">
+<article class="step reveal">
+<div class="step-number">FASE 01</div>
+<h3>Troviamo il punto lento</h3>
+<p>Individuiamo ciò che ruba più tempo.</p>
+</article>
+<article class="step reveal">
+<div class="step-number">FASE 02</div>
+<h3>Disegniamo il flusso</h3>
+<p>Scegliamo cosa automatizzare.</p>
+</article>
+<article class="step reveal">
+<div class="step-number">FASE 03</div>
+<h3>Costruiamo la soluzione</h3>
+<p>Automazioni, integrazioni o gestionale.</p>
+</article>
+<article class="step reveal">
+<div class="step-number">FASE 04</div>
+<h3>La miglioriamo</h3>
+<p>Aggiungiamo ciò che serve nel tempo.</p>
+</article>
+</div>
+</div>
+</section>
+<section id="esempio">
+<div class="container case-layout">
+<div class="reveal">
+<div class="section-kicker">Esempio di automazione</div>
+<h2>Una richiesta entra. Il sistema fa il resto.</h2>
+<p class="section-copy">Il cliente compila un modulo. I dati vengono salvati, assegnati e notificati automaticamente.</p>
+<div class="case-tags">
+<span class="case-tag">Modulo online</span>
+<span class="case-tag">Archivio clienti</span>
+<span class="case-tag">Assegnazione</span>
+<span class="case-tag">Notifica</span>
+<span class="case-tag">Dashboard</span>
+</div>
+</div>
+<div class="case-board reveal">
+<div class="case-board-top">
+<div>
+<div class="case-board-title">Richieste in lavorazione</div>
+<div class="hero-note" style="margin-top:5px">Esempio di schermata personalizzata</div>
+</div>
+<div class="case-filter">Oggi</div>
+</div>
+<div class="booking-table">
+<div class="booking-row header">
+<span>Cliente</span><span>Canale</span><span>Azione</span><span>Stato</span>
+</div>
+<div class="booking-row">
+<strong>Marco Rossi</strong><span>Sito</span><span>Preventivo</span><span class="status-pill">Inviato</span>
+</div>
+<div class="booking-row">
+<strong>Giulia Bianchi</strong><span>WhatsApp</span><span>Appuntamento</span><span class="status-pill">Confermato</span>
+</div>
+<div class="booking-row">
+<strong>Luca Ferri</strong><span>Email</span><span>Richiamare</span><span class="status-pill">In attesa</span>
+</div>
+<div class="booking-row">
+<strong>Anna Romano</strong><span>Modulo</span><span>Registrazione</span><span class="status-pill">Completata</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="quote-band">
+<div class="container quote-band-inner reveal">
+<div>
+<h2>Quale attività ti fa perdere tempo?</h2>
+<p>Raccontacela. Ti proponiamo come automatizzarla.</p>
+</div>
+<a class="btn" href="#contatti">Richiedi il tuo preventivo</a>
+</div>
+</section>
+<section id="faq">
+<div class="container faq-grid">
+<div class="reveal">
+<div class="section-kicker">Domande frequenti</div>
+<h2>Domande rapide.</h2>
+</div>
+<div class="reveal">
+<details open="">
+<summary>Quanto costa un’automazione?</summary>
+<p>Dipende dal flusso e dagli strumenti da collegare. Prepariamo un preventivo dopo una breve analisi.</p>
+</details>
+<details>
+<summary>Devo avere già un gestionale?</summary>
+<p>No. Possiamo partire da Excel, email, moduli o dagli strumenti che usi già.</p>
+</details>
+<details>
+<summary>Cosa potete collegare?</summary>
+<p>Sito, moduli, email, calendari, Excel e altri servizi compatibili.</p>
+</details>
+<details>
+<summary>Posso partire da una sola automazione?</summary>
+<p>Sì. Iniziamo dal passaggio che ti fa perdere più tempo.</p>
+</details>
+</div>
+</div>
+</section>
+<section id="contatti">
+<div class="container">
+<div class="contact-box reveal">
+<div class="contact-copy">
+<div class="section-kicker">Richiedi un preventivo</div>
+<h2>Cosa vuoi automatizzare?</h2>
+<p>Descrivi il passaggio che oggi fai a mano.</p>
+<div class="contact-note">Ti ricontattiamo con una proposta adatta al tuo flusso.</div>
+</div>
+<form accept-charset="UTF-8" action="https://formspree.io/f/xjgnlaew" id="leadForm" method="POST">
+<input name="_subject" type="hidden" value="Nuova richiesta di preventivo — Easy Come"/>
+<input aria-hidden="true" autocomplete="off" name="_gotcha" style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" tabindex="-1" type="text"/>
+<div class="field-row">
+<label>
                 Nome e cognome
-                <input type="text" name="nome" placeholder="Il tuo nome" required />
-              </label>
-
-              <label>
+                <input name="nome" placeholder="Il tuo nome" required="" type="text"/>
+</label>
+<label>
                 Attività
-                <input type="text" name="attivita" placeholder="Nome o tipologia di attività" required />
-              </label>
-            </div>
-
-            <div class="field-row">
-              <label>
+                <input name="attivita" placeholder="Nome o tipologia di attività" required="" type="text"/>
+</label>
+</div>
+<div class="field-row">
+<label>
                 Email
-                <input type="email" name="email" placeholder="nome@email.it" required />
-              </label>
-
-              <label>
+                <input name="email" placeholder="nome@email.it" required="" type="email"/>
+</label>
+<label>
                 Numero di telefono
-                <input type="tel" name="telefono" placeholder="Facoltativo" />
-              </label>
-            </div>
-
-            <label>
+                <input name="telefono" placeholder="Facoltativo" type="tel"/>
+</label>
+</div>
+<label>
               Cosa vuoi gestire meglio?
-              <select name="esigenza">
-                <option>Prenotazioni e disponibilità</option>
-                <option>Clienti e appuntamenti</option>
-                <option>Ordini, lavori o interventi</option>
-                <option>Pagamenti e scadenze</option>
-                <option>Più attività collegate tra loro</option>
-                <option>Non lo so ancora</option>
-              </select>
-            </label>
-
-            <label>
-              Raccontaci come lavori oggi
-              <textarea name="messaggio" placeholder="Esempio: ricevo le richieste su WhatsApp, poi le copio in Excel e aggiorno manualmente il calendario..." required></textarea>
-            </label>
-
-            <button class="btn btn-primary" type="submit">Invia la richiesta di preventivo</button>
-
-            <div class="form-success" id="formSuccess" role="status" aria-live="polite">
-              Richiesta inviata correttamente. Ti ricontatteremo per capire meglio le tue esigenze e preparare il preventivo.
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <button class="chat-launcher" id="chatLauncher" aria-label="Apri l'assistente Easy Come" aria-expanded="false">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M5 18.5 3.8 21l3.1-1.2c1.5.8 3.2 1.2 5.1 1.2 5 0 9-3.6 9-8s-4-8-9-8-9 3.6-9 8c0 2.1.8 4 2 5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-      <path d="M8 13h.01M12 13h.01M16 13h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-    </svg>
-    <span class="chat-notification" id="chatNotification">1</span>
-  </button>
-
-  <aside class="chat-panel" id="chatPanel" aria-label="Assistente Easy Come" aria-hidden="true">
-    <div class="chat-header">
-      <div class="chat-agent">
-        <div class="chat-avatar">EC</div>
-        <div>
-          <strong>Assistente Easy Come</strong>
-          <span><i class="online-dot"></i> Risposte immediate</span>
-        </div>
-      </div>
-      <button class="chat-close" id="chatClose" aria-label="Chiudi assistente">✕</button>
-    </div>
-
-    <div class="chat-messages" id="chatMessages" aria-live="polite">
-      <div class="chat-message">
-        Ciao! Sono l'assistente Easy Come. Rispondo alle domande generali sui nostri gestionali e sulle automazioni. Per richieste molto specifiche ti accompagno direttamente a una valutazione reale.
-        <span class="chat-time">Ora</span>
-      </div>
-
-      <div class="chat-suggestions" id="chatSuggestions">
-        <button class="chat-chip" type="button">Quanto costa?</button>
-        <button class="chat-chip" type="button">Cosa potete automatizzare?</button>
-        <button class="chat-chip" type="button">Quanto tempo serve?</button>
-        <button class="chat-chip" type="button">Funziona da telefono?</button>
-      </div>
-
-      <div class="typing-indicator" id="typingIndicator" aria-label="L'assistente sta scrivendo">
-        <span></span><span></span><span></span>
-      </div>
-    </div>
-
-    <div class="chat-footer">
-      <form class="chat-form" id="chatForm">
-        <input class="chat-input" id="chatInput" type="text" autocomplete="off" maxlength="300" placeholder="Scrivi una domanda..." aria-label="Scrivi una domanda" />
-        <button class="chat-send" type="submit" aria-label="Invia domanda">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="m4 4 17 8-17 8 3-8-3-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M7 12h14" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </button>
-      </form>
-      <div class="chat-disclaimer">Risponde alle domande generali senza inventare dettagli. I casi specifici vengono inviati a Easy Come per una valutazione reale.</div>
-    </div>
-  </aside>
-
-  <footer>
-    <div class="container footer-inner">
-      <a href="#home" class="brand">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span>Easy Come</span>
-      </a>
-      <div>© <span id="year"></span> Easy Come. Gestionali semplici per attività reali.</div>
-      <div class="footer-links">
-        <a href="#servizi">Servizi</a>
-        <a href="#esempio">Esempio</a>
-        <a href="#contatti">Preventivo</a>
-      </div>
-    </div>
-  </footer>
-
-  <script>
+              <select name="esigenza"><option>Attività ripetitive e inserimento dati</option><option>Richieste clienti e risposte</option><option>Prenotazioni e appuntamenti</option><option>Ordini, lavori o interventi</option><option>Gestione clienti e pagamenti</option><option>Gestionale completo</option><option>Non lo so ancora</option></select>
+</label>
+<label>Descrivi il problema
+              <textarea name="messaggio" placeholder="Esempio: copio ogni richiesta da WhatsApp a Excel e invio le conferme a mano..." required=""></textarea>
+</label>
+<button class="btn btn-primary" type="submit">Invia la richiesta</button>
+<div aria-live="polite" class="form-success" id="formSuccess" role="status">Richiesta inviata. Ti ricontatteremo presto.</div>
+</form>
+</div>
+</div>
+</section>
+</main>
+<button aria-expanded="false" aria-label="Apri l'assistente Easy Come" class="chat-launcher" id="chatLauncher">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24">
+<path d="M5 18.5 3.8 21l3.1-1.2c1.5.8 3.2 1.2 5.1 1.2 5 0 9-3.6 9-8s-4-8-9-8-9 3.6-9 8c0 2.1.8 4 2 5.5Z" stroke="currentColor" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M8 13h.01M12 13h.01M16 13h.01" stroke="currentColor" stroke-linecap="round" stroke-width="2.4"></path>
+</svg>
+<span class="chat-notification" id="chatNotification">1</span>
+</button>
+<aside aria-hidden="true" aria-label="Assistente Easy Come" class="chat-panel" id="chatPanel">
+<div class="chat-header">
+<div class="chat-agent">
+<div class="chat-avatar">EC</div>
+<div>
+<strong>Assistente Easy Come</strong>
+<span><i class="online-dot"></i> Risposte immediate</span>
+</div>
+</div>
+<button aria-label="Chiudi assistente" class="chat-close" id="chatClose">✕</button>
+</div>
+<div aria-live="polite" class="chat-messages" id="chatMessages">
+<div class="chat-message">Ciao! Ti aiuto a capire cosa può automatizzare Easy Come. Per i casi specifici ti porto al preventivo.<span class="chat-time">Ora</span></div>
+<div class="chat-suggestions" id="chatSuggestions">
+<button class="chat-chip" type="button">Cosa potete automatizzare?</button>
+<button class="chat-chip" type="button">Fate anche gestionali?</button>
+<button class="chat-chip" type="button">Quanto costa?</button>
+<button class="chat-chip" type="button">Cosa si può collegare?</button>
+</div>
+<div aria-label="L'assistente sta scrivendo" class="typing-indicator" id="typingIndicator">
+<span></span><span></span><span></span>
+</div>
+</div>
+<div class="chat-footer">
+<form class="chat-form" id="chatForm">
+<input aria-label="Scrivi una domanda" autocomplete="off" class="chat-input" id="chatInput" maxlength="300" placeholder="Scrivi una domanda..." type="text"/>
+<button aria-label="Invia domanda" class="chat-send" type="submit">
+<svg aria-hidden="true" fill="none" viewbox="0 0 24 24">
+<path d="m4 4 17 8-17 8 3-8-3-8Z" stroke="currentColor" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M7 12h14" stroke="currentColor" stroke-width="2"></path>
+</svg>
+</button>
+</form>
+<div class="chat-disclaimer">Risponde alle domande generali senza inventare dettagli. I casi specifici vengono inviati a Easy Come per una valutazione reale.</div>
+</div>
+</aside>
+<footer>
+<div class="container footer-inner">
+<a class="brand" href="#home">
+<span aria-hidden="true" class="brand-mark"></span>
+<span>Easy Come</span>
+</a>
+<div>© <span id="year"></span> Easy Come. Automazione per piccole imprese.</div>
+<div class="footer-links">
+<a href="#servizi">Servizi</a>
+<a href="#esempio">Esempio</a>
+<a href="#contatti">Preventivo</a>
+</div>
+</div>
+</footer>
+<script>
     const nav = document.getElementById("nav");
     const navLinks = document.getElementById("navLinks");
     const mobileToggle = document.getElementById("mobileToggle");
@@ -1585,7 +1512,7 @@
         }
 
         leadForm.reset();
-        formSuccess.textContent = "Richiesta inviata correttamente. Ti ricontatteremo per capire meglio le tue esigenze e preparare il preventivo.";
+        formSuccess.textContent = "Richiesta inviata. Ti ricontatteremo presto.";
         formSuccess.style.display = "block";
         formSuccess.scrollIntoView({ behavior: "smooth", block: "nearest" });
       } catch (error) {
@@ -1642,8 +1569,8 @@
         phrases: ["ciao", "salve", "buongiorno", "buonasera", "hey", "ehi"],
         keywords: ["ciao", "salve", "buongiorno", "buonasera", "hey", "ehi"],
         responses: [
-          "Ciao! Raccontami pure cosa vuoi semplificare nella tua attività. Posso aiutarti su gestionali, automazioni, funzionamento, tempi e preventivi.",
-          "Ciao! Sono qui per spiegarti come lavora Easy Come. Puoi chiedermi, ad esempio, cosa possiamo automatizzare o come nasce un gestionale su misura."
+          "Ciao! Dimmi quale attività vuoi rendere automatica. Posso aiutarti su processi, gestionali, integrazioni e preventivi.",
+          "Ciao! Posso spiegarti cosa automatizziamo, quali strumenti colleghiamo e quando serve un gestionale su misura."
         ]
       },
       {
@@ -1658,10 +1585,10 @@
       {
         id: "services",
         phrases: ["cosa fate", "che servizi offrite", "cos e easy come", "come funziona easy come", "di cosa vi occupate"],
-        keywords: ["servizi", "gestionale", "easy", "come", "azienda", "software", "piattaforma"],
+        keywords: ["servizi", "automazione", "automatizzare", "gestionale", "easy", "come", "azienda", "software", "piattaforma", "chatbot", "bot", "ai"],
         responses: [
-          "Easy Come realizza gestionali personalizzati per piccole attività. Riuniamo in un unico sistema ciò che oggi viene gestito tra fogli, chat, email e agenda: clienti, prenotazioni, appuntamenti, disponibilità, lavori, pagamenti e riepiloghi.",
-          "Partiamo dal modo in cui lavori oggi e costruiamo un sistema semplice attorno alla tua attività. L'obiettivo è ridurre passaggi manuali, errori e informazioni sparse."
+          "Easy Come automatizza i processi delle piccole imprese. Colleghiamo strumenti, eliminiamo attività ripetitive e, quando serve, creiamo gestionali su misura.",
+          "Partiamo dal lavoro quotidiano e rendiamo automatici i passaggi che fanno perdere tempo."
         ]
       },
       {
@@ -1670,7 +1597,7 @@
         keywords: ["costo", "costa", "prezzo", "prezzi", "budget", "tariffa", "euro", "€"],
         responses: [
           "Non esiste un prezzo standard: dipende dalle funzioni, dalle automazioni e dagli strumenti da collegare. Dopo una breve analisi ricevi un preventivo chiaro e costruito sul progetto reale.",
-          "Il costo viene definito solo dopo aver capito cosa deve fare il gestionale. In questo modo non paghi funzioni inutili e il preventivo resta legato alle tue esigenze."
+          "Il costo dipende dal processo da automatizzare e dagli strumenti da collegare. Prepariamo il preventivo dopo aver capito il flusso."
         ],
         action: "Richiedi un preventivo"
       },
@@ -1695,7 +1622,7 @@
       },
       {
         id: "process",
-        phrases: ["come lavorate", "come si inizia", "come nasce il gestionale", "quali sono i passaggi", "da dove partiamo"],
+        phrases: ["come lavorate", "come si inizia", "come nasce un automazione", "come nasce il gestionale", "quali sono i passaggi", "da dove partiamo"],
         keywords: ["iniziare", "partire", "procedura", "passaggi", "analisi", "progetto", "metodo"],
         responses: [
           "Il percorso è semplice: analizziamo come lavori, scegliamo le funzioni davvero utili, costruiamo e testiamo il sistema, poi ti aiutiamo a usarlo. In seguito può essere ampliato.",
@@ -1705,7 +1632,7 @@
       {
         id: "automation",
         phrases: ["cosa potete automatizzare", "quali automazioni fate", "si puo automatizzare", "lavoro automatico"],
-        keywords: ["automatizzare", "automazione", "automatico", "ripetitivo", "manualmente", "notifica", "conferma", "aggiornare"],
+        keywords: ["automatizzare", "automazione", "automatico", "ripetitivo", "manualmente", "notifica", "conferma", "aggiornare", "chatbot", "assistente", "ai"],
         responses: [
           "Possiamo automatizzare registrazione delle richieste, aggiornamento di calendari e archivi, conferme, promemoria, assegnazioni, riepiloghi e passaggi tra strumenti diversi. La fattibilità precisa dipende da come lavora la tua attività.",
           "In generale automatizziamo i passaggi ripetitivi: inserire gli stessi dati più volte, controllare disponibilità, inviare conferme e aggiornare più file separati."
@@ -1725,7 +1652,7 @@
         phrases: ["funziona da telefono", "si usa da smartphone", "posso usarlo da pc", "funziona online", "si usa fuori sede"],
         keywords: ["telefono", "smartphone", "tablet", "mobile", "computer", "pc", "online", "ovunque", "remoto"],
         responses: [
-          "Sì. Il gestionale può essere progettato per funzionare da computer, tablet e smartphone, così le informazioni restano accessibili anche fuori sede.",
+          "Sì. Le soluzioni possono funzionare da computer, tablet e smartphone, anche fuori sede.",
           "L'interfaccia può adattarsi ai diversi dispositivi. Le funzioni principali vengono organizzate per essere semplici anche da telefono."
         ]
       },
@@ -1734,8 +1661,8 @@
         phrases: ["e personalizzato", "si puo modificare", "posso aggiungere funzioni", "e su misura", "puo crescere"],
         keywords: ["personalizzato", "personalizzare", "misura", "modificare", "funzione", "funzioni", "aggiungere", "crescere", "modulo"],
         responses: [
-          "Sì. Il gestionale viene costruito sulle funzioni realmente necessarie e può crescere nel tempo. Si può partire da una base essenziale e aggiungere nuovi moduli in seguito.",
-          "Non imponiamo un software identico a tutti: struttura, campi, schermate e automazioni vengono adattati al flusso dell'attività."
+          "Sì. Puoi partire da una sola automazione e aggiungere nuovi flussi o moduli nel tempo.",
+          "Non imponiamo un sistema uguale per tutti: automazioni, schermate e collegamenti seguono il tuo flusso."
         ]
       },
       {
@@ -1824,7 +1751,7 @@
         phrases: ["spiegate come usarlo", "fate formazione", "e difficile da usare", "imparare a usarlo"],
         keywords: ["formazione", "spiegare", "imparare", "usare", "semplice", "difficile", "tutorial"],
         responses: [
-          "Il gestionale viene progettato per essere semplice e la consegna può includere una spiegazione pratica delle funzioni. L'obiettivo è renderlo utilizzabile senza competenze tecniche.",
+          "La soluzione viene progettata per essere semplice e la consegna può includere una spiegazione pratica.",
           "Sì. Ti aiutiamo a partire e organizziamo schermate e passaggi in modo coerente con il lavoro che già conosci."
         ]
       },
@@ -1842,8 +1769,8 @@
         phrases: ["fate anche il sito", "collegare il sito", "modulo sul sito", "prenotazione dal sito"],
         keywords: ["sito", "website", "pagina", "landing", "modulo", "form", "online"],
         responses: [
-          "Possiamo collegare il gestionale a moduli e funzioni del sito, per esempio richieste o prenotazioni. La realizzazione completa del sito va valutata come parte del progetto.",
-          "Il sito può diventare il punto di ingresso dei dati: una richiesta compilata online può arrivare direttamente nel gestionale."
+          "Possiamo collegare il sito a moduli, automazioni, chatbot e gestionali. La fattibilità viene valutata sul progetto.",
+          "Il sito può avviare il flusso: una richiesta online può essere salvata, assegnata e notificata automaticamente."
         ]
       },
       {
@@ -1949,7 +1876,7 @@
 
       if (isOffTopic(normalized)) {
         return {
-          answer: "Posso aiutarti solo con domande su Easy Come, gestionali e automazioni per attività. Per il resto è meglio usare un assistente generalista.",
+          answer: "Posso aiutarti su Easy Come, automazioni, gestionali e digitalizzazione delle piccole imprese.",
           intent: "off-topic"
         };
       }
@@ -1965,7 +1892,7 @@
 
       if (!best || best.score < 3) {
         return {
-          answer: "Posso rispondere alle domande generali su servizi, automazioni, tempi, dispositivi, integrazioni e preventivi. Per capire il tuo caso, prova a dirmi quale attività vuoi gestire meglio.",
+          answer: "Posso rispondere su automazioni, gestionali, integrazioni, tempi e preventivi. Dimmi quale attività vuoi rendere più veloce.",
           intent: "fallback",
           action: "Descrivi il tuo progetto",
           prefill: question.length > 18 ? question : ""
