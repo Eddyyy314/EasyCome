@@ -1,0 +1,12 @@
+{
+  "name": "easycome-v5-generator-checkout",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx vercel dev",
+    "static": "npx serve .",
+    "verify": "node tests/verify.mjs",
+    "build": "node scripts/build-public.mjs"
+  }
+}

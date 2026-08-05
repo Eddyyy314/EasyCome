@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1e137f30-d6d0-451a-b681-f82cbc311d4a",
+    "name": "Nuova richiesta al team",
+    "trigger": "record_created",
+    "entity": "public_submissions",
+    "action": "email",
+    "target": "direzione@borgomarina.example",
+    "message": "Nuova richiesta ricevuta dal portale.",
+    "enabled": true
+  },
+  {
+    "id": "e71b0683-3e00-4c13-88b7-99aca5120ff1",
+    "name": "Task pre-arrivo",
+    "trigger": "record_created",
+    "entity": "bookings",
+    "action": "create_task",
+    "target": "",
+    "message": "Verifica documenti e saldo prima dell’arrivo.",
+    "enabled": true
+  },
+  {
+    "id": "1df53b3e-33be-44b5-a68d-2a21588b6a52",
+    "name": "Conferma webhook",
+    "trigger": "status_changed",
+    "entity": "bookings",
+    "action": "webhook",
+    "target": "https://example.com/make-webhook",
+    "message": "Prenotazione confermata.",
+    "enabled": true
+  }
+]

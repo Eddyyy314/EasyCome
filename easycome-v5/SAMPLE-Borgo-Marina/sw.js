@@ -1,0 +1,1 @@
+const CACHE='easycome-v2';const ASSETS=['./','./index.html','./portal.html','./assets/styles.css','./js/config.js','./js/app.js','./js/portal.js'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
