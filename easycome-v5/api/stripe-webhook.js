@@ -21,8 +21,8 @@ export default async function handler(req, res) {
       updated_at: new Date().toISOString(),
     };
     let patch = null;
-    if (event.type === 'checkout.session.completed') patch = { ...common, status: session.payment_status === 'paid' ? 'paid' : 'processing', paid_at: session.payment_status === 'paid' ? new Date().toISOString() : null };
-    if (event.type === 'checkout.session.async_payment_succeeded') patch = { ...common, status: 'paid', paid_at: new Date().toISOString() };
+    if (event.type === 'checkout.session.completed') patch = { ...common, status: session.payment_status === 'paid' ? 'paid' : 'processing', delivery_status: session.payment_status === 'paid' ? 'ready_to_generate' : 'not_ready', paid_at: session.payment_status === 'paid' ? new Date().toISOString() : null };
+    if (event.type === 'checkout.session.async_payment_succeeded') patch = { ...common, status: 'paid', delivery_status: 'ready_to_generate', paid_at: new Date().toISOString() };
     if (event.type === 'checkout.session.async_payment_failed') patch = { ...common, status: 'payment_failed' };
     if (event.type === 'checkout.session.expired') patch = { ...common, status: 'expired' };
     if (patch) {

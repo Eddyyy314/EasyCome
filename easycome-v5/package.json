@@ -1,6 +1,6 @@
 {
-  "name": "easycome-v5-generator-checkout",
-  "version": "5.0.0",
+  "name": "easycome-studio-v7",
+  "version": "7.0.0",
   "private": true,
   "type": "module",
   "scripts": {

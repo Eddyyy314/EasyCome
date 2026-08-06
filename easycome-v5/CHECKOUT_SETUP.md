@@ -1,45 +1,25 @@
-# Checkout Easy Come — configurazione
+# Checkout e consegna automatica
 
-Il sito usa Stripe Checkout ospitato. Il browser non riceve mai la secret key e non decide l'importo: `/api/create-checkout-session` ricalcola il prezzo con il catalogo Easy Come.
+## Architettura
 
-## 1. Stripe
+Il prezzo viene calcolato nuovamente dal server. Il browser non può inviare un totale arbitrario. La configurazione viene salvata in `easycome_orders` prima di aprire Stripe.
 
-1. Crea o apri l'account Stripe.
-2. Copia la chiave segreta di test in `STRIPE_SECRET_KEY` nelle variabili Vercel.
-3. Pubblica il sito e crea un webhook verso:
-   `https://TUO-DOMINIO/api/stripe-webhook`
-4. Seleziona gli eventi:
-   - `checkout.session.completed`
-   - `checkout.session.async_payment_succeeded`
-   - `checkout.session.async_payment_failed`
-   - `checkout.session.expired`
-5. Copia il signing secret in `STRIPE_WEBHOOK_SECRET`.
-6. Prova in test mode prima di passare alle chiavi live.
+Dopo il pagamento:
 
-## 2. Supabase per gestire gli ordini
+- Stripe reindirizza a `success.html?session_id=...`;
+- `checkout-status` verifica la sessione direttamente su Stripe;
+- `generate-delivery` richiede un pagamento confermato;
+- il generatore server compone i file e restituisce lo ZIP;
+- Supabase registra stato e numero di download.
 
-1. Esegui `checkout/schema.sql` nel SQL Editor.
-2. Aggiungi `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` alle variabili server di Vercel.
-3. Crea un utente in Supabase Auth.
-4. Esegui la riga finale del file SQL sostituendo la tua email.
-5. Inserisci URL e publishable key in `js/admin-config.js` per usare `orders.html`.
+## Configurazione minima
 
-La service role deve restare soltanto nelle variabili server. Non inserirla in file JavaScript pubblici.
+1. Esegui `checkout/schema.sql` su Supabase.
+2. Inserisci su Vercel `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`.
+3. Mantieni `STRIPE_SECRET_KEY` solo su Vercel.
+4. Imposta `APP_URL=https://easy-come.it`.
+5. Crea il webhook Stripe e inserisci `STRIPE_WEBHOOK_SECRET`.
 
-## 3. Vercel
+## Modalità test e live
 
-Carica il progetto su GitHub, importalo in Vercel e imposta le variabili contenute in `.env.example`.
-
-Il cliente viene reindirizzato al Checkout Stripe. Dopo il pagamento torna su `success.html`; il webhook aggiorna l'ordine anche se il cliente chiude la pagina prima del ritorno.
-
-## 4. Modalità interna
-
-Per scaricare ZIP senza checkout nella tua copia privata modifica `js/sales-config.js`:
-
-```js
-mode: 'builder',
-internalDownloadEnabled: true,
-generationSeconds: 0,
-```
-
-Non pubblicare la copia interna con il download aperto.
+Le chiavi test e live sono separate. Quando passi in produzione sostituisci `sk_test_...` con `sk_live_...` e crea un webhook live separato.

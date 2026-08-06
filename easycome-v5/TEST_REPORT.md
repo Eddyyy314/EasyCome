@@ -1,77 +1,55 @@
-# Test Report — Easy Come V5
+# Easy Come Studio V6 — Test report
 
-Data revisione: 3 agosto 2026
+Data verifica: 5 agosto 2026
 
-## Esito
+## Risultato
 
-**PASS — pacchetto generabile e checkout coerente con il preventivo.**
+**PASS** per struttura, generazione pacchetti, prezzi, build pubblica e file binari.
 
-## Generatore
+## Test eseguiti
 
-Sono stati generati e verificati tutti i 9 modelli:
+- 10 modelli aziendali generati;
+- punteggio qualità minimo: 100/100 nei modelli standard;
+- da 38 a 53 file generati nei modelli standard;
+- modello completo con sito, PWA, AI e brand kit;
+- coerenza prezzo browser/server per tutti i modelli;
+- implementazione da €150 applicata soltanto quando selezionata;
+- ZIP browser e ZIP server validi;
+- workbook Excel importato con `artifact_tool`;
+- 9 fogli rilevati nel workbook campione;
+- nessun errore formula evidente (#REF, #DIV/0, #VALUE, #NAME, #N/A);
+- dashboard Excel renderizzata e ispezionata;
+- manuale PDF renderizzato senza testo tagliato o sovrapposto;
+- sintassi verificata per tutti i file JavaScript, API e script;
+- build Vercel pubblica completata;
+- `builder.html`, `zip.js` e template interni esclusi dalla build pubblica;
+- pagina di successo collegata a `/api/generate-delivery`;
+- endpoint di consegna bloccato se Stripe non restituisce `payment_status=paid`;
+- schema ordini con `delivery_status`, `download_count` e `last_downloaded_at`;
+- integrità dello ZIP dimostrativo verificata con `unzip -t`.
 
-| Modello | Qualità | File | Prezzo software di test |
-|---|---:|---:|---:|
-| Da zero | 100/100 | 32 | €99,00 |
-| Prenotazioni | 100/100 | 37 | €153,00 |
-| Appuntamenti | 100/100 | 37 | €135,00 |
-| Ristorazione | 100/100 | 42 | €153,40 |
-| Officina e interventi | 100/100 | 41 | €157,80 |
-| Studio professionale | 100/100 | 38 | €151,80 |
-| Negozio e vendite | 100/100 | 39 | €151,80 |
-| Progetti e cantieri | 100/100 | 41 | €150,20 |
-| Iscrizioni e abbonati | 100/100 | 39 | €151,80 |
+## Pacchetto campione
 
-Per ogni modello sono stati verificati:
+Atelier Nova:
 
-- unicità dei file generati;
-- sintassi JavaScript del gestionale, portale e service worker;
-- schema Supabase con RLS, ruoli, audit log, Storage e protezione richieste pubbliche;
-- presenza di viste tabella, foglio operativo, kanban, agenda, calendario, disponibilità e schede;
-- ZIP finale integro;
-- qualità minima obbligatoria prima della consegna.
+- 55 file;
+- gestionale, portale e database;
+- Excel e CSV;
+- manuale PDF;
+- sito pubblico;
+- app PWA;
+- brand kit;
+- AI configurabile;
+- workflow n8n e piano Make;
+- totale simulato: €193,40;
+- qualità: 97/100.
 
-## Interfaccia commerciale
+## Non verificato in questo ambiente
 
-- il timer visibile è stato eliminato;
-- la preparazione usa una rotellina e una barra indeterminata;
-- la card laterale “Anteprima del brand” è stata rimossa;
-- l’anteprima mostra dashboard, foglio operativo, calendario risorse e portale;
-- l’implementazione parte da **€0** ed entra nel totale soltanto dopo selezione esplicita;
-- selezionando l’implementazione vengono aggiunti **€150** sia nel frontend sia nel calcolo server;
-- il prezzo frontend coincide con il prezzo ricalcolato dal server per tutti i modelli.
+- pagamento Stripe reale o Sandbox con le credenziali dell'utente;
+- ricezione webhook sul dominio `easy-come.it`;
+- scrittura reale degli ordini nel progetto Supabase dell'utente;
+- download post-pagamento su Vercel con le variabili dell'utente;
+- invio reale di email, WhatsApp o richieste AI.
 
-## Workbook Excel
-
-Il pacchetto dimostrativo Borgo Marina genera un vero file `.xlsx` importabile, con:
-
-- 18 fogli complessivi;
-- foglio Istruzioni;
-- Dashboard con KPI e formule;
-- Calendario disponibilità con formule e colori condizionali;
-- Listino e regole di prezzo;
-- un foglio operativo per ogni entità;
-- righe dimostrative, formati data/valuta, filtri, blocco intestazioni e menu a tendina;
-- CSV separato per ogni sezione.
-
-Il workbook è stato importato e ispezionato con `artifact_tool`. Non sono stati rilevati errori `#REF!`, `#DIV/0!`, `#VALUE!`, `#NAME?` o `#N/A` nei fogli controllati.
-
-## Checkout e sicurezza
-
-- importo ricalcolato in `api/_pricing.js`;
-- chiavi Stripe e Supabase sensibili solo lato server;
-- firma webhook Stripe HMAC-SHA256 verificata con confronto timing-safe;
-- schema ordini Supabase con RLS e amministratori separati;
-- build pubblica priva di `builder.html`, `zip.js` e template del generatore;
-- pagine pagamento riuscito, annullato e gestione ordini presenti.
-
-## Limiti prima del lancio reale
-
-Restano obbligatori:
-
-- test di una transazione reale in Stripe test mode;
-- pubblicazione e collaudo del webhook sul dominio definitivo;
-- collaudo Supabase con account titolare e collaboratore;
-- inserimento dei dati legali reali in termini e privacy;
-- verifica fiscale con il commercialista;
-- test finale del primo gestionale con i dati di un’impresa pilota.
+Questi punti richiedono le credenziali e gli account esterni dell'utente. Il test finale va eseguito in Sandbox dopo il deploy.

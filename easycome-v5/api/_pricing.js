@@ -1,8 +1,8 @@
 export const MODULE_PRICES = Object.freeze({
   crm: 0, tasks: 0, bookings: 10, appointments: 8, quotes: 6, orders: 8,
   inventory: 10, invoices: 12, payments: 8, expenses: 6, projects: 8,
-  support: 8, staff: 8, documents: 4, assets: 10, reports: 8, portal: 10,
-  dynamic_pricing: 12, automations: 8, multiuser: 6, multisite: 10, ai: 15,
+  support: 8, staff: 8, documents: 4, assets: 10, reports: 8, easycome_hub: 0,
+  dynamic_pricing: 12, automations: 8, multiuser: 6, multisite: 10, ai: 15, website: 12, mobile_app: 12, branding: 6,
 });
 
 const numberEnv = (name, fallback) => {
@@ -40,7 +40,7 @@ export function calculateServerPrice(project = {}) {
 export function compactProject(project = {}) {
   const company = project.company || {};
   return {
-    version: project.version || '3.0',
+    version: project.version || '7.0',
     organizationId: project.organizationId || '',
     company: {
       name: String(company.name || '').slice(0, 160),
@@ -51,12 +51,18 @@ export function compactProject(project = {}) {
       primaryColor: String(company.primaryColor || '').slice(0, 20),
       accentColor: String(company.accentColor || '').slice(0, 20),
       style: String(company.style || '').slice(0, 80),
+      layout: String(company.layout || company.style || '').slice(0, 80),
+      phone: String(company.phone || '').slice(0, 80),
+      surfaceColor: String(company.surfaceColor || '').slice(0, 20),
+      currency: String(company.currency || 'EUR').slice(0, 8),
+      locale: String(company.locale || 'it-IT').slice(0, 20),
+      logoData: /^data:image\/(png|jpeg|jpg|webp|svg\+xml);base64,/i.test(String(company.logoData || '')) && String(company.logoData || '').length <= 1200000 ? String(company.logoData) : '',
     },
     modules: Array.isArray(project.modules) ? project.modules.slice(0, 50) : [],
     customEntities: Array.isArray(project.customEntities) ? project.customEntities.slice(0, 30) : [],
     automations: Array.isArray(project.automations) ? project.automations.slice(0, 40) : [],
     pricing: project.pricing || {},
-    portal: project.portal || {},
+    hub: project.hub || { enabled: true },
     delivery: {
       previewApproved: Boolean(project.delivery?.previewApproved),
       implementationSelected: Boolean(project.delivery?.implementationSelected),

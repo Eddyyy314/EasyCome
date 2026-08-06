@@ -1,46 +1,39 @@
-# Easy Come V5 — Generator & Checkout
+# Easy Come Studio V7
 
-Un configuratore pubblico con anteprima navigabile e checkout Stripe, più un Builder interno che genera il pacchetto completo del cliente.
+Easy Come Studio V7 è il configuratore pubblico che permette a un’impresa di progettare, vedere in anteprima e acquistare un sistema gestionale personalizzato.
 
 ## Flusso cliente
 
-1. L’impresa descrive attività e processi.
-2. Sceglie moduli, sezioni, campi, prezzi e automazioni.
-3. Prova dashboard, foglio operativo, calendario disponibilità e portale.
-4. Approva l’anteprima.
-5. Una rotellina mostra la preparazione del progetto, senza timer artificiale.
-6. Acquista il solo software oppure aggiunge volontariamente l’implementazione assistita da €150.
-7. Easy Come genera e consegna il pacchetto configurato.
+1. L’utente crea il proprio account Easy Come.
+2. Configura attività, funzioni, sezioni, regole e layout.
+3. Naviga l’anteprima reale del gestionale.
+4. Approva il progetto e paga tramite Stripe.
+5. Il server verifica il pagamento e genera lo ZIP.
+6. Il gestionale acquistato usa lo stesso account Easy Come.
 
-## Cosa viene generato
+## Novità V7
 
-- gestionale responsive con dashboard e KPI;
-- tabella, foglio modificabile tipo Excel, kanban, agenda, calendario, disponibilità e schede;
-- vero workbook `.xlsx` con Istruzioni, Dashboard, Listino, Calendario e fogli operativi;
-- modelli CSV per ogni sezione;
-- import/export CSV ed Excel, backup e ripristino JSON;
-- preventivi, ordini e documenti stampabili;
-- portale pubblico;
-- Supabase con RLS, Storage, ruoli e audit log;
-- automazioni e documentazione di installazione/collaudo.
+- account unico per sito, gestionale ed Easy Come Hub;
+- progetti salvati su Supabase;
+- Easy Come Hub al posto del vecchio portale pubblico;
+- manuale HTML e PDF personalizzato;
+- richieste assistenza, bug, nuove funzioni, implementazione e formazione;
+- struttura dati visuale e procedura guidata per nuove sezioni;
+- modelli prezzi: nessun prezzo, preventivo manuale, listino fisso, tariffa oraria, abbonamento e prezzo dinamico;
+- ricette di automazione comprensibili;
+- layout professionali predefiniti, senza color picker confusi;
+- anteprima del gestionale operativo, non del foglio Excel.
 
-## Modalità
+## Aree del prodotto
 
-- `index.html`: configuratore pubblico con anteprima e checkout.
-- `builder.html`: copia interna Easy Come con generazione ZIP.
-- `orders.html`: gestione ordini pagati, riservata agli amministratori.
+- `index.html`: configuratore pubblico protetto da registrazione;
+- `builder.html`: generatore interno con download diretto;
+- `orders.html`: pannello ordini;
+- `api/`: checkout, account, webhook e generazione server;
+- `checkout/schema.sql`: database centrale Easy Come;
+- `js/generator-core.js`: motore dei pacchetti;
+- `templates/`: codice del gestionale e del Hub generati.
 
-## Prezzi
+## Limiti dichiarati
 
-- software base: €99 una tantum;
-- moduli: principalmente €4–€15;
-- implementazione: €150, **facoltativa e mai preselezionata**;
-- nessun canone Easy Come inserito automaticamente.
-
-## Test
-
-```bash
-npm run verify
-```
-
-Per Stripe e Supabase segui `CHECKOUT_SETUP.md`.
+Il pacchetto base usa l’account Easy Come e può funzionare con dati locali. L’implementazione opzionale serve per database cloud, deploy, ruoli, migrazione dati e collaudo. Le app native, la fatturazione elettronica e le integrazioni con servizi esterni richiedono configurazioni e account specifici.

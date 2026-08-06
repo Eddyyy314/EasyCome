@@ -1,4 +1,6 @@
-(function (global) {
+import { createZipBytes } from './_zip-node.js';
+import { ECProductTemplates } from './_product-templates-node.js';
+const global = { EasyZip: { createZipBytes }, ECProductTemplates, crypto: globalThis.crypto };
   'use strict';
 
   const BASE_PRICE = 99;
@@ -2144,7 +2146,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
     return String(value ?? '').replace(/[&<>"']/g, (match) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[match]));
   }
 
-  global.ECGenerator = {
+  export const ECGenerator = {
     BASE_PRICE,
     IMPLEMENTATION_PRICE,
     MODULES,
@@ -2160,4 +2162,3 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
     sqlName,
     uuidv4,
   };
-}(window));

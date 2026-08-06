@@ -4,9 +4,14 @@ function config() {
   return { url, key, ready: Boolean(url && key) };
 }
 
+export function assertOrderStore() {
+  const current = config();
+  if (!current.ready) throw new Error('Archivio ordini non configurato: aggiungi SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY su Vercel.');
+  return current;
+}
+
 async function request(path, options = {}) {
-  const { url, key, ready } = config();
-  if (!ready) return null;
+  const { url, key } = assertOrderStore();
   const response = await fetch(`${url}/rest/v1/${path}`, {
     ...options,
     headers: {
@@ -37,5 +42,10 @@ export async function updateOrderBySession(sessionId, patch) {
 
 export async function getOrderById(id) {
   const result = await request(`easycome_orders?id=eq.${encodeURIComponent(id)}&select=*`);
+  return Array.isArray(result) ? result[0] || null : null;
+}
+
+export async function getOrderBySession(sessionId) {
+  const result = await request(`easycome_orders?stripe_session_id=eq.${encodeURIComponent(sessionId)}&select=*`);
   return Array.isArray(result) ? result[0] || null : null;
 }

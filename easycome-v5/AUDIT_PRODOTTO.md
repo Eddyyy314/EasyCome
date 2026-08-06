@@ -1,17 +1,22 @@
-# Audit prodotto — Easy Come V5
+# Audit prodotto V7
 
-## Modello commerciale
+## Cosa è realmente incluso
 
-Il pacchetto software parte da €99. Moduli e personalizzazioni hanno prezzi contenuti. L’implementazione assistita costa €150, è facoltativa e non viene mai aggiunta automaticamente.
+- configuratore con account centrale;
+- anteprima del gestionale operativo;
+- checkout Stripe con prezzo server-side;
+- generazione automatica dello ZIP dopo il pagamento;
+- gestionale, Excel, database, manuale, Easy Come Hub e asset selezionati;
+- stesso Easy Come ID per sito, gestionale e Hub;
+- assistenza e richiesta funzioni tracciate su Supabase.
 
-## Valore consegnato
+## Cosa richiede implementazione o servizi esterni
 
-Il pacchetto non è una semplice dashboard. Comprende foglio operativo tipo Excel, workbook `.xlsx`, calendario, disponibilità risorse, viste multiple, CRUD, import/export, documenti, backup, database Supabase, ruoli, audit log, portale e automazioni.
+- database cloud operativo del singolo cliente;
+- migrazione dati;
+- configurazione email, WhatsApp, AI o pagamenti del cliente;
+- pubblicazione App Store/Play Store;
+- fatturazione elettronica;
+- personalizzazioni non presenti nel configuratore.
 
-## Trasparenza
-
-La schermata di preparazione usa una rotellina e non mostra tempi artificiali. Il checkout distingue chiaramente software e implementazione opzionale.
-
-## Limiti
-
-API esterne, invii WhatsApp, fatturazione elettronica, pagamenti del gestionale e servizi regolamentati richiedono configurazioni o fornitori specifici e non vengono promessi come attivi senza integrazione.
+L’implementazione resta facoltativa e viene aggiunta al prezzo solo se selezionata.

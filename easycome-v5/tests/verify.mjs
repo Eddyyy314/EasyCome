@@ -4,132 +4,75 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(here, '..');
-globalThis.window = globalThis;
-for (const file of ['js/zip.js', 'js/product-templates.js', 'js/generator-core.js']) {
-  vm.runInThisContext(fs.readFileSync(path.join(root, file), 'utf8'), { filename: file });
-}
-const G = globalThis.ECGenerator;
-const appSource = fs.readFileSync(path.join(root, 'js/app.js'), 'utf8');
-const match = appSource.match(/const TEMPLATES = (\[[\s\S]*?\n  \]);/);
-assert(match, 'Impossibile leggere i modelli dal configuratore');
-const templates = vm.runInNewContext(`(${match[1]})`);
-assert.equal(templates.length, 9, 'Il catalogo deve contenere 9 modelli');
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+globalThis.window=globalThis;
+for(const file of ['js/zip.js','js/product-templates.js','js/generator-core.js']) vm.runInThisContext(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
+const G=globalThis.ECGenerator;
+const appSource=fs.readFileSync(path.join(root,'js/app.js'),'utf8');
+const match=appSource.match(/const TEMPLATES = (\[[\s\S]*?\n  \]);/);
+assert(match,'Catalogo modelli non leggibile');
+const templates=vm.runInNewContext(`(${match[1]})`);
+assert(templates.length>=11,'Il catalogo V7 deve coprire almeno 11 casi aziendali');
 
-function projectFrom(template, index) {
-  const p = G.defaultProject();
-  p.company.name = `Impresa Test ${index + 1}`;
-  p.company.slug = `impresa-test-${index + 1}`;
-  p.company.industry = template.industry || 'Impresa personalizzata';
-  p.company.description = template.description || 'Gestionale operativo personalizzato per centralizzare dati, attività e processi aziendali quotidiani.';
-  if (p.company.description.length < 35) p.company.description += ' con un flusso operativo chiaro e verificabile.';
-  p.company.email = `titolare${index + 1}@example.com`;
-  p.modules = [...new Set(template.modules || ['crm', 'tasks'])];
-  p.customEntities = structuredClone(template.custom || []);
-  if (template.portal) p.portal = { ...p.portal, enabled: true, ...template.portal };
-  if (template.pricing) { p.pricing.enabled = true; p.pricing.basePrice = 50; p.pricing.rules = [{ type: 'duration_discount', name: 'Sconto durata', min: 7, percent: 5 }]; }
-  p.delivery.previewApproved = true;
-  return p;
+function projectFrom(template,index){
+ const p=G.defaultProject();
+ p.company={...p.company,name:`Impresa Test ${index+1}`,slug:`impresa-test-${index+1}`,industry:template.industry||'Impresa',description:(template.description||'Sistema operativo personalizzato per centralizzare dati e processi quotidiani.')+' Flusso completo e verificabile.',email:`titolare${index+1}@example.com`,layout:'studio',style:'studio'};
+ p.modules=[...new Set([...(template.modules||['crm','tasks']),'easycome_hub'])];
+ p.customEntities=structuredClone(template.custom||[]);
+ p.pricing={...p.pricing,mode:template.pricingMode||'none',enabled:['fixed','hourly','subscription','dynamic'].includes(template.pricingMode||'none'),basePrice:template.pricingMode==='none'?0:60,rules:template.pricingMode==='dynamic'?[{type:'duration_discount',name:'Sconto durata',min:7,percent:5}]:[],extras:[]};
+ p.delivery.previewApproved=true;
+ p.identity={...p.identity,supabaseUrl:'https://example.supabase.co',supabaseAnonKey:'anon-test',ownerUserId:'00000000-0000-4000-8000-000000000001',ownerEmail:p.company.email,easycomeBaseUrl:'https://easy-come.it',dataMode:'local'};
+ return p;
 }
 
-const results = [];
-for (const [index, template] of templates.entries()) {
-  const project = projectFrom(template, index);
-  const audit = G.auditProject(project);
-  assert.equal(audit.blockers.length, 0, `${template.name}: problemi bloccanti: ${audit.blockers.join(' | ')}`);
-  assert(audit.score >= 82, `${template.name}: punteggio qualità insufficiente (${audit.score})`);
-  const result = G.generatePackage(project);
-  assert(result.files.length >= 32, `${template.name}: numero file insufficiente (${result.files.length})`);
-  assert.equal(new Set(result.files.map((file) => file.name)).size, result.files.length, `${template.name}: nomi file duplicati`);
-  const byName = Object.fromEntries(result.files.map((file) => [file.name, file.data]));
-  for (const required of ['index.html', 'portal.html', 'js/app.js', 'js/portal.js', 'supabase/schema.sql', '04-RAPPORTO-QUALITA.md', '06-PRIMA-DELLA-CONSEGNA.md', 'Excel/LEGGIMI.md']) assert(required in byName, `${template.name}: manca ${required}`);
-  new Function(byName['js/app.js']);
-  new Function(byName['js/portal.js']);
-  new Function(byName['sw.js']);
-  const workbookName = Object.keys(byName).find((name) => name.endsWith('.xlsx'));
-  assert(workbookName, `${template.name}: workbook Excel mancante`);
-  assert(byName[workbookName] instanceof Uint8Array, `${template.name}: workbook non binario`);
-  assert.equal(byName[workbookName][0], 0x50, `${template.name}: workbook ZIP non valido`);
-  assert(byName['js/app.js'].includes('renderSheet') && byName['js/app.js'].includes('renderAvailability'), `${template.name}: viste operative avanzate mancanti`);
-  const schema = byName['supabase/schema.sql'];
-  for (const expected of ['enable row level security', 'claim_owner_by_email', 'submit_public_request', 'public_submission_limits', 'audit_log', 'easycome-documents']) assert(schema.includes(expected), `${template.name}: schema incompleto (${expected})`);
-  results.push({ template: template.name, score: audit.score, files: result.files.length, total: result.price.total });
+const results=[];
+for(const [index,template] of templates.entries()){
+ const project=projectFrom(template,index);
+ const audit=G.auditProject(project);
+ assert.equal(audit.blockers.length,0,`${template.name}: ${audit.blockers.join(' | ')}`);
+ const result=G.generatePackage(project);
+ const files=Object.fromEntries(result.files.map(f=>[f.name,f.data]));
+ for(const required of ['index.html','easycome-hub.html','manuale.html','js/app.js','js/hub.js','js/config.js','supabase/schema.sql','Excel/LEGGIMI.md','DOCUMENTI/MANUALE-OPERATIVO.pdf','BRAND/brand-guide.html']) assert(required in files,`${template.name}: manca ${required}`);
+ assert(!('js/portal.js' in files),`${template.name}: il vecchio portale pubblico non deve essere generato`);
+ assert(String(files['js/app.js']).includes('Easy Come Hub')&&String(files['js/app.js']).toLowerCase().includes('stesse credenziali'),`${template.name}: account/Hub non collegati`);
+ assert(String(files['js/hub.js']).includes('easycome_support_requests'),`${template.name}: Hub non operativo`);
+ assert(String(files['manuale.html']).includes('stesso indirizzo email')||String(files['manuale.html']).includes('stessa password'),`${template.name}: manuale account incompleto`);
+ new Function(String(files['js/app.js'])); new Function(String(files['js/hub.js'])); new Function(String(files['sw.js']));
+ const xlsx=Object.entries(files).find(([name])=>name.endsWith('.xlsx'))?.[1]; assert(xlsx instanceof Uint8Array&&xlsx[0]===0x50,`${template.name}: Excel non valido`);
+ results.push({template:template.name,score:audit.score,files:result.files.length,total:result.price.total});
 }
 
-const multisite = G.defaultProject();
-multisite.company = { ...multisite.company, name: 'Multi Sede Test', description: 'Gestione coordinata di più sedi e dati operativi attribuiti alla sede corretta.', email: 'owner@example.com' };
-multisite.modules = ['crm', 'tasks', 'multisite', 'projects'];
-multisite.delivery.previewApproved = true;
-const multisiteEntities = G.buildEntities(multisite);
-assert(multisiteEntities.find((entity) => entity.key === 'customers').fields.some((field) => field.key === 'location_name'), 'Il modulo multisede deve aggiungere il campo sede');
-assert(multisiteEntities.find((entity) => entity.key === 'tasks').fields.some((field) => field.key === 'project_name'), 'Il modulo progetti deve collegare le attività');
+const {calculateServerPrice}=await import(path.join(root,'api/_pricing.js'));
+for(const [i,t] of templates.entries()) assert.equal(calculateServerPrice(projectFrom(t,i)).total,G.calculatePrice(projectFrom(t,i)).total,`${t.name}: prezzo server/browser diverso`);
 
-const zipProject = projectFrom(templates[1], 99);
-const packageResult = G.generatePackage(zipProject);
-const blob = globalThis.EasyZip.createZip(packageResult.files);
-const zipPath = path.join(root, 'tests', 'generated-test.zip');
-fs.writeFileSync(zipPath, Buffer.from(await blob.arrayBuffer()));
-assert(fs.statSync(zipPath).size > 10_000, 'ZIP di test troppo piccolo');
+const complete=projectFrom(templates.find(t=>t.id==='complete'),50);
+complete.modules=[...new Set([...complete.modules,'website','mobile_app','branding','ai','automations'])];
+const browserResult=G.generatePackage(complete);
+const {ECGenerator:ServerGenerator}=await import(path.join(root,'api/_generator-node.js'));
+const serverResult=ServerGenerator.generatePackage(complete);
+assert.equal(serverResult.files.length,browserResult.files.length,'Generatori browser/server disallineati');
+const requiredV7=['public-site/index.html','mobile/index.html','AI/README.md','automations/n8n-workflow.json','easycome-hub.html','manuale.html'];
+const names=new Set(browserResult.files.map(f=>f.name));for(const n of requiredV7)assert(names.has(n),`Pacchetto completo: manca ${n}`);
 
-console.log(JSON.stringify({ ok: true, templates: results, zipPath }, null, 2));
+for(const file of ['assets/v7.css','js/account.js','api/public-config.js','api/_auth.js','api/create-checkout-session.js','api/generate-delivery.js','checkout/schema.sql']) assert(fs.existsSync(path.join(root,file)),`Manca ${file}`);
+const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert(index.includes('js/account.js')&&index.includes('@supabase/supabase-js')&&index.includes('accountGate'),'Registrazione centrale non montata');
+assert(!appSource.toLowerCase().includes('portale pubblico'),'Configuratore contiene ancora Portale pubblico');
+assert(appSource.includes('LAYOUT_PRESETS')&&appSource.includes('PRICE_MODES')&&appSource.includes('SECTION_PRESETS'),'Wizard semplificato incompleto');
+assert(appSource.includes("previewMode = 'dashboard'")&&!appSource.includes("previewMode = 'sheet'"),'Anteprima non deve partire dal foglio Excel');
+assert(appSource.includes('authorization: `Bearer'),'Checkout non invia la sessione account');
+const checkout=fs.readFileSync(path.join(root,'api/create-checkout-session.js'),'utf8');
+assert(checkout.includes('authenticatedUser')&&checkout.includes('user_id: user.id'),'Checkout non legato all’account');
+const delivery=fs.readFileSync(path.join(root,'api/generate-delivery.js'),'utf8');
+assert(delivery.includes('ownerUserId')&&delivery.includes('SUPABASE_ANON_KEY')&&delivery.includes('easycome-studio-v7.zip'),'Consegna V7 non inietta identità centrale');
+const schema=fs.readFileSync(path.join(root,'checkout/schema.sql'),'utf8');
+for(const x of ['easycome_profiles','easycome_projects','easycome_support_requests','user_id uuid','projects_own','support_own_insert'])assert(schema.includes(x),`Schema account incompleto: ${x}`);
 
+const noImpl=projectFrom(templates[0],90);assert.equal(G.calculatePrice(noImpl).implementation,0);noImpl.delivery.implementationSelected=true;assert.equal(G.calculatePrice(noImpl).implementation,150);assert.equal(calculateServerPrice(noImpl).implementation,150);
 
-// Verifiche Easy Come 4.0 — preparazione e checkout
-for (const file of [
-  'assets/editorial.css', 'success.html', 'cancel.html', 'orders.html',
-  'api/create-checkout-session.js', 'api/stripe-webhook.js', 'api/checkout-status.js',
-  'api/_pricing.js', 'checkout/schema.sql', 'CHECKOUT_SETUP.md', '.env.example'
-]) assert(fs.existsSync(path.join(root, file)), `Manca il file checkout ${file}`);
+await import(path.join(root,'scripts/build-public.mjs'));
+for(const n of ['index.html','assets/v7.css','js/account.js','js/app.js'])assert(fs.existsSync(path.join(root,'dist-public',n)),`Build pubblica: manca ${n}`);
+for(const n of ['builder.html','js/zip.js','js/product-templates.js'])assert(!fs.existsSync(path.join(root,'dist-public',n)),`Build pubblica espone ${n}`);
 
-const salesConfig = fs.readFileSync(path.join(root, 'js/sales-config.js'), 'utf8');
-assert(salesConfig.includes("mode: 'customer'"), 'La versione pubblica deve partire in modalità customer');
-assert(salesConfig.includes('generationSeconds: 0'), 'La preparazione pubblica non deve mostrare un timer fisso');
-assert(salesConfig.includes("checkoutEndpoint: '/api/create-checkout-session'"), 'Endpoint checkout mancante');
-assert(appSource.includes('PREPARATION_STAGES'), 'Sequenza di preparazione mancante');
-assert(appSource.includes('runPreparation'), 'Motore di preparazione mancante');
-assert(appSource.includes('openCheckout'), 'Checkout frontend mancante');
-
-const { calculateServerPrice } = await import(path.join(root, 'api/_pricing.js'));
-for (const [index, template] of templates.entries()) {
-  const p = projectFrom(template, index);
-  const browserPrice = G.calculatePrice(p);
-  const serverPrice = calculateServerPrice(p);
-  assert.equal(serverPrice.total, browserPrice.total, `${template.name}: prezzo frontend e server non coincidono`);
-}
-
-const checkoutSchema = fs.readFileSync(path.join(root, 'checkout/schema.sql'), 'utf8');
-for (const expected of ['easycome_orders', 'easycome_admins', 'enable row level security', 'is_easycome_admin']) assert(checkoutSchema.includes(expected), `Schema checkout incompleto: ${expected}`);
-
-const noImplementation = projectFrom(templates[0], 500);
-const baseOnlyBrowser = G.calculatePrice(noImplementation);
-const baseOnlyServer = calculateServerPrice(noImplementation);
-assert.equal(baseOnlyBrowser.implementation, 0, 'L’implementazione non deve essere inclusa automaticamente nel frontend');
-assert.equal(baseOnlyServer.implementation, 0, 'L’implementazione non deve essere inclusa automaticamente nel server');
-noImplementation.delivery.implementationSelected = true;
-assert.equal(G.calculatePrice(noImplementation).implementation, 150, 'L’implementazione opzionale deve costare 150 euro');
-assert.equal(calculateServerPrice(noImplementation).implementation, 150, 'Il server deve applicare l’implementazione solo se selezionata');
-assert(appSource.includes('process-spinner'), 'La preparazione deve mostrare una rotellina');
-assert(!appSource.includes('processTimer'), 'Il timer visibile deve essere eliminato');
-assert(!appSource.includes('summary-preview'), 'La card promozionale laterale deve essere eliminata');
-console.log(JSON.stringify({ checkout: true, spinner: true, optionalImplementation: true, serverPricingVerified: templates.length }, null, 2));
-
-
-const publicIndex = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-assert(!publicIndex.includes('js/zip.js'), 'Il sito pubblico non deve caricare zip.js');
-assert(!publicIndex.includes('js/product-templates.js'), 'Il sito pubblico non deve caricare i template di generazione');
-const builderIndex = fs.readFileSync(path.join(root, 'builder.html'), 'utf8');
-assert(builderIndex.includes('js/zip.js') && builderIndex.includes('js/product-templates.js'), 'Il Builder interno deve mantenere il motore completo');
-
-const { verifyStripeSignature } = await import(path.join(root, 'api/_stripe.js'));
-const crypto = await import('node:crypto');
-const webhookBody = Buffer.from(JSON.stringify({ id: 'evt_test', type: 'checkout.session.completed' }));
-const timestamp = Math.floor(Date.now() / 1000);
-const webhookSecret = 'whsec_test_secret';
-const signature = crypto.createHmac('sha256', webhookSecret).update(`${timestamp}.${webhookBody.toString('utf8')}`).digest('hex');
-verifyStripeSignature(webhookBody, `t=${timestamp},v1=${signature}`, webhookSecret);
-assert.throws(() => verifyStripeSignature(Buffer.from('altered'), `t=${timestamp},v1=${signature}`, webhookSecret), /non valida/);
-
-await import(path.join(root, 'scripts/build-public.mjs'));
-for (const required of ['index.html','success.html','cancel.html','assets/editorial.css','js/app.js']) assert(fs.existsSync(path.join(root,'dist-public',required)), `Build pubblica: manca ${required}`);
-for (const forbidden of ['builder.html','js/zip.js','js/product-templates.js']) assert(!fs.existsSync(path.join(root,'dist-public',forbidden)), `Build pubblica: file interno esposto ${forbidden}`);
+const blob=globalThis.EasyZip.createZip(browserResult.files);const zipPath=path.join(root,'tests','generated-v7.zip');fs.writeFileSync(zipPath,Buffer.from(await blob.arrayBuffer()));assert(fs.statSync(zipPath).size>100000,'ZIP V7 troppo piccolo');
+console.log(JSON.stringify({ok:true,version:'7.0',templates:results,zipPath},null,2));

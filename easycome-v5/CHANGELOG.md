@@ -1,13 +1,16 @@
 # Changelog
 
-## 5.0
+## 7.0.0
 
-- eliminato il timer da 90 secondi;
-- aggiunta rotellina di preparazione senza conto alla rovescia;
-- implementazione da €150 resa facoltativa e non preselezionata;
-- rimossa la card laterale “Anteprima del brand”;
-- ridotti i prezzi dei moduli;
-- anteprima con foglio operativo e calendario disponibilità;
-- pacchetto con workbook Excel `.xlsx` e CSV per ogni sezione;
-- gestionale con foglio modificabile, calendario mensile e matrice risorse;
-- checkout e preventivo aggiornati.
+- Account Easy Come obbligatorio prima del configuratore.
+- Stesse credenziali per gestionale ed Easy Come Hub.
+- Progetti salvati online.
+- Easy Come Hub sostituisce il portale pubblico.
+- Manuale personalizzato interattivo.
+- Supporto, bug, feature request, implementazione, formazione e aggiornamenti.
+- Sezioni dati ricostruite con wizard visuale.
+- Sei modelli di prezzo, incluso preventivo manuale.
+- Ricette di automazione guidate.
+- Sei layout professionali predefiniti.
+- Anteprima reale del gestionale.
+- Ordini associati all’utente autenticato.
