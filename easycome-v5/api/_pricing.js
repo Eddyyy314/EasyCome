@@ -5,13 +5,25 @@ export const MODULE_PRICES = Object.freeze({
   dynamic_pricing: 12, automations: 8, multiuser: 6, multisite: 10, ai: 15, website: 12, mobile_app: 12, branding: 6,
 });
 
+const LEGACY_MODULE_ALIASES = Object.freeze({
+  portal: 'easycome_hub',
+  public_portal: 'easycome_hub',
+  client_portal: 'easycome_hub',
+  hub: 'easycome_hub',
+});
+
+export function normalizeModuleIds(value) {
+  const input = Array.isArray(value) ? value : [];
+  return [...new Set(input.map((id) => LEGACY_MODULE_ALIASES[String(id)] || String(id)).filter(Boolean))];
+}
+
 const numberEnv = (name, fallback) => {
   const value = Number(process.env[name]);
   return Number.isFinite(value) && value >= 0 ? value : fallback;
 };
 
 export function calculateServerPrice(project = {}) {
-  const modules = Array.isArray(project.modules) ? [...new Set(project.modules)] : [];
+  const modules = normalizeModuleIds(project.modules);
   const unknown = modules.filter((id) => !(id in MODULE_PRICES));
   if (unknown.length) throw new Error(`Moduli non riconosciuti: ${unknown.join(', ')}`);
 
@@ -58,7 +70,7 @@ export function compactProject(project = {}) {
       locale: String(company.locale || 'it-IT').slice(0, 20),
       logoData: /^data:image\/(png|jpeg|jpg|webp|svg\+xml);base64,/i.test(String(company.logoData || '')) && String(company.logoData || '').length <= 1200000 ? String(company.logoData) : '',
     },
-    modules: Array.isArray(project.modules) ? project.modules.slice(0, 50) : [],
+    modules: normalizeModuleIds(project.modules).slice(0, 50),
     customEntities: Array.isArray(project.customEntities) ? project.customEntities.slice(0, 30) : [],
     automations: Array.isArray(project.automations) ? project.automations.slice(0, 40) : [],
     pricing: project.pricing || {},

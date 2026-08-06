@@ -42,8 +42,13 @@ for(const [index,template] of templates.entries()){
  results.push({template:template.name,score:audit.score,files:result.files.length,total:result.price.total});
 }
 
-const {calculateServerPrice}=await import(path.join(root,'api/_pricing.js'));
+const {calculateServerPrice,compactProject,normalizeModuleIds}=await import(path.join(root,'api/_pricing.js'));
 for(const [i,t] of templates.entries()) assert.equal(calculateServerPrice(projectFrom(t,i)).total,G.calculatePrice(projectFrom(t,i)).total,`${t.name}: prezzo server/browser diverso`);
+const legacyPortal=projectFrom(templates[0],75);legacyPortal.modules.push('portal');
+assert(!normalizeModuleIds(legacyPortal.modules).includes('portal'),'Alias legacy portal non migrato');
+assert(normalizeModuleIds(legacyPortal.modules).includes('easycome_hub'),'Alias legacy portal non convertito in Easy Come Hub');
+assert.doesNotThrow(()=>calculateServerPrice(legacyPortal),'Il checkout deve accettare i progetti V6 con modulo portal');
+assert(!compactProject(legacyPortal).modules.includes('portal'),'Il progetto compatto non deve conservare portal');
 
 const complete=projectFrom(templates.find(t=>t.id==='complete'),50);
 complete.modules=[...new Set([...complete.modules,'website','mobile_app','branding','ai','automations'])];
@@ -75,4 +80,4 @@ for(const n of ['index.html','assets/v7.css','js/account.js','js/app.js'])assert
 for(const n of ['builder.html','js/zip.js','js/product-templates.js'])assert(!fs.existsSync(path.join(root,'dist-public',n)),`Build pubblica espone ${n}`);
 
 const blob=globalThis.EasyZip.createZip(browserResult.files);const zipPath=path.join(root,'tests','generated-v7.zip');fs.writeFileSync(zipPath,Buffer.from(await blob.arrayBuffer()));assert(fs.statSync(zipPath).size>100000,'ZIP V7 troppo piccolo');
-console.log(JSON.stringify({ok:true,version:'7.0',templates:results,zipPath},null,2));
+console.log(JSON.stringify({ok:true,version:'7.0.1',templates:results,zipPath},null,2));

@@ -82,7 +82,8 @@
   function normalizeProject(value) {
     const base = G.defaultProject();
     const p = { ...base, ...value, company: { ...base.company, ...(value.company || {}) }, pricing: { ...base.pricing, ...(value.pricing || {}) }, delivery: { ...base.delivery, ...(value.delivery || {}) } };
-    p.modules = Array.from(new Set([...(p.modules || []), 'crm', 'tasks', 'easycome_hub']));
+    const moduleAliases = { portal: 'easycome_hub', public_portal: 'easycome_hub', client_portal: 'easycome_hub', hub: 'easycome_hub' };
+    p.modules = Array.from(new Set([...(p.modules || []).map((id) => moduleAliases[id] || id), 'crm', 'tasks', 'easycome_hub']));
     p.customEntities = p.customEntities || [];
     p.automations = p.automations || [];
     p.pricing.rules = p.pricing.rules || [];
@@ -486,8 +487,10 @@
   ];
 
   function projectForCheckout() {
+    const moduleAliases = { portal: 'easycome_hub', public_portal: 'easycome_hub', client_portal: 'easycome_hub', hub: 'easycome_hub' };
     return {
       ...project,
+      modules: Array.from(new Set((project.modules || []).map((id) => moduleAliases[id] || id))),
       company: { ...project.company },
       delivery: { ...project.delivery, previewApproved: true },
     };

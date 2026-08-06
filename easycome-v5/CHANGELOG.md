@@ -1,3 +1,9 @@
+# V7.0.1 — Compatibilità progetti precedenti
+
+- Migrazione automatica del vecchio modulo `portal` verso `easycome_hub`.
+- Checkout compatibile con configurazioni salvate nelle versioni precedenti.
+- Rimozione dell’errore “Moduli non riconosciuti: portal”.
+
 # Changelog
 
 ## 7.0.0
