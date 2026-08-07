@@ -1,22 +1,24 @@
-# Audit prodotto V7
+# Audit prodotto — Easy Come Studio V8
 
-## Cosa è realmente incluso
+## Valore introdotto
 
-- configuratore con account centrale;
-- anteprima del gestionale operativo;
-- checkout Stripe con prezzo server-side;
-- generazione automatica dello ZIP dopo il pagamento;
-- gestionale, Excel, database, manuale, Easy Come Hub e asset selezionati;
-- stesso Easy Come ID per sito, gestionale e Hub;
-- assistenza e richiesta funzioni tracciate su Supabase.
+La V8 trasforma Easy Come da configuratore con download a relazione continuativa con il cliente:
 
-## Cosa richiede implementazione o servizi esterni
+1. il cliente possiede un profilo centrale;
+2. ordini e download non si perdono dopo il pagamento;
+3. l’Hub del gestionale è una vera area di servizio e sviluppo;
+4. richieste e incontri sono tracciati;
+5. Easy Come può vendere gestione tecnica ricorrente a 30 €/mese;
+6. il titolare vede ordini, incontri, ticket e abbonamenti dal pannello amministratore.
 
-- database cloud operativo del singolo cliente;
-- migrazione dati;
-- configurazione email, WhatsApp, AI o pagamenti del cliente;
-- pubblicazione App Store/Play Store;
-- fatturazione elettronica;
-- personalizzazioni non presenti nel configuratore.
+## Limiti dichiarati del canone da 30 €/mese
 
-L’implementazione resta facoltativa e viene aggiunta al prezzo solo se selezionata.
+Il servizio copre controllo tecnico, supporto su configurazioni, aggiornamenti minori e assistenza prioritaria. Non comprende automaticamente:
+
+- nuove funzioni importanti;
+- rifacimenti completi;
+- costi Stripe, Supabase, email, WhatsApp, AI o altri fornitori;
+- interventi causati da servizi terzi non disponibili;
+- consulenza legale, fiscale o cybersecurity certificata.
+
+Questi limiti devono essere riportati nei termini commerciali prima del lancio Live.

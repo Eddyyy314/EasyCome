@@ -1,25 +1,30 @@
-# Checkout e consegna automatica
+# Checkout e abbonamenti — Easy Come V8
 
-## Architettura
+## Acquisto software
 
-Il prezzo viene calcolato nuovamente dal server. Il browser non può inviare un totale arbitrario. La configurazione viene salvata in `easycome_orders` prima di aprire Stripe.
+- Senza Easy Come Managed: Stripe Checkout usa `mode=payment`.
+- Con Easy Come Managed: Stripe Checkout usa `mode=subscription`, con una voce software una tantum e una voce ricorrente da 30 €/mese.
 
-Dopo il pagamento:
+## Attivazione successiva
 
-- Stripe reindirizza a `success.html?session_id=...`;
-- `checkout-status` verifica la sessione direttamente su Stripe;
-- `generate-delivery` richiede un pagamento confermato;
-- il generatore server compone i file e restituisce lo ZIP;
-- Supabase registra stato e numero di download.
+Dal Profilo il cliente può attivare solo Easy Come Managed tramite `/api/create-managed-subscription`.
 
-## Configurazione minima
+## Gestione e disdetta
 
-1. Esegui `checkout/schema.sql` su Supabase.
-2. Inserisci su Vercel `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`.
-3. Mantieni `STRIPE_SECRET_KEY` solo su Vercel.
-4. Imposta `APP_URL=https://easy-come.it`.
-5. Crea il webhook Stripe e inserisci `STRIPE_WEBHOOK_SECRET`.
+Il pulsante “Gestisci pagamento o disdici” crea una sessione Stripe Customer Portal tramite `/api/create-billing-portal`.
 
-## Modalità test e live
+## Variabili
 
-Le chiavi test e live sono separate. Quando passi in produzione sostituisci `sk_test_...` con `sk_live_...` e crea un webhook live separato.
+```text
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+EASYCOME_MANAGED_MONTHLY_CENTS=3000
+APP_URL=https://easy-come.it
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+## Webhook
+
+Configura `https://easy-come.it/api/stripe-webhook` con gli eventi elencati in `DEPLOY-V8.md`.

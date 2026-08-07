@@ -3,35 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Easy Come — Costruiamo il gestionale della tua impresa</title>
-  <meta name="description" content="Componi il gestionale della tua impresa, provalo in anteprima e acquistalo con un pagamento unico.">
+  <title>Easy Come Studio — Costruisci il sistema digitale della tua impresa</title>
+  <meta name="description" content="Componi gestionale, sito, app PWA, automazioni e database della tua impresa. Prova tutto in anteprima prima del pagamento.">
   <meta name="theme-color" content="#ff6b35">
   <link rel="stylesheet" href="assets/styles.css">
   <link rel="stylesheet" href="assets/editorial.css">
+  <link rel="stylesheet" href="assets/v7.css">
 </head>
 <body class="editorial-site">
+  <div id="accountGate"></div>
   <div class="app-shell">
     <aside class="leftbar">
       <a class="logo" href="#" aria-label="Easy Come">
         <span>EC</span>
-        <div><strong>Easy Come</strong><small>software per imprese</small></div>
+        <div><strong>Easy Come Studio</strong><small>sistemi digitali per imprese</small></div>
       </a>
       <div class="intro-copy">
-        <span class="eyebrow light">UN SOFTWARE FATTO SUL TUO MODO DI LAVORARE</span>
-        <h2>Prima lo componi. Poi lo provi. Solo dopo decidi.</h2>
-        <p>Niente demo generiche: scegli dati, funzioni e automazioni, quindi naviga il risultato con il nome e i colori della tua attività.</p>
+        <span class="eyebrow light">UN SISTEMA DIGITALE COSTRUITO SUL TUO LAVORO</span>
+        <h2>Componi il tuo sistema. Provalo. Poi decidi.</h2>
+        <p>Gestionale, sito, app installabile, Excel, database e automazioni: scegli ciò che serve e naviga il risultato prima di pagare.</p>
       </div>
       <nav id="stepList" class="step-list"></nav>
       <div class="left-footer">
-        <strong>Pagamento unico</strong>
-        <span>Da €99, pagamento unico</span>
-        <small>L’implementazione assistita è facoltativa e si aggiunge solo se la selezioni.</small>
+        <strong>Software da €99 una tantum</strong>
+        <span>Anteprima prima dell’acquisto</span>
+        <small>Implementazione e gestione tecnica a 30 €/mese sono sempre facoltative.</small>
       </div>
     </aside>
 
     <main class="workspace">
       <header class="mobile-header">
-        <a class="logo dark" href="#"><span>EC</span><div><strong>Easy Come</strong><small>software per imprese</small></div></a>
+        <a class="logo dark" href="#"><span>EC</span><div><strong>Easy Come Studio</strong><small>sistemi digitali per imprese</small></div></a>
         <button id="globalPreviewMobile" class="btn btn-secondary btn-small">Anteprima</button>
       </header>
       <div class="workspace-top">
@@ -52,6 +54,8 @@
   <div id="previewRoot"></div>
   <div id="generationRoot"></div>
   <div id="checkoutRoot"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/account.js"></script>
   <script src="js/generator-core.js"></script>
   <script src="js/sales-config.js"></script>
   <script src="js/app.js"></script>

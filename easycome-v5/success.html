@@ -22,7 +22,7 @@
     </div>
     <section class="status" id="status"><div class="row"><span>Stato</span><strong>Verifica in corso…</strong></div></section>
     <div id="error"></div>
-    <div class="actions"><button class="btn primary" id="downloadButton" disabled>Preparazione in corso…</button><a class="btn" href="/">Torna allo Studio</a><a class="btn" id="supportLink" href="#">Assistenza</a></div>
+    <div class="actions"><button class="btn primary" id="downloadButton" disabled>Preparazione in corso…</button><a class="btn" href="/profilo.html?tab=orders">Apri il mio profilo</a><a class="btn" href="/">Torna allo Studio</a><a class="btn" id="supportLink" href="#">Assistenza</a></div>
     <p class="note">Il download viene autorizzato soltanto dopo la conferma del pagamento da parte di Stripe. Conserva l’email dell’ordine per eventuale assistenza.</p>
   </main>
   <script src="js/sales-config.js"></script>
@@ -32,7 +32,7 @@
     const sessionId=new URLSearchParams(location.search).get('session_id');
     const button=document.querySelector('#downloadButton');
     const stages=[...document.querySelectorAll('.stage')];
-    let downloadUrl=''; let downloadName='easycome-studio-v7.zip';
+    let downloadUrl=''; let downloadName='easycome-studio-v8.zip';
     const support=window.EASYCOME_SALES?.supportEmail||'';const supportLink=document.querySelector('#supportLink');if(support)supportLink.href='mailto:'+support;else supportLink.style.display='none';
     function stage(index){stages.forEach((el,i)=>{el.classList.toggle('active',i===index);el.classList.toggle('done',i<index);if(i<index)el.querySelector('b').textContent='✓';});}
     function fail(message){document.querySelector('#error').innerHTML=`<div class="error">${esc(message)}</div>`;button.disabled=true;button.textContent='Preparazione non riuscita';document.querySelector('#loader').classList.remove('done');}

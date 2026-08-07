@@ -394,7 +394,7 @@
 
   function defaultProject() {
     return {
-      version: '7.0.0',
+      version: '8.0.0',
       generatedAt: new Date().toISOString(),
       organizationId: uuidv4(),
       company: {
@@ -407,7 +407,7 @@
       hub: { enabled: true, manual: true, support: true, featureRequests: true, onboarding: true, updates: true },
       pricing: { mode: 'none', enabled: false, basePrice: 0, unit: 'servizio', taxPerPerson: 0, depositPercent: 0, minimumUnits: 1, renewalNoticeDays: 15, rules: [], extras: [] },
       identity: { provider: 'easycome', supabaseUrl: '', supabaseAnonKey: '', ownerUserId: '', ownerEmail: '', easycomeBaseUrl: 'https://easy-come.it', dataMode: 'local' },
-      delivery: { packagePrice: BASE_PRICE, implementationPrice: IMPLEMENTATION_PRICE, implementationSelected: false, notes: '', supportDays: 30, previewApproved: false },
+      delivery: { packagePrice: BASE_PRICE, implementationPrice: IMPLEMENTATION_PRICE, implementationSelected: false, managedServiceSelected: false, managedServicePrice: 30, notes: '', supportDays: 30, previewApproved: false },
     };
   }
 
@@ -673,7 +673,7 @@ on conflict (organization_id, key) do update set value = excluded.value, updated
 `
       : '';
 
-    return `-- Easy Come Studio V6 — schema Supabase
+    return `-- Easy Come Studio V8 — schema Supabase
 -- Progetto: ${companyName}
 -- Generato: ${new Date().toISOString()}
 -- Eseguibile più volte: policy, trigger e seed sono idempotenti.
@@ -1101,7 +1101,7 @@ using (bucket_id = 'easycome-documents' and public.org_can_admin((storage.folder
     <section class="manual-section" id="panoramica"><h2>Panoramica</h2><p>La dashboard mostra attività, scadenze, indicatori e accessi rapidi. I valori si aggiornano in base ai dati inseriti nelle sezioni operative.</p><div class="manual-grid">${moduleNames.slice(0,8).map((name)=>`<article class="manual-card"><strong>${escapeHtml(name)}</strong><small>Funzione inclusa nel progetto</small></article>`).join('')}</div></section>
     <section class="manual-section" id="sezioni"><h2>Sezioni operative</h2><div class="manual-grid">${entities.filter((e)=>!e.system).map((entity)=>`<article class="manual-card"><strong>${escapeHtml(entity.label)}</strong><small>${entity.fields.length} campi · crea, cerca, modifica ed esporta</small></article>`).join('')}</div></section>
     <section class="manual-section" id="dati"><h2>Dati, Excel e backup</h2><ul><li>Usa la ricerca e i filtri per trovare rapidamente le informazioni.</li><li>Esporta CSV o workbook Excel senza bloccare i dati nel software.</li><li>Scarica un backup JSON prima di importazioni o modifiche importanti.</li><li>Il pacchetto base usa accesso Easy Come e dati locali; l’implementazione può attivare il database cloud.</li></ul></section>
-    <section class="manual-section" id="hub"><h2>Easy Come Hub</h2><p>È il canale riservato tra la tua azienda ed Easy Come. Qui puoi aprire il manuale, segnalare un problema, chiedere una nuova funzione, richiedere implementazione o vedere gli aggiornamenti del progetto.</p><div class="manual-actions"><a href="easycome-hub.html">Apri Easy Come Hub</a><a class="secondary" href="DOCUMENTI/MANUALE-OPERATIVO.pdf">Scarica PDF</a></div></section>
+    <section class="manual-section" id="hub"><h2>Easy Come Hub</h2><p>È il canale riservato tra la tua azienda ed Easy Come. Qui puoi aprire il manuale, seguire l’onboarding, segnalare un problema, chiedere una nuova funzione, prenotare un incontro, vedere gli aggiornamenti e raggiungere il profilo centrale con ordini e gestione del servizio tecnico.</p><div class="manual-actions"><a href="easycome-hub.html">Apri Easy Come Hub</a><a class="secondary" href="DOCUMENTI/MANUALE-OPERATIVO.pdf">Scarica PDF</a></div></section>
     <section class="manual-section" id="sicurezza"><h2>Sicurezza e buone pratiche</h2><ul><li>Non condividere password tra collaboratori: crea un account per ogni persona.</li><li>Conserva backup periodici in una posizione sicura.</li><li>Attiva il database cloud solo con RLS e ruoli verificati.</li><li>Le integrazioni esterne richiedono credenziali intestate all’azienda.</li></ul></section>
     </main></div></body></html>`;
   }
@@ -1338,7 +1338,7 @@ Deno.serve(async (req) => {
   }
 
   function generatedServiceWorker() {
-    return `const CACHE='easycome-v7';const ASSETS=['./','./index.html','./easycome-hub.html','./manuale.html','./assets/styles.css','./js/config.js','./js/app.js','./js/hub.js'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+    return `const CACHE='easycome-v8';const ASSETS=['./','./index.html','./easycome-hub.html','./manuale.html','./assets/styles.css','./js/config.js','./js/app.js','./js/hub.js'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
   }
 
   function generatedFavicon(project) {
@@ -1356,7 +1356,7 @@ Deno.serve(async (req) => {
   }
 
   function generatedOffer(project, price) {
-    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Offerta ${escapeHtml(project.company.name||'')}</title><style>body{font-family:Arial,sans-serif;background:#f5f5f2;color:#171717;margin:0;padding:50px}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:24px;padding:45px;box-shadow:0 25px 80px #0001}h1{font-size:42px;margin:12px 0}.muted{color:#777}.row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}.total{background:#171717;color:#fff;border-radius:18px;padding:22px;margin-top:20px}.total strong{font-size:34px;display:block;margin-top:5px}.pill{display:inline-block;background:${project.company.primaryColor||'#ff6b35'}22;color:${project.company.primaryColor||'#ff6b35'};padding:7px 10px;border-radius:999px;font-weight:bold;font-size:12px}</style></head><body><div class="sheet"><span class="pill">EASY COME · UNA TANTUM</span><h1>${escapeHtml(project.company.name||'Gestionale personalizzato')}</h1><p class="muted">${escapeHtml(project.company.description||'Soluzione digitale personalizzata per semplificare il lavoro quotidiano.')}</p><h2>Investimento</h2><div class="row"><span>Pacchetto software</span><strong>€${price.base.toFixed(2)}</strong></div>${price.implementation ? `<div class="row"><span>Implementazione assistita (opzionale)</span><strong>€${price.implementation.toFixed(2)}</strong></div>` : ''}<div class="row"><span>Moduli e personalizzazioni</span><strong>€${price.extras.toFixed(2)}</strong></div><div class="total"><span>Totale una tantum</span><strong>€${price.total.toFixed(2)}</strong><small>Nessun canone Easy Come.</small></div><h2>Cosa ricevi</h2><p>Gestionale responsive, fogli Excel, calendario operativo, database Supabase, Easy Come Hub e manuale personalizzato.${price.implementation ? ` Implementazione assistita e ${project.delivery.supportDays||30} giorni di supporto inclusi.` : ' Implementazione e supporto non inclusi nel pacchetto software.'}</p></div></body></html>`;
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Offerta ${escapeHtml(project.company.name||'')}</title><style>body{font-family:Arial,sans-serif;background:#f5f5f2;color:#171717;margin:0;padding:50px}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:24px;padding:45px;box-shadow:0 25px 80px #0001}h1{font-size:42px;margin:12px 0}.muted{color:#777}.row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}.total{background:#171717;color:#fff;border-radius:18px;padding:22px;margin-top:20px}.total strong{font-size:34px;display:block;margin-top:5px}.pill{display:inline-block;background:${project.company.primaryColor||'#ff6b35'}22;color:${project.company.primaryColor||'#ff6b35'};padding:7px 10px;border-radius:999px;font-weight:bold;font-size:12px}</style></head><body><div class="sheet"><span class="pill">EASY COME · UNA TANTUM</span><h1>${escapeHtml(project.company.name||'Gestionale personalizzato')}</h1><p class="muted">${escapeHtml(project.company.description||'Soluzione digitale personalizzata per semplificare il lavoro quotidiano.')}</p><h2>Investimento</h2><div class="row"><span>Pacchetto software</span><strong>€${price.base.toFixed(2)}</strong></div>${price.implementation ? `<div class="row"><span>Implementazione assistita (opzionale)</span><strong>€${price.implementation.toFixed(2)}</strong></div>` : ''}<div class="row"><span>Moduli e personalizzazioni</span><strong>€${price.extras.toFixed(2)}</strong></div><div class="total"><span>Totale da pagare ora</span><strong>€${price.total.toFixed(2)}</strong><small>${project.delivery?.managedServiceSelected ? 'Più €30 al mese per la gestione tecnica Easy Come, gestibile dal profilo.' : 'Nessun canone Easy Come selezionato.'}</small></div><h2>Cosa ricevi</h2><p>Gestionale responsive, fogli Excel, calendario operativo, database Supabase, Easy Come Hub e manuale personalizzato.${price.implementation ? ` Implementazione assistita e ${project.delivery.supportDays||30} giorni di supporto inclusi.` : ' Implementazione e supporto non inclusi nel pacchetto software.'}</p></div></body></html>`;
   }
 
   function generatedQualityReport(project, entities, price, quality) {
@@ -1381,7 +1381,7 @@ ${quality.strengths.map((item) => `- ${item}`).join('\n')}
 - importazione ed esportazione CSV;
 - viste tabella, foglio Excel, bacheca, agenda, calendario, disponibilità e schede quando coerenti;
 - audit log e permessi per ruolo;
-- prezzo configurato: €${price.total.toFixed(2)} una tantum.
+- prezzo configurato: €${price.total.toFixed(2)} da pagare ora;${project.delivery?.managedServiceSelected ? '\n- gestione tecnica Easy Come selezionata: €30 al mese.' : ''}
 
 ## Regola di consegna
 Il pacchetto deve essere consegnato soltanto dopo aver completato la checklist di collaudo, collegato Supabase e verificato i flussi esterni effettivamente acquistati.
@@ -1456,7 +1456,7 @@ ${(project.automations || []).length ? (project.automations || []).map((flow) =>
     const moduleNames = project.modules.map((id) => MODULES.find((item) => item.id === id)?.name).filter(Boolean);
     return `# ${project.company.name || 'Gestionale personalizzato'}
 
-Pacchetto generato con **Easy Come Studio V6** e bloccato da un controllo qualità prima del download.
+Pacchetto generato con **Easy Come Studio V8** e bloccato da un controllo qualità prima del download.
 
 ## Contenuto
 
@@ -1467,7 +1467,7 @@ Pacchetto generato con **Easy Come Studio V6** e bloccato da un controllo qualit
 - modalità demo locale immediata;
 - collegamento Supabase per login e dati cloud;
 - schema SQL con Row Level Security;
-- Easy Come Hub per manuale, assistenza, onboarding e nuove funzioni;
+- Easy Come Hub ridisegnato per manuale, assistenza, incontri, nuove funzioni e gestione tecnica;
 - motore prezzi dinamici${project.pricing.enabled ? ' configurato' : ' predisposto'};
 - ${project.automations.length} automazioni configurate;
 - Edge Function per email, webhook, notifiche, task e aggiornamenti;
@@ -1475,7 +1475,8 @@ Pacchetto generato con **Easy Come Studio V6** e bloccato da un controllo qualit
 - workbook Excel, manuale PDF, executive summary e brand kit;
 - sito pubblico e PWA mobile quando selezionati;
 - workflow n8n e piano Make quando sono presenti automazioni;
-- endpoint AI configurabile quando viene selezionato il modulo AI.
+- endpoint AI configurabile quando viene selezionato il modulo AI;
+- accesso al profilo Easy Come per ordini, download, incontri, assistenza e gestione dell’eventuale abbonamento tecnico.
 
 ## Moduli
 
@@ -1530,12 +1531,18 @@ Secret opzionali:
 
 Programma una chiamata periodica alla funzione per processare la coda.
 
+## Profilo e continuità Easy Come
+
+Accedi all’indirizzo ${project.identity?.easycomeBaseUrl || 'https://easy-come.it'}/profilo.html con lo stesso account usato per l’acquisto. Da lì puoi riscaricare il pacchetto, chiedere assistenza, prenotare un incontro e gestire il servizio tecnico mensile quando attivo.
+
 ## Prezzo Easy Come configurato
 
 - Pacchetto base: €${price.base.toFixed(2)}
+- Totale da pagare ora: €${price.total.toFixed(2)}
+${project.delivery?.managedServiceSelected ? '- Gestione tecnica continuativa: €30/mese (opzionale, gestibile dal profilo)' : '- Gestione tecnica continuativa: non selezionata'}
 - Implementazione assistita: ${price.implementation ? `€${price.implementation.toFixed(2)} (selezionata)` : 'non selezionata'}
 - Moduli e personalizzazioni: €${price.extras.toFixed(2)}
-- **Totale: €${price.total.toFixed(2)} una tantum**
+- **Totale da pagare ora: €${price.total.toFixed(2)}**
 
 ## Limite importante
 
@@ -1982,7 +1989,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
   }
 
   function generatedMobileServiceWorker() {
-    return `const C='ec-mobile-v6';const A=['./','./index.html','./manifest.webmanifest','../assets/favicon.svg'];self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(A))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('./index.html')))));`;
+    return `const C='ec-mobile-v8';const A=['./','./index.html','./manifest.webmanifest','../assets/favicon.svg'];self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(A))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('./index.html')))));`;
   }
 
   function generatedCapacitorConfig(project) {
@@ -2010,7 +2017,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
 
   function generatedExecutiveSummary(project, entities, price) {
     const moduleNames=(project.modules||[]).map((id)=>MODULES.find((item)=>item.id===id)?.name).filter(Boolean);
-    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Executive summary</title><style>body{font-family:Arial,sans-serif;margin:0;background:#eee9df;color:#171717}.page{width:900px;max-width:calc(100% - 40px);margin:40px auto;background:#fff;padding:50px;border:1px solid #111}.k{font-size:11px;letter-spacing:.16em;font-weight:800;color:${project.company.primaryColor||'#ff6b35'}}h1{font:700 60px/1 Georgia,serif}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#222;border:1px solid #222}.metric{background:#fff;padding:22px}.metric b{font-size:30px;display:block}.list{columns:2;line-height:1.8}@media(max-width:700px){.grid{grid-template-columns:1fr}.list{columns:1}}</style></head><body><main class="page"><span class="k">EASY COME STUDIO · PROGETTO DIGITALE</span><h1>${escapeHtml(project.company.name||'')}</h1><p>${escapeHtml(project.company.description||'')}</p><div class="grid"><div class="metric"><b>${entities.filter(e=>!e.system).length}</b><span>sezioni operative</span></div><div class="metric"><b>${project.automations?.length||0}</b><span>automazioni progettate</span></div><div class="metric"><b>€${price.total.toFixed(2)}</b><span>investimento una tantum</span></div></div><h2>Componenti incluse</h2><div class="list">${moduleNames.map(name=>`<div>✓ ${escapeHtml(name)}</div>`).join('')}</div><h2>Consegna</h2><p>Gestionale, database Supabase, workbook Excel, manuale personalizzato, Easy Come Hub e asset selezionati nel configuratore. Le integrazioni esterne richiedono credenziali intestate al cliente.</p></main></body></html>`;
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Executive summary</title><style>body{font-family:Arial,sans-serif;margin:0;background:#eee9df;color:#171717}.page{width:900px;max-width:calc(100% - 40px);margin:40px auto;background:#fff;padding:50px;border:1px solid #111}.k{font-size:11px;letter-spacing:.16em;font-weight:800;color:${project.company.primaryColor||'#ff6b35'}}h1{font:700 60px/1 Georgia,serif}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#222;border:1px solid #222}.metric{background:#fff;padding:22px}.metric b{font-size:30px;display:block}.list{columns:2;line-height:1.8}@media(max-width:700px){.grid{grid-template-columns:1fr}.list{columns:1}}</style></head><body><main class="page"><span class="k">EASY COME STUDIO · PROGETTO DIGITALE</span><h1>${escapeHtml(project.company.name||'')}</h1><p>${escapeHtml(project.company.description||'')}</p><div class="grid"><div class="metric"><b>${entities.filter(e=>!e.system).length}</b><span>sezioni operative</span></div><div class="metric"><b>${project.automations?.length||0}</b><span>automazioni progettate</span></div><div class="metric"><b>€${price.total.toFixed(2)}</b><span>da pagare ora${project.delivery?.managedServiceSelected ? ' + €30/mese' : ''}</span></div></div><h2>Componenti incluse</h2><div class="list">${moduleNames.map(name=>`<div>✓ ${escapeHtml(name)}</div>`).join('')}</div><h2>Consegna</h2><p>Gestionale, database Supabase, workbook Excel, manuale personalizzato, Easy Come Hub e asset selezionati nel configuratore. Le integrazioni esterne richiedono credenziali intestate al cliente.</p></main></body></html>`;
   }
 
   function pdfEscape(value) {
@@ -2058,7 +2065,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
   function generatedPackageJson(project) {
     return JSON.stringify({
       name: slugify(project.company.name || 'easycome-gestionale'),
-      version: '7.0.0',
+      version: '8.0.0',
       private: true,
       scripts: { dev: 'npx serve .', preview: 'npx serve .', 'deploy:supabase': 'supabase db push' },
     }, null, 2);
@@ -2137,7 +2144,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
       { name: 'vercel.json', data: JSON.stringify({ cleanUrls: true, trailingSlash: false }, null, 2) },
       { name: 'netlify.toml', data: '[build]\n  publish = "."\n\n[[headers]]\n  for = "/*"\n  [headers.values]\n    X-Frame-Options = "DENY"\n    X-Content-Type-Options = "nosniff"\n' },
     ];
-    return { project: configObject, entities, price, files, filename: `${project.company.slug || 'gestionale'}-easycome-v7.zip` };
+    return { project: configObject, entities, price, files, filename: `${project.company.slug || 'gestionale'}-easycome-v8.zip` };
   }
 
   function escapeHtml(value) {

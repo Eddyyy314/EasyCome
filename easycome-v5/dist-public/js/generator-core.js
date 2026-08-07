@@ -21,12 +21,15 @@
     { id: 'documents', name: 'Documenti e allegati', category: 'Operatività', price: 4, description: 'Archivio documentale e scadenze.', entities: ['documents'] },
     { id: 'assets', name: 'Beni e manutenzioni', category: 'Operatività', price: 10, description: 'Attrezzature, veicoli e manutenzioni.', entities: ['assets', 'maintenance'] },
     { id: 'reports', name: 'Report e KPI', category: 'Analisi', price: 8, description: 'Dashboard calcolata dai dati, filtri, CSV, backup e grafici.', entities: [] },
-    { id: 'portal', name: 'Portale pubblico', category: 'Canali', price: 10, description: 'Richieste, ordini, appuntamenti o preventivi online.', entities: ['public_submissions'] },
+    { id: 'easycome_hub', name: 'Manuale & Easy Come Hub', category: 'Assistenza', price: 0, included: true, description: 'Manuale personalizzato, onboarding, supporto, bug e richiesta nuove funzioni.', entities: [] },
     { id: 'dynamic_pricing', name: 'Prezzi dinamici', category: 'Automazioni', price: 12, description: 'Stagioni, giorni, durata, persone, extra e promo.', entities: ['pricing_rules', 'quotes'] },
     { id: 'automations', name: 'Motore automazioni', category: 'Automazioni', price: 8, description: 'Trigger, email, webhook, task e aggiornamenti.', entities: ['automation_log'] },
     { id: 'multiuser', name: 'Utenti, ruoli e permessi', category: 'Sicurezza', price: 6, description: 'Accessi separati per titolare e collaboratori.', entities: [] },
     { id: 'multisite', name: 'Più sedi', category: 'Struttura', price: 10, description: 'Anagrafica sedi e attribuzione della sede ai dati operativi.', entities: ['locations'] },
     { id: 'ai', name: 'AI tramite integrazione', category: 'Automazioni', price: 15, description: 'Bozze, riepiloghi e classificazione tramite API esterna configurata.', entities: ['ai_requests'] },
+    { id: 'website', name: 'Sito pubblico coordinato', category: 'Canali', price: 12, description: 'Sito vetrina responsive coordinato con il gestionale.', entities: [] },
+    { id: 'mobile_app', name: 'App PWA installabile', category: 'Canali', price: 12, description: 'Web app mobile installabile con accessi rapidi e modalità offline di base.', entities: [] },
+    { id: 'branding', name: 'Brand kit completo', category: 'Identità', price: 6, description: 'Logo vettoriale, varianti, copertina social e guida visiva.', entities: [] },
   ];
 
   const ENTITY_PRESETS = {
@@ -391,19 +394,20 @@
 
   function defaultProject() {
     return {
-      version: '2.0.0',
+      version: '8.0.0',
       generatedAt: new Date().toISOString(),
       organizationId: uuidv4(),
       company: {
         name: '', slug: '', industry: '', description: '', email: '', phone: '',
-        primaryColor: '#ff6b35', accentColor: '#151515', surfaceColor: '#ffffff', currency: 'EUR', locale: 'it-IT', logoData: '', style: 'signature',
+        primaryColor: '#275dff', accentColor: '#17213b', surfaceColor: '#f7f8fb', currency: 'EUR', locale: 'it-IT', logoData: '', style: 'studio', layout: 'studio',
       },
-      modules: ['crm', 'tasks'],
+      modules: ['crm', 'tasks', 'easycome_hub'],
       customEntities: [],
       automations: [],
-      portal: { enabled: false, type: 'request', title: 'Invia una richiesta', successMessage: 'Richiesta inviata correttamente.', collect: ['name', 'email', 'phone', 'message'] },
-      pricing: { enabled: false, basePrice: 0, unit: 'servizio', taxPerPerson: 0, depositPercent: 0, rules: [], extras: [] },
-      delivery: { packagePrice: BASE_PRICE, implementationPrice: IMPLEMENTATION_PRICE, implementationSelected: false, notes: '', supportDays: 30, previewApproved: false },
+      hub: { enabled: true, manual: true, support: true, featureRequests: true, onboarding: true, updates: true },
+      pricing: { mode: 'none', enabled: false, basePrice: 0, unit: 'servizio', taxPerPerson: 0, depositPercent: 0, minimumUnits: 1, renewalNoticeDays: 15, rules: [], extras: [] },
+      identity: { provider: 'easycome', supabaseUrl: '', supabaseAnonKey: '', ownerUserId: '', ownerEmail: '', easycomeBaseUrl: 'https://easy-come.it', dataMode: 'local' },
+      delivery: { packagePrice: BASE_PRICE, implementationPrice: IMPLEMENTATION_PRICE, implementationSelected: false, managedServiceSelected: false, managedServicePrice: 30, notes: '', supportDays: 30, previewApproved: false },
     };
   }
 
@@ -413,8 +417,7 @@
       const module = MODULES.find((item) => item.id === moduleId);
       if (module) module.entities.forEach((key) => { if (!keys.includes(key)) keys.push(key); });
     });
-    if (project.portal && project.portal.enabled && !keys.includes('public_submissions')) keys.push('public_submissions');
-    if (project.pricing && project.pricing.enabled && !keys.includes('pricing_rules')) keys.push('pricing_rules');
+    if (project.pricing && project.pricing.mode === 'dynamic' && !keys.includes('pricing_rules')) keys.push('pricing_rules');
     const presets = keys.map((key) => clone(ENTITY_PRESETS[key])).filter(Boolean);
     const custom = (project.customEntities || []).map((entity) => ({ ...clone(entity), key: sqlName(entity.key || entity.label), custom: true }));
     const merged = [];
@@ -501,17 +504,19 @@
       if (!entity.system && !(entity.fields || []).some((field) => field.required)) penalize(2, `La sezione “${entity.label}” non ha nessun campo obbligatorio.`);
     });
 
-    if (project.portal?.enabled) {
-      if (!(project.portal.collect || []).includes('name') || !(project.portal.collect || []).includes('email')) penalize(7, 'Il portale dovrebbe raccogliere almeno nome ed email.');
-      else strengths.push('Portale con dati di contatto essenziali.');
-      if (String(project.portal.title || '').trim().length < 8) penalize(4, 'Rendi più specifico il titolo del portale.');
-    }
+    if (project.hub?.enabled !== true) penalize(8, 'Easy Come Hub deve restare incluso nel pacchetto.', true);
+    else strengths.push('Manuale personalizzato ed Easy Come Hub inclusi.');
 
-    if (project.pricing?.enabled) {
-      if (Number(project.pricing.basePrice || 0) <= 0) penalize(8, 'I prezzi dinamici sono attivi ma il prezzo base è zero.');
-      if (!(project.pricing.rules || []).length) penalize(4, 'Aggiungi almeno una regola oppure disattiva i prezzi dinamici.');
-      else strengths.push('Motore prezzi configurato con regole reali.');
+    const pricingMode = project.pricing?.mode || 'none';
+    if (pricingMode === 'dynamic') {
+      if (Number(project.pricing.basePrice || 0) <= 0) penalize(8, 'Il prezzo variabile è attivo ma il prezzo di partenza è zero.');
+      if (!(project.pricing.rules || []).length) warnings.push('Prezzo variabile senza variazioni: verrà usato soltanto il prezzo di partenza.');
+      else strengths.push('Prezzo variabile configurato con regole reali.');
     }
+    if (['fixed','hourly','subscription'].includes(pricingMode) && Number(project.pricing.basePrice || 0) <= 0) {
+      penalize(4, 'Il modello economico selezionato non ha ancora un valore indicativo.');
+    }
+    if (pricingMode === 'manual_quote') strengths.push('Preventivazione caso per caso configurata senza forzare un listino fisso.');
 
     (project.automations || []).forEach((flow, index) => {
       const name = flow.name || `Automazione ${index + 1}`;
@@ -528,7 +533,7 @@
     if (!project.company?.logoData) warnings.push('Il logo è facoltativo, ma migliora molto la percezione del prodotto.');
     if ((project.modules || []).includes('documents')) strengths.push('Archivio documenti predisposto con Storage privato Supabase.');
     if ((project.modules || []).includes('bookings') || (project.modules || []).includes('appointments')) strengths.push('Controlli anti-sovrapposizione inclusi nel frontend e nel database.');
-    strengths.push('Backup JSON, workbook Excel, import/export CSV, foglio operativo, calendario, ruoli e audit log inclusi.');
+    strengths.push('Backup JSON, workbook Excel, import/export CSV, viste operative, calendario, ruoli e audit log inclusi.');
 
     score = Math.max(0, Math.min(100, Math.round(score)));
     const grade = score >= 92 && blockers.length === 0 ? 'Eccellente' : score >= 82 && blockers.length === 0 ? 'Pronto' : score >= 68 ? 'Da rifinire' : 'Non consegnabile';
@@ -668,7 +673,7 @@ on conflict (organization_id, key) do update set value = excluded.value, updated
 `
       : '';
 
-    return `-- Easy Come Studio Masterpiece — schema Supabase
+    return `-- Easy Come Studio V8 — schema Supabase
 -- Progetto: ${companyName}
 -- Generato: ${new Date().toISOString()}
 -- Eseguibile più volte: policy, trigger e seed sono idempotenti.
@@ -1027,9 +1032,12 @@ using (bucket_id = 'easycome-documents' and public.org_can_admin((storage.folder
     safeProject.company.slug = safeProject.company.slug || slugify(safeProject.company.name);
     safeProject.entities = entities;
     safeProject.price = calculatePrice(project);
+    const identity = safeProject.identity || {};
     return `window.APP_CONFIG = ${JSON.stringify({
-      supabaseUrl: 'INSERISCI_PROJECT_URL',
-      supabaseAnonKey: 'INSERISCI_PUBLISHABLE_KEY',
+      supabaseUrl: identity.supabaseUrl || 'INSERISCI_PROJECT_URL',
+      supabaseAnonKey: identity.supabaseAnonKey || 'INSERISCI_PUBLISHABLE_KEY',
+      dataMode: identity.dataMode || 'local',
+      easycomeBaseUrl: identity.easycomeBaseUrl || 'https://easy-come.it',
       project: safeProject,
     }, null, 2)};\n`;
   }
@@ -1062,35 +1070,49 @@ using (bucket_id = 'easycome-documents' and public.org_can_admin((storage.folder
 </html>`;
   }
 
-  function generatedPortalHtml(project) {
-    const title = project.portal.title || 'Invia una richiesta';
+  function generatedHubHtml(project) {
+    const title = `Easy Come Hub — ${project.company.name || 'Azienda'}`;
     return `<!doctype html>
 <html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>${escapeHtml(title)} — ${escapeHtml(project.company.name || 'Azienda')}</title>
-  <meta name="description" content="Portale clienti di ${escapeHtml(project.company.name || 'Azienda')}">
-  <meta name="theme-color" content="${project.company.accentColor || '#151515'}">
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="Manuale, supporto e nuove funzioni per ${escapeHtml(project.company.name || 'Azienda')}">
+  <meta name="theme-color" content="${project.company.accentColor || '#17213b'}">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/styles.css">
 </head>
-<body class="portal">
-  <div id="portal"></div>
+<body class="hub-page">
+  <div id="hub"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
-  <script src="js/portal.js"></script>
+  <script src="js/hub.js"></script>
 </body>
 </html>`;
+  }
+
+  function generatedManualHtml(project, entities) {
+    const moduleNames = (project.modules || []).map((id) => MODULES.find((item) => item.id === id)?.name).filter(Boolean);
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Manuale — ${escapeHtml(project.company.name || 'Gestionale')}</title><style>
+    *{box-sizing:border-box}body{margin:0;background:#f1eee8;color:#171916;font-family:Inter,Arial,sans-serif}.manual-shell{display:grid;grid-template-columns:270px 1fr;min-height:100vh}.manual-nav{background:#171916;color:#fff;padding:28px 22px;position:sticky;top:0;height:100vh}.manual-brand{display:flex;gap:10px;align-items:center}.manual-brand b{width:42px;height:42px;border-radius:13px;background:${project.company.primaryColor || '#275dff'};display:grid;place-items:center}.manual-brand span strong,.manual-brand span small{display:block}.manual-brand span small{color:#ffffff77;font-size:10px}.manual-nav nav{display:grid;gap:5px;margin-top:35px}.manual-nav a{color:#ffffff88;text-decoration:none;padding:10px;border-radius:10px;font-size:12px}.manual-nav a:hover{background:#ffffff12;color:#fff}.manual-nav footer{position:absolute;bottom:24px;font-size:10px;color:#ffffff66}.manual-main{padding:52px clamp(28px,7vw,100px);max-width:1100px}.manual-main>header span{font-size:10px;letter-spacing:.14em;color:${project.company.primaryColor || '#275dff'};font-weight:900}.manual-main h1{font:700 clamp(50px,7vw,90px)/.9 Georgia,serif;letter-spacing:-.055em;margin:15px 0}.manual-main>header p{font-size:18px;color:#6f6a62;line-height:1.55}.manual-section{background:#fff;border:1px solid #dcd6cd;border-radius:22px;padding:28px;margin:18px 0}.manual-section h2{font-size:27px;margin:0 0 12px}.manual-section p,.manual-section li{line-height:1.65;color:#625d56}.manual-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.manual-card{border:1px solid #e4ded5;border-radius:16px;padding:18px}.manual-card strong,.manual-card small{display:block}.manual-card small{color:#817a70;margin-top:5px}.step-list{counter-reset:step;display:grid;gap:12px}.step-list article{display:grid;grid-template-columns:38px 1fr;gap:12px}.step-list article:before{counter-increment:step;content:counter(step);width:38px;height:38px;border-radius:12px;background:#171916;color:#fff;display:grid;place-items:center;font-weight:900}.step-list h3{margin:0}.step-list p{margin:4px 0 0}.manual-actions{display:flex;gap:10px;flex-wrap:wrap}.manual-actions a{display:inline-block;text-decoration:none;padding:12px 15px;border-radius:11px;background:#171916;color:#fff;font-weight:800}.manual-actions a.secondary{background:#fff;color:#171916;border:1px solid #d8d1c6}@media(max-width:800px){.manual-shell{grid-template-columns:1fr}.manual-nav{position:relative;height:auto}.manual-nav nav,.manual-nav footer{display:none}.manual-grid{grid-template-columns:1fr}.manual-main{padding:30px 20px}}
+    </style></head><body><div class="manual-shell"><aside class="manual-nav"><div class="manual-brand"><b>EC</b><span><strong>${escapeHtml(project.company.name || 'Gestionale')}</strong><small>Manuale Easy Come</small></span></div><nav><a href="#inizio">Primo accesso</a><a href="#panoramica">Panoramica</a><a href="#sezioni">Sezioni operative</a><a href="#dati">Dati e backup</a><a href="#hub">Easy Come Hub</a><a href="#sicurezza">Sicurezza</a></nav><footer>Generato per ${escapeHtml(project.company.email || '')}</footer></aside><main class="manual-main"><header><span>MANUALE PERSONALIZZATO · VERSIONE 1.0</span><h1>${escapeHtml(project.company.name || 'Il tuo gestionale')}</h1><p>${escapeHtml(project.company.description || 'Questa guida spiega come usare il sistema giorno per giorno.')}</p></header>
+    <section class="manual-section" id="inizio"><h2>Primo accesso</h2><div class="step-list"><article><div><h3>Apri il gestionale</h3><p>Usa lo stesso indirizzo email e la stessa password creati su Easy Come.</p></div></article><article><div><h3>Controlla il tuo account</h3><p>Il titolare accede come amministratore. Gli altri utenti vengono invitati dalla sezione Impostazioni.</p></div></article><article><div><h3>Completa la checklist</h3><p>Apri Easy Come Hub e completa i passaggi di avvio prima di inserire dati reali.</p></div></article></div></section>
+    <section class="manual-section" id="panoramica"><h2>Panoramica</h2><p>La dashboard mostra attività, scadenze, indicatori e accessi rapidi. I valori si aggiornano in base ai dati inseriti nelle sezioni operative.</p><div class="manual-grid">${moduleNames.slice(0,8).map((name)=>`<article class="manual-card"><strong>${escapeHtml(name)}</strong><small>Funzione inclusa nel progetto</small></article>`).join('')}</div></section>
+    <section class="manual-section" id="sezioni"><h2>Sezioni operative</h2><div class="manual-grid">${entities.filter((e)=>!e.system).map((entity)=>`<article class="manual-card"><strong>${escapeHtml(entity.label)}</strong><small>${entity.fields.length} campi · crea, cerca, modifica ed esporta</small></article>`).join('')}</div></section>
+    <section class="manual-section" id="dati"><h2>Dati, Excel e backup</h2><ul><li>Usa la ricerca e i filtri per trovare rapidamente le informazioni.</li><li>Esporta CSV o workbook Excel senza bloccare i dati nel software.</li><li>Scarica un backup JSON prima di importazioni o modifiche importanti.</li><li>Il pacchetto base usa accesso Easy Come e dati locali; l’implementazione può attivare il database cloud.</li></ul></section>
+    <section class="manual-section" id="hub"><h2>Easy Come Hub</h2><p>È il canale riservato tra la tua azienda ed Easy Come. Qui puoi aprire il manuale, seguire l’onboarding, segnalare un problema, chiedere una nuova funzione, prenotare un incontro, vedere gli aggiornamenti e raggiungere il profilo centrale con ordini e gestione del servizio tecnico.</p><div class="manual-actions"><a href="easycome-hub.html">Apri Easy Come Hub</a><a class="secondary" href="DOCUMENTI/MANUALE-OPERATIVO.pdf">Scarica PDF</a></div></section>
+    <section class="manual-section" id="sicurezza"><h2>Sicurezza e buone pratiche</h2><ul><li>Non condividere password tra collaboratori: crea un account per ogni persona.</li><li>Conserva backup periodici in una posizione sicura.</li><li>Attiva il database cloud solo con RLS e ruoli verificati.</li><li>Le integrazioni esterne richiedono credenziali intestate all’azienda.</li></ul></section>
+    </main></div></body></html>`;
   }
 
   function generatedAppJs() {
     if (!global.ECProductTemplates) throw new Error('Template prodotto non caricati.');
     return global.ECProductTemplates.appJs();
   }
-  function generatedPortalJs() {
+  function generatedHubJs() {
     if (!global.ECProductTemplates) throw new Error('Template prodotto non caricati.');
-    return global.ECProductTemplates.portalJs();
+    return global.ECProductTemplates.hubJs();
   }
   function generatedAutomationFunction(project) {
     const workflows = JSON.stringify(project.automations || [], null, 2);
@@ -1316,7 +1338,7 @@ Deno.serve(async (req) => {
   }
 
   function generatedServiceWorker() {
-    return `const CACHE='easycome-v2';const ASSETS=['./','./index.html','./portal.html','./assets/styles.css','./js/config.js','./js/app.js','./js/portal.js'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+    return `const CACHE='easycome-v8';const ASSETS=['./','./index.html','./easycome-hub.html','./manuale.html','./assets/styles.css','./js/config.js','./js/app.js','./js/hub.js'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
   }
 
   function generatedFavicon(project) {
@@ -1330,11 +1352,11 @@ Deno.serve(async (req) => {
   }
 
   function generatedTestChecklist(project, entities) {
-    return `# Checklist collaudo\n\n- [ ] Login e recupero accesso\n- [ ] Creazione, modifica ed eliminazione record\n- [ ] Ricerca in ogni sezione\n- [ ] Permessi utenti verificati\n- [ ] Visualizzazione mobile\n- [ ] Backup ed esportazione dati\n${project.portal.enabled?'- [ ] Invio richiesta dal portale\\n- [ ] Conferma di avvenuta ricezione\\n':''}${project.pricing.enabled?'- [ ] Calcolo prezzi e regole promozionali\\n':''}${(project.automations||[]).map((a)=>`- [ ] Automazione: ${a.name}`).join('\\n')}\n\nSezioni da verificare: ${entities.map((e)=>e.label).join(', ')}.\n`;
+    return `# Checklist collaudo\n\n- [ ] Login con le stesse credenziali Easy Come\n- [ ] Recupero password verificato\n- [ ] Creazione, modifica ed eliminazione record\n- [ ] Ricerca in ogni sezione\n- [ ] Permessi utenti verificati\n- [ ] Visualizzazione mobile\n- [ ] Backup ed esportazione dati\n- [ ] Easy Come Hub aperto con lo stesso account\n- [ ] Richiesta di assistenza inviata dal Hub\n- [ ] Manuale personalizzato verificato\n${project.pricing.enabled?'- [ ] Calcolo prezzi e regole promozionali\\n':''}${(project.automations||[]).map((a)=>`- [ ] Automazione: ${a.name}`).join('\\n')}\n\nSezioni da verificare: ${entities.map((e)=>e.label).join(', ')}.\n`;
   }
 
   function generatedOffer(project, price) {
-    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Offerta ${escapeHtml(project.company.name||'')}</title><style>body{font-family:Arial,sans-serif;background:#f5f5f2;color:#171717;margin:0;padding:50px}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:24px;padding:45px;box-shadow:0 25px 80px #0001}h1{font-size:42px;margin:12px 0}.muted{color:#777}.row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}.total{background:#171717;color:#fff;border-radius:18px;padding:22px;margin-top:20px}.total strong{font-size:34px;display:block;margin-top:5px}.pill{display:inline-block;background:${project.company.primaryColor||'#ff6b35'}22;color:${project.company.primaryColor||'#ff6b35'};padding:7px 10px;border-radius:999px;font-weight:bold;font-size:12px}</style></head><body><div class="sheet"><span class="pill">EASY COME · UNA TANTUM</span><h1>${escapeHtml(project.company.name||'Gestionale personalizzato')}</h1><p class="muted">${escapeHtml(project.company.description||'Soluzione digitale personalizzata per semplificare il lavoro quotidiano.')}</p><h2>Investimento</h2><div class="row"><span>Pacchetto software</span><strong>€${price.base.toFixed(2)}</strong></div>${price.implementation ? `<div class="row"><span>Implementazione assistita (opzionale)</span><strong>€${price.implementation.toFixed(2)}</strong></div>` : ''}<div class="row"><span>Moduli e personalizzazioni</span><strong>€${price.extras.toFixed(2)}</strong></div><div class="total"><span>Totale una tantum</span><strong>€${price.total.toFixed(2)}</strong><small>Nessun canone Easy Come.</small></div><h2>Cosa ricevi</h2><p>Gestionale responsive, fogli Excel, calendario operativo, database Supabase, portale cliente e documentazione.${price.implementation ? ` Implementazione assistita e ${project.delivery.supportDays||30} giorni di supporto inclusi.` : ' Implementazione e supporto non inclusi nel pacchetto software.'}</p></div></body></html>`;
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Offerta ${escapeHtml(project.company.name||'')}</title><style>body{font-family:Arial,sans-serif;background:#f5f5f2;color:#171717;margin:0;padding:50px}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:24px;padding:45px;box-shadow:0 25px 80px #0001}h1{font-size:42px;margin:12px 0}.muted{color:#777}.row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}.total{background:#171717;color:#fff;border-radius:18px;padding:22px;margin-top:20px}.total strong{font-size:34px;display:block;margin-top:5px}.pill{display:inline-block;background:${project.company.primaryColor||'#ff6b35'}22;color:${project.company.primaryColor||'#ff6b35'};padding:7px 10px;border-radius:999px;font-weight:bold;font-size:12px}</style></head><body><div class="sheet"><span class="pill">EASY COME · UNA TANTUM</span><h1>${escapeHtml(project.company.name||'Gestionale personalizzato')}</h1><p class="muted">${escapeHtml(project.company.description||'Soluzione digitale personalizzata per semplificare il lavoro quotidiano.')}</p><h2>Investimento</h2><div class="row"><span>Pacchetto software</span><strong>€${price.base.toFixed(2)}</strong></div>${price.implementation ? `<div class="row"><span>Implementazione assistita (opzionale)</span><strong>€${price.implementation.toFixed(2)}</strong></div>` : ''}<div class="row"><span>Moduli e personalizzazioni</span><strong>€${price.extras.toFixed(2)}</strong></div><div class="total"><span>Totale da pagare ora</span><strong>€${price.total.toFixed(2)}</strong><small>${project.delivery?.managedServiceSelected ? 'Più €30 al mese per la gestione tecnica Easy Come, gestibile dal profilo.' : 'Nessun canone Easy Come selezionato.'}</small></div><h2>Cosa ricevi</h2><p>Gestionale responsive, fogli Excel, calendario operativo, database Supabase, Easy Come Hub e manuale personalizzato.${price.implementation ? ` Implementazione assistita e ${project.delivery.supportDays||30} giorni di supporto inclusi.` : ' Implementazione e supporto non inclusi nel pacchetto software.'}</p></div></body></html>`;
   }
 
   function generatedQualityReport(project, entities, price, quality) {
@@ -1359,7 +1381,7 @@ ${quality.strengths.map((item) => `- ${item}`).join('\n')}
 - importazione ed esportazione CSV;
 - viste tabella, foglio Excel, bacheca, agenda, calendario, disponibilità e schede quando coerenti;
 - audit log e permessi per ruolo;
-- prezzo configurato: €${price.total.toFixed(2)} una tantum.
+- prezzo configurato: €${price.total.toFixed(2)} da pagare ora;${project.delivery?.managedServiceSelected ? '\n- gestione tecnica Easy Come selezionata: €30 al mese.' : ''}
 
 ## Regola di consegna
 Il pacchetto deve essere consegnato soltanto dopo aver completato la checklist di collaudo, collegato Supabase e verificato i flussi esterni effettivamente acquistati.
@@ -1416,7 +1438,7 @@ Le automazioni email, webhook, AI e pagamenti diventano operative soltanto dopo 
 - [ ] Provate tabella, foglio Excel, bacheca, agenda, calendario, disponibilità e schede disponibili.
 - [ ] Esportato e reimportato un CSV.
 - [ ] Creato un backup JSON e verificato il contenuto.
-${project.portal.enabled ? '- [ ] Inviata una richiesta reale dal portale e verificata nel gestionale.\n' : ''}${project.pricing.enabled ? '- [ ] Verificati prezzo base, regole, tasse, extra e caparra.\n' : ''}- [ ] Verificati i controlli anti-sovrapposizione quando presenti.
+- [ ] Inviata una richiesta di prova da Easy Come Hub.\n${project.pricing.enabled ? '- [ ] Verificati prezzo base, regole, tasse, extra e caparra.\n' : ''}- [ ] Verificati i controlli anti-sovrapposizione quando presenti.
 
 ## 3. Automazioni
 ${(project.automations || []).length ? (project.automations || []).map((flow) => `- [ ] Testata “${flow.name}” con un evento reale.`).join('\n') : '- Nessuna automazione personalizzata da testare.'}
@@ -1434,7 +1456,7 @@ ${(project.automations || []).length ? (project.automations || []).map((flow) =>
     const moduleNames = project.modules.map((id) => MODULES.find((item) => item.id === id)?.name).filter(Boolean);
     return `# ${project.company.name || 'Gestionale personalizzato'}
 
-Pacchetto generato con **Easy Come Studio Masterpiece** e bloccato da un controllo qualità prima del download.
+Pacchetto generato con **Easy Come Studio V8** e bloccato da un controllo qualità prima del download.
 
 ## Contenuto
 
@@ -1445,11 +1467,16 @@ Pacchetto generato con **Easy Come Studio Masterpiece** e bloccato da un control
 - modalità demo locale immediata;
 - collegamento Supabase per login e dati cloud;
 - schema SQL con Row Level Security;
-- portale pubblico${project.portal.enabled ? ' attivo' : ' predisposto'};
+- Easy Come Hub ridisegnato per manuale, assistenza, incontri, nuove funzioni e gestione tecnica;
 - motore prezzi dinamici${project.pricing.enabled ? ' configurato' : ' predisposto'};
 - ${project.automations.length} automazioni configurate;
 - Edge Function per email, webhook, notifiche, task e aggiornamenti;
-- file Vercel e Netlify per il deploy.
+- file Vercel e Netlify per il deploy;
+- workbook Excel, manuale PDF, executive summary e brand kit;
+- sito pubblico e PWA mobile quando selezionati;
+- workflow n8n e piano Make quando sono presenti automazioni;
+- endpoint AI configurabile quando viene selezionato il modulo AI;
+- accesso al profilo Easy Come per ordini, download, incontri, assistenza e gestione dell’eventuale abbonamento tecnico.
 
 ## Moduli
 
@@ -1498,16 +1525,24 @@ Secret opzionali:
 - AUTOMATION_CRON_SECRET
 - RESEND_API_KEY
 - EMAIL_FROM
-- AI_WEBHOOK_URL
+- AI_API_URL
+- AI_API_KEY
+- AI_MODEL
 
 Programma una chiamata periodica alla funzione per processare la coda.
+
+## Profilo e continuità Easy Come
+
+Accedi all’indirizzo ${project.identity?.easycomeBaseUrl || 'https://easy-come.it'}/profilo.html con lo stesso account usato per l’acquisto. Da lì puoi riscaricare il pacchetto, chiedere assistenza, prenotare un incontro e gestire il servizio tecnico mensile quando attivo.
 
 ## Prezzo Easy Come configurato
 
 - Pacchetto base: €${price.base.toFixed(2)}
+- Totale da pagare ora: €${price.total.toFixed(2)}
+${project.delivery?.managedServiceSelected ? '- Gestione tecnica continuativa: €30/mese (opzionale, gestibile dal profilo)' : '- Gestione tecnica continuativa: non selezionata'}
 - Implementazione assistita: ${price.implementation ? `€${price.implementation.toFixed(2)} (selezionata)` : 'non selezionata'}
 - Moduli e personalizzazioni: €${price.extras.toFixed(2)}
-- **Totale: €${price.total.toFixed(2)} una tantum**
+- **Totale da pagare ora: €${price.total.toFixed(2)}**
 
 ## Limite importante
 
@@ -1550,9 +1585,9 @@ Trascina la cartella nella schermata Deploy oppure collega il repository.
 
 Registrati dal gestionale con l’email del titolare configurata nel progetto: **${project.company.email || 'da inserire'}**. Se la conferma email è attiva, conferma l’indirizzo. La RPC \`claim_owner_by_email\` rifiuta indirizzi diversi.
 
-## Portale pubblico
+## Easy Come Hub
 
-${project.portal.enabled ? 'È attivo in `portal.html`.' : 'È presente ma disattivato nella configurazione. Puoi attivarlo modificando `easycome-project.json` e `js/config.js`.'}
+È disponibile in \`easycome-hub.html\` e usa le stesse credenziali dell’account Easy Come.
 `;
   }
 
@@ -1670,7 +1705,7 @@ ${project.portal.enabled ? 'È attivo in `portal.html`.' : 'È presente ma disat
           ['3', 'Usa filtri e menu', 'Le colonne con valori predefiniti contengono menu a tendina e controlli.'],
           ['4', 'Controlla il calendario', 'Quando presenti, disponibilità e occupazioni si leggono nel foglio dedicato.'],
           ['5', 'Importa dal gestionale', 'Esporta CSV/XLS dal gestionale, aggiorna i dati e reimporta mantenendo le colonne.'],
-          ['6', 'Prima della consegna', 'Elimina le righe dimostrative e verifica formule, ruoli, backup e portale.'],
+          ['6', 'Prima della consegna', 'Elimina le righe dimostrative e verifica formule, ruoli, backup, manuale e Easy Come Hub.'],
         ];
         instructions.forEach((item, index) => {
           const r = index + 6;
@@ -1911,12 +1946,128 @@ ${project.portal.enabled ? 'È attivo in `portal.html`.' : 'È presente ma disat
     return `\ufeff${header}\n${example}\n`;
   }
 
+  function generatedLogoWordmarkSvg(project, inverse = false) {
+    const name = escapeHtml(project.company.name || 'Easy Come Business');
+    const primary = inverse ? '#ffffff' : (project.company.primaryColor || '#ff6b35');
+    const ink = inverse ? '#ffffff' : (project.company.accentColor || '#151515');
+    const initials = (project.company.name || 'EC').split(/\s+/).filter(Boolean).slice(0,2).map((part)=>part[0]).join('').toUpperCase();
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360"><rect width="1200" height="360" fill="${inverse ? project.company.accentColor || '#151515' : '#ffffff'}"/><rect x="70" y="70" width="220" height="220" rx="58" fill="${primary}"/><text x="180" y="210" dominant-baseline="middle" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="76" font-weight="800" fill="${inverse ? project.company.accentColor || '#151515' : '#ffffff'}">${escapeHtml(initials)}</text><text x="340" y="178" font-family="Georgia,serif" font-size="82" font-weight="700" fill="${ink}">${name}</text><text x="344" y="232" font-family="Arial,Helvetica,sans-serif" font-size="24" letter-spacing="5" fill="${primary}">${escapeHtml(project.company.industry || 'GESTIONE · AUTOMAZIONE · CRESCITA').toUpperCase()}</text></svg>`;
+  }
+
+  function generatedSocialCoverSvg(project) {
+    const name = escapeHtml(project.company.name || 'La tua impresa');
+    const description = escapeHtml((project.company.description || 'Un sistema digitale costruito intorno al tuo lavoro.').slice(0,150));
+    const primary = project.company.primaryColor || '#ff6b35';
+    const accent = project.company.accentColor || '#151515';
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900"><rect width="1600" height="900" fill="#f4efe7"/><circle cx="1360" cy="170" r="260" fill="${primary}" opacity=".9"/><circle cx="1460" cy="720" r="390" fill="${accent}" opacity=".96"/><path d="M0 720 C420 560 680 900 1110 650 L1110 900 H0Z" fill="${primary}" opacity=".16"/><text x="110" y="290" font-family="Georgia,serif" font-size="112" font-weight="700" fill="${accent}">${name}</text><foreignObject x="115" y="350" width="850" height="220"><div xmlns="http://www.w3.org/1999/xhtml" style="font:32px/1.45 Arial,sans-serif;color:${accent};max-width:760px">${description}</div></foreignObject><rect x="115" y="665" width="390" height="76" rx="38" fill="${primary}"/><text x="310" y="712" text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="800" fill="#fff">SCOPRI IL NOSTRO SISTEMA</text></svg>`;
+  }
+
+  function generatedBrandGuide(project) {
+    const primary = project.company.primaryColor || '#ff6b35';
+    const accent = project.company.accentColor || '#151515';
+    const name = escapeHtml(project.company.name || 'La tua impresa');
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Brand kit — ${name}</title><style>body{margin:0;background:#eee8de;color:${accent};font-family:Arial,sans-serif}.wrap{max-width:1050px;margin:auto;padding:60px 24px}.hero{background:#fff;border:1px solid ${accent};padding:54px;box-shadow:14px 14px 0 #0001}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.18em;color:${primary}}h1{font:700 64px/1 Georgia,serif;margin:18px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:30px}.card{background:#fff;border:1px solid #bdb4a7;padding:24px}.swatch{height:130px;border:1px solid #0002;margin-bottom:16px}.type-serif{font:700 42px Georgia,serif}.type-sans{font:700 28px Arial,sans-serif}.rules{line-height:1.7}.logo{width:100%;background:#fff;border:1px solid #ddd}</style></head><body><main class="wrap"><section class="hero"><span class="eyebrow">IDENTITÀ VISIVA</span><h1>${name}</h1><p>${escapeHtml(project.company.description || 'Sistema visivo coordinato per comunicare in modo chiaro e riconoscibile.')}</p><div class="grid"><div class="card"><div class="swatch" style="background:${primary}"></div><strong>Colore principale</strong><p>${primary}</p></div><div class="card"><div class="swatch" style="background:${accent}"></div><strong>Colore scuro</strong><p>${accent}</p></div><div class="card"><div class="type-serif">Titoli</div><p>Georgia / serif editoriale</p></div><div class="card"><div class="type-sans">Testi e interfaccia</div><p>Arial / sans-serif funzionale</p></div></div><h2>Regole essenziali</h2><div class="rules"><p>Usa il colore principale per azioni, stati positivi e dettagli riconoscibili. Mantieni ampi spazi bianchi. Non alterare proporzioni e contrasto del logo. Per testi lunghi usa sempre il colore scuro su fondo chiaro.</p></div><img class="logo" src="logo-wordmark.svg" alt="Logo ${name}"></section></main></body></html>`;
+  }
+
+  function generatedPublicSite(project) {
+    const modules = (project.modules || []).map((id)=>MODULES.find((item)=>item.id===id)?.name).filter(Boolean).slice(0,8);
+    const name = escapeHtml(project.company.name || 'La tua impresa');
+    const primary = project.company.primaryColor || '#ff6b35';
+    const accent = project.company.accentColor || '#151515';
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${name}</title><meta name="description" content="${escapeHtml(project.company.description || '')}"><style>*{box-sizing:border-box}body{margin:0;background:#f5efe6;color:${accent};font-family:Arial,sans-serif}a{color:inherit}.nav{display:flex;justify-content:space-between;align-items:center;padding:26px 5vw;border-bottom:1px solid ${accent}}.brand{font:700 25px Georgia,serif}.nav a{font-size:13px;font-weight:800;text-decoration:none}.hero{min-height:72vh;padding:8vw 5vw;display:grid;grid-template-columns:1.2fr .8fr;gap:4vw;align-items:center}.k{color:${primary};font-size:12px;font-weight:900;letter-spacing:.18em}h1{font:700 clamp(58px,8vw,128px)/.88 Georgia,serif;letter-spacing:-.06em;margin:22px 0}.lead{max-width:700px;font-size:20px;line-height:1.55}.cta{display:inline-block;margin-top:24px;padding:17px 25px;background:${primary};color:#fff;text-decoration:none;font-weight:800}.art{height:520px;border:1px solid ${accent};position:relative;overflow:hidden;background:#fff}.art:before{content:'';position:absolute;width:420px;height:420px;border-radius:50%;background:${primary};right:-120px;top:-90px}.art:after{content:'';position:absolute;width:520px;height:320px;background:${accent};left:-80px;bottom:-180px;transform:rotate(-12deg)}.services{padding:80px 5vw;background:#fff}.services h2{font:700 54px Georgia,serif}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:${accent};border:1px solid ${accent}}.card{background:#fff;padding:28px;min-height:170px}.card b{display:block;color:${primary};font-size:12px;margin-bottom:18px}.footer{padding:42px 5vw;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}@media(max-width:800px){.hero{grid-template-columns:1fr}.art{height:330px}}</style></head><body><nav class="nav"><div class="brand">${name}</div><a href="mailto:${escapeHtml(project.company.email || '')}">CONTATTI →</a></nav><main><section class="hero"><div><span class="k">${escapeHtml(project.company.industry || 'SERVIZI DIGITALI').toUpperCase()}</span><h1>${name}</h1><p class="lead">${escapeHtml(project.company.description || 'Un servizio costruito con attenzione, processi chiari e strumenti digitali semplici da usare.')}</p><a class="cta" href="mailto:${escapeHtml(project.company.email || '')}">Contatta ${name}</a></div><div class="art" aria-hidden="true"></div></section><section class="services"><span class="k">COSA GESTIAMO</span><h2>Un’esperienza più semplice, dall’inizio alla fine.</h2><div class="grid">${modules.map((module,index)=>`<article class="card"><b>${String(index+1).padStart(2,'0')}</b><h3>${escapeHtml(module)}</h3><p>Processo coordinato con il gestionale e aggiornabile dal tuo team.</p></article>`).join('')}</div></section></main><footer class="footer"><strong>${name}</strong><span>${escapeHtml(project.company.email || '')}</span></footer></body></html>`;
+  }
+
+  function generatedMobileApp(project, entities) {
+    const name = escapeHtml(project.company.name || 'La tua impresa');
+    const primary = project.company.primaryColor || '#ff6b35';
+    const quick = entities.filter((entity)=>!entity.system).slice(0,6);
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="${primary}"><link rel="manifest" href="manifest.webmanifest"><title>${name} App</title><style>*{box-sizing:border-box}body{margin:0;background:#f3f1ed;color:#161616;font-family:Arial,sans-serif;padding-bottom:90px}.top{padding:calc(25px + env(safe-area-inset-top)) 22px 22px;background:${project.company.accentColor || '#151515'};color:#fff}.top span{font-size:11px;letter-spacing:.14em;color:${primary};font-weight:900}.top h1{margin:9px 0 0;font:700 34px Georgia,serif}.content{padding:20px}.hero{background:${primary};color:#fff;border-radius:26px;padding:25px;min-height:180px;display:flex;flex-direction:column;justify-content:space-between}.hero strong{font:700 30px Georgia,serif}.hero button{border:0;background:#fff;color:#111;padding:13px 16px;border-radius:14px;font-weight:800}.label{font-size:11px;font-weight:900;letter-spacing:.12em;margin:28px 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tile{border:0;background:#fff;border-radius:20px;padding:20px;text-align:left;min-height:125px;box-shadow:0 8px 30px #00000008}.tile b{display:block;font-size:20px;margin-bottom:20px}.tile span{font-weight:800}.offline{background:#fff4d8;border-radius:18px;padding:17px;margin-top:16px;font-size:13px}.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:12px 10px calc(12px + env(safe-area-inset-bottom));font-size:11px;font-weight:800}.nav a{text-decoration:none;color:#222}</style></head><body><header class="top"><span>APP OPERATIVA</span><h1>${name}</h1></header><main class="content"><section class="hero"><div><small>OGGI</small><strong>Il lavoro importante, a portata di mano.</strong></div><button onclick="location.href='../index.html'">Apri il gestionale completo</button></section><div class="label">ACCESSI RAPIDI</div><section class="grid">${quick.map((entity,index)=>`<button class="tile" onclick="location.href='../index.html#${escapeHtml(entity.key)}'"><b>${['◎','▦','◇','✓','⌁','◷'][index%6]}</b><span>${escapeHtml(entity.label)}</span></button>`).join('')}</section><div class="offline"><strong>Modalità mobile</strong><br>La shell resta disponibile anche con connessione instabile; i dati cloud richiedono il collegamento a Supabase.</div></main><nav class="nav"><a href="../index.html">Gestionale</a><a href="../easycome-hub.html">Easy Come Hub</a>${(project.modules || []).includes('website') ? '<a href="../public-site/index.html">Sito</a>' : ''}</nav><script>if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');</script></body></html>`;
+  }
+
+  function generatedMobileManifest(project) {
+    return JSON.stringify({name:`${project.company.name || 'Easy Come'} App`,short_name:(project.company.name||'App').slice(0,18),start_url:'./index.html',display:'standalone',background_color:'#f3f1ed',theme_color:project.company.primaryColor||'#ff6b35',icons:[{src:'../assets/favicon.svg',sizes:'any',type:'image/svg+xml'}]},null,2);
+  }
+
+  function generatedMobileServiceWorker() {
+    return `const C='ec-mobile-v8';const A=['./','./index.html','./manifest.webmanifest','../assets/favicon.svg'];self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(A))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('./index.html')))));`;
+  }
+
+  function generatedCapacitorConfig(project) {
+    return JSON.stringify({appId:`com.easycome.${slugify(project.company.name).replace(/-/g,'')}`.slice(0,50),appName:project.company.name || 'Easy Come App',webDir:'mobile',server:{androidScheme:'https'}},null,2);
+  }
+
+  function generatedAiEndpoint(project) {
+    return `export default async function handler(req,res){if(req.method!=='POST')return res.status(405).json({error:'Metodo non consentito'});try{const key=process.env.AI_API_KEY;const url=process.env.AI_API_URL;const model=process.env.AI_MODEL||'default';if(!key||!url)throw new Error('Configura AI_API_URL e AI_API_KEY');const message=String(req.body?.message||'').slice(0,6000);const context=${JSON.stringify((project.company.description || '').slice(0,1500))};const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+key},body:JSON.stringify({model,messages:[{role:'system',content:'Sei l’assistente operativo di ${String(project.company.name || '').replace(/'/g,"\\'")}. Usa questo contesto: '+context},{role:'user',content:message}]})});const data=await r.json();if(!r.ok)throw new Error(data.error?.message||'Provider AI non disponibile');return res.status(200).json({answer:data.choices?.[0]?.message?.content||data.output_text||''});}catch(e){return res.status(400).json({error:e.message||'Errore AI'});}}`;
+  }
+
+  function generatedAiReadme(project) {
+    return `# Assistente AI — ${project.company.name || ''}\n\nIl pacchetto include una funzione server compatibile con provider API configurabili.\n\nVariabili richieste:\n\n- \`AI_API_URL\`\n- \`AI_API_KEY\`\n- \`AI_MODEL\`\n\nL’assistente non è attivo finché non vengono inserite credenziali valide e definite le regole privacy dell’impresa. Non inviare dati sensibili senza una base giuridica e una configurazione adeguata.\n`;
+  }
+
+  function generatedN8nWorkflow(project) {
+    const flows = (project.automations || []).filter((flow)=>flow.enabled!==false);
+    const nodes=[{parameters:{httpMethod:'POST',path:`${slugify(project.company.name)}-easycome`,responseMode:'onReceived',options:{}},id:'webhook',name:'Easy Come Webhook',type:'n8n-nodes-base.webhook',typeVersion:2,position:[260,300]}];
+    if(flows.length){nodes.push({parameters:{assignments:{assignments:[{id:'project',name:'project',value:project.company.name||'',type:'string'},{id:'automation_count',name:'automation_count',value:flows.length,type:'number'}]},options:{}},id:'prepare',name:'Prepara evento',type:'n8n-nodes-base.set',typeVersion:3.4,position:[520,300]});}
+    return JSON.stringify({name:`${project.company.name || 'Easy Come'} — Automazioni`,nodes,connections:flows.length?{'Easy Come Webhook':{main:[[{node:'Prepara evento',type:'main',index:0}]]}}:{},active:false,settings:{executionOrder:'v1'},meta:{templateCredsSetupCompleted:false},tags:[{name:'Easy Come'}]},null,2);
+  }
+
+  function generatedMakePlan(project) {
+    return JSON.stringify({format:'easycome-make-plan-v1',company:project.company.name,warning:'Piano tecnico: ricrea i moduli nel tuo account Make e collega le credenziali del cliente.',scenarios:(project.automations||[]).map((flow,index)=>({order:index+1,name:flow.name,trigger:flow.trigger,entity:flow.entity,action:flow.action,target:flow.target||'',message:flow.message||'',recommendedModules:['Webhooks','Router','HTTP','Email']}))},null,2);
+  }
+
+  function generatedExecutiveSummary(project, entities, price) {
+    const moduleNames=(project.modules||[]).map((id)=>MODULES.find((item)=>item.id===id)?.name).filter(Boolean);
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Executive summary</title><style>body{font-family:Arial,sans-serif;margin:0;background:#eee9df;color:#171717}.page{width:900px;max-width:calc(100% - 40px);margin:40px auto;background:#fff;padding:50px;border:1px solid #111}.k{font-size:11px;letter-spacing:.16em;font-weight:800;color:${project.company.primaryColor||'#ff6b35'}}h1{font:700 60px/1 Georgia,serif}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#222;border:1px solid #222}.metric{background:#fff;padding:22px}.metric b{font-size:30px;display:block}.list{columns:2;line-height:1.8}@media(max-width:700px){.grid{grid-template-columns:1fr}.list{columns:1}}</style></head><body><main class="page"><span class="k">EASY COME STUDIO · PROGETTO DIGITALE</span><h1>${escapeHtml(project.company.name||'')}</h1><p>${escapeHtml(project.company.description||'')}</p><div class="grid"><div class="metric"><b>${entities.filter(e=>!e.system).length}</b><span>sezioni operative</span></div><div class="metric"><b>${project.automations?.length||0}</b><span>automazioni progettate</span></div><div class="metric"><b>€${price.total.toFixed(2)}</b><span>da pagare ora${project.delivery?.managedServiceSelected ? ' + €30/mese' : ''}</span></div></div><h2>Componenti incluse</h2><div class="list">${moduleNames.map(name=>`<div>✓ ${escapeHtml(name)}</div>`).join('')}</div><h2>Consegna</h2><p>Gestionale, database Supabase, workbook Excel, manuale personalizzato, Easy Come Hub e asset selezionati nel configuratore. Le integrazioni esterne richiedono credenziali intestate al cliente.</p></main></body></html>`;
+  }
+
+  function pdfEscape(value) {
+    return String(value || '').replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/[\u0080-\uFFFF]/g,(char)=>({ 'à':'a','è':'e','é':'e','ì':'i','ò':'o','ù':'u','€':'EUR','—':'-' }[char]||'?'));
+  }
+
+  function generatedManualPdf(project, entities, price) {
+    const lines=[
+      `MANUALE OPERATIVO - ${project.company.name || 'GESTIONALE'}`,
+      '',
+      '1. COSA CONTIENE IL PACCHETTO',
+      `Sezioni operative: ${entities.filter(e=>!e.system).length}`,
+      `Totale progetto: EUR ${price.total.toFixed(2)} una tantum`,
+      '',
+      '2. AVVIO RAPIDO',
+      'Apri README.md e 01-INSTALLAZIONE.md. Crea un progetto Supabase, esegui supabase/schema.sql e inserisci URL e chiave pubblica in js/config.js.',
+      '',
+      '3. GESTIONALE',
+      'index.html apre il gestionale. easycome-hub.html apre manuale, assistenza e richieste di nuove funzioni. La cartella mobile contiene la PWA installabile quando selezionata.',
+      '',
+      '4. DATI ED EXCEL',
+      'La cartella Excel contiene il workbook operativo e i modelli CSV per importazione ed esportazione.',
+      '',
+      '5. AUTOMAZIONI E AI',
+      'Le integrazioni esterne restano inattive finche non vengono configurate credenziali del cliente. Verifica sempre privacy, destinatari e testi prima di attivarle.',
+      '',
+      '6. COLLAUDO',
+      'Esegui la checklist inclusa prima della consegna: accessi, permessi, dati, Easy Come Hub, manuale, backup e automazioni.',
+    ];
+    const wrapped=[];
+    lines.forEach(line=>{if(!line){wrapped.push('');return;}const words=line.split(/\s+/);let current='';words.forEach(word=>{const next=(current+' '+word).trim();if(next.length>88){wrapped.push(current);current=word}else current=next});if(current)wrapped.push(current)});
+    const pages=[];for(let i=0;i<wrapped.length;i+=44)pages.push(wrapped.slice(i,i+44));
+    const objects=[];const add=(body)=>{objects.push(body);return objects.length};
+    const font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+    const pageIds=[];const contentIds=[];
+    pages.forEach((page,pageIndex)=>{let stream='BT\n/F1 11 Tf\n50 790 Td\n';page.forEach((line,index)=>{const size=index===0&&pageIndex===0?18:11;if(index===0&&pageIndex===0)stream+='/F1 18 Tf\n';stream+=`(${pdfEscape(line)}) Tj\n0 -17 Td\n`;if(index===0&&pageIndex===0)stream+='/F1 11 Tf\n';});stream+='ET';const content=add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);contentIds.push(content);pageIds.push(add('PENDING'));});
+    const pagesId=add('PAGES_PENDING');
+    pageIds.forEach((id,index)=>{objects[id-1]=`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${font} 0 R >> >> /Contents ${contentIds[index]} 0 R >>`;});
+    objects[pagesId-1]=`<< /Type /Pages /Kids [${pageIds.map(id=>`${id} 0 R`).join(' ')}] /Count ${pageIds.length} >>`;
+    const catalog=add(`<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
+    let pdf='%PDF-1.4\n';const offsets=[0];objects.forEach((obj,index)=>{offsets.push(pdf.length);pdf+=`${index+1} 0 obj\n${obj}\nendobj\n`;});const xref=pdf.length;pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`;for(let i=1;i<offsets.length;i++)pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';pdf+=`trailer\n<< /Size ${objects.length+1} /Root ${catalog} 0 R >>\nstartxref\n${xref}\n%%EOF`;
+    return new TextEncoder().encode(pdf);
+  }
+
   function generatedPackageJson(project) {
     return JSON.stringify({
       name: slugify(project.company.name || 'easycome-gestionale'),
-      version: '2.0.0',
+      version: '8.0.0',
       private: true,
-      scripts: { dev: 'npx serve .', preview: 'npx serve .' },
+      scripts: { dev: 'npx serve .', preview: 'npx serve .', 'deploy:supabase': 'supabase db push' },
     }, null, 2);
   }
 
@@ -1925,8 +2076,9 @@ ${project.portal.enabled ? 'È attivo in `portal.html`.' : 'È presente ma disat
     project.generatedAt = new Date().toISOString();
     project.company.slug = project.company.slug || slugify(project.company.name);
     if (!project.organizationId) project.organizationId = uuidv4();
-    if (project.portal) project.portal.enabled = project.modules.includes('portal') || Boolean(project.portal.enabled);
-    if (project.pricing) project.pricing.enabled = project.modules.includes('dynamic_pricing') || Boolean(project.pricing.enabled);
+    project.hub = { enabled: true, manual: true, support: true, featureRequests: true, onboarding: true, ...(project.hub || {}) };
+    if (!project.modules.includes('easycome_hub')) project.modules.push('easycome_hub');
+    if (project.pricing) project.pricing.enabled = ['fixed','hourly','subscription','dynamic'].includes(project.pricing.mode || 'none');
     const entities = buildEntities(project);
     const price = calculatePrice(project);
     const quality = auditProject(project);
@@ -1942,30 +2094,57 @@ ${project.portal.enabled ? 'È attivo in `portal.html`.' : 'È presente ma disat
       { name: '06-PRIMA-DELLA-CONSEGNA.md', data: generatedDeliveryGate(project) },
       { name: 'OFFERTA-COMMERCIALE.html', data: generatedOffer(project, price) },
       { name: 'easycome-project.json', data: JSON.stringify(configObject, null, 2) },
+      { name: 'DOCUMENTI/EXECUTIVE-SUMMARY.html', data: generatedExecutiveSummary(project, entities, price) },
+      { name: 'DOCUMENTI/MANUALE-OPERATIVO.pdf', data: generatedManualPdf(project, entities, price) },
+      { name: 'BRAND/logo-wordmark.svg', data: generatedLogoWordmarkSvg(project, false) },
+      { name: 'BRAND/logo-wordmark-inverse.svg', data: generatedLogoWordmarkSvg(project, true) },
+      { name: 'BRAND/social-cover.svg', data: generatedSocialCoverSvg(project) },
+      { name: 'BRAND/brand-guide.html', data: generatedBrandGuide(project) },
       { name: `Excel/MODELLO-DATI-${project.company.slug || 'gestionale'}.xlsx`, data: generatedExcelWorkbook(project, entities) || 'Workbook non generato: apri il Builder interno con js/zip.js caricato.' },
       { name: 'Excel/LEGGIMI.md', data: '# Modelli Excel\n\nIl file .xlsx contiene un foglio Dashboard e un foglio per ogni sezione operativa. Mantieni le intestazioni della prima riga quando importi i dati nel gestionale.\n' },
       ...entities.filter((entity) => !entity.system).map((entity) => ({ name: `Excel/CSV/${entity.key}.csv`, data: generatedCsvTemplate(entity) })),
       { name: 'package.json', data: generatedPackageJson(project) },
       { name: '.gitignore', data: '.env\n.env.local\n.DS_Store\nnode_modules/\n' },
-      { name: '.env.example', data: 'SUPABASE_URL=\nSUPABASE_ANON_KEY=\nAUTOMATION_CRON_SECRET=\nRESEND_API_KEY=\nEMAIL_FROM=\nAI_WEBHOOK_URL=\n' },
+      { name: '.env.example', data: 'SUPABASE_URL=\nSUPABASE_ANON_KEY=\nEASYCOME_BASE_URL=https://easy-come.it\nAUTOMATION_CRON_SECRET=\nRESEND_API_KEY=\nEMAIL_FROM=\nAI_API_URL=\nAI_API_KEY=\nAI_MODEL=\n' },
       { name: 'index.html', data: generatedIndexHtml(project) },
-      { name: 'portal.html', data: generatedPortalHtml(project) },
+      { name: 'easycome-hub.html', data: generatedHubHtml(project) },
+      { name: 'manuale.html', data: generatedManualHtml(project, entities) },
       { name: 'manifest.webmanifest', data: generatedManifest(project) },
       { name: 'sw.js', data: generatedServiceWorker() },
       { name: 'assets/favicon.svg', data: generatedFavicon(project) },
       { name: 'assets/styles.css', data: generatedStyles(project) },
       { name: 'js/config.js', data: generateConfig(project, entities) },
       { name: 'js/app.js', data: generatedAppJs() },
-      { name: 'js/portal.js', data: generatedPortalJs() },
+      { name: 'js/hub.js', data: generatedHubJs() },
       { name: 'supabase/schema.sql', data: generateSchema(project, entities) },
       { name: 'supabase/functions/process-automations/index.ts', data: generatedAutomationFunction(project) },
       { name: 'supabase/functions/invite-member/index.ts', data: generatedInviteFunction(project) },
       { name: 'automations/automation-plan.json', data: JSON.stringify(project.automations || [], null, 2) },
       { name: 'pricing/pricing-rules.json', data: JSON.stringify(project.pricing || {}, null, 2) },
+      ...((project.modules || []).includes('website') ? [
+        { name: 'public-site/index.html', data: generatedPublicSite(project) },
+        { name: 'public-site/README.md', data: '# Sito pubblico\n\nPagina vetrina coordinata con il gestionale. Personalizza testi, immagini, privacy e dati legali prima della pubblicazione.\n' },
+      ] : []),
+      ...((project.modules || []).includes('mobile_app') ? [
+        { name: 'mobile/index.html', data: generatedMobileApp(project, entities) },
+        { name: 'mobile/manifest.webmanifest', data: generatedMobileManifest(project) },
+        { name: 'mobile/sw.js', data: generatedMobileServiceWorker() },
+        { name: 'mobile/capacitor.config.json', data: generatedCapacitorConfig(project) },
+        { name: 'mobile/README.md', data: '# App PWA\n\nLa cartella mobile contiene una web app installabile. Non sono inclusi file binari App Store o Play Store. Per creare pacchetti nativi usa Capacitor e account sviluppatore intestati al cliente.\n' },
+      ] : []),
+      ...((project.modules || []).includes('ai') ? [
+        { name: 'api/ai-assistant.js', data: generatedAiEndpoint(project) },
+        { name: 'AI/README.md', data: generatedAiReadme(project) },
+        { name: 'AI/knowledge-base.md', data: `# Knowledge base — ${project.company.name || ''}\n\n## Attività\n${project.company.description || ''}\n\n## Regole\n- Non inventare prezzi o disponibilità.\n- Chiedere conferma quando mancano dati.\n- Non condividere informazioni riservate.\n` },
+      ] : []),
+      ...((project.modules || []).includes('automations') ? [
+        { name: 'automations/n8n-workflow.json', data: generatedN8nWorkflow(project) },
+        { name: 'automations/make-scenario-plan.json', data: generatedMakePlan(project) },
+      ] : []),
       { name: 'vercel.json', data: JSON.stringify({ cleanUrls: true, trailingSlash: false }, null, 2) },
       { name: 'netlify.toml', data: '[build]\n  publish = "."\n\n[[headers]]\n  for = "/*"\n  [headers.values]\n    X-Frame-Options = "DENY"\n    X-Content-Type-Options = "nosniff"\n' },
     ];
-    return { project: configObject, entities, price, files, filename: `${project.company.slug || 'gestionale'}-easycome.zip` };
+    return { project: configObject, entities, price, files, filename: `${project.company.slug || 'gestionale'}-easycome-v8.zip` };
   }
 
   function escapeHtml(value) {

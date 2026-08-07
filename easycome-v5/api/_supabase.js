@@ -49,3 +49,23 @@ export async function getOrderBySession(sessionId) {
   const result = await request(`easycome_orders?stripe_session_id=eq.${encodeURIComponent(sessionId)}&select=*`);
   return Array.isArray(result) ? result[0] || null : null;
 }
+
+export async function upsertSubscription(subscription) {
+  const result = await request('easycome_subscriptions?on_conflict=stripe_subscription_id', {
+    method: 'POST',
+    body: JSON.stringify(subscription),
+    headers: { prefer: 'resolution=merge-duplicates,return=representation' },
+  });
+  return Array.isArray(result) ? result[0] || null : result;
+}
+
+export async function updateSubscriptionByStripeId(subscriptionId, patch) {
+  return request(`easycome_subscriptions?stripe_subscription_id=eq.${encodeURIComponent(subscriptionId)}`, {
+    method: 'PATCH', body: JSON.stringify(patch), prefer: 'return=minimal',
+  });
+}
+
+export async function getSubscriptionByUser(userId) {
+  const result = await request(`easycome_subscriptions?user_id=eq.${encodeURIComponent(userId)}&order=created_at.desc&limit=1&select=*`);
+  return Array.isArray(result) ? result[0] || null : null;
+}

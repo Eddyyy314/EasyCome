@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     project.delivery = { ...(project.delivery || {}), previewApproved: true };
     const generated = ECGenerator.generatePackage(project);
     const zipBytes = createZipBytes(generated.files);
-    const filename = `${safeName(order.company_name || project.company?.name)}-easycome-studio-v7.zip`;
+    const filename = `${safeName(order.company_name || project.company?.name)}-easycome-studio-v8.zip`;
     const now = new Date().toISOString();
     await updateOrderById(order.id, {
       status: 'paid',

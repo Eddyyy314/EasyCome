@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { calculateServerPrice, compactProject } from './_pricing.js';
-import { createOrder, updateOrderById } from './_supabase.js';
+import { createOrder, updateOrderById, getSubscriptionByUser } from './_supabase.js';
 import { appOrigin, json, readJson } from './_responses.js';
 import { stripePost } from './_stripe.js';
 import { authenticatedUser } from './_auth.js';
@@ -30,24 +30,31 @@ export default async function handler(req, res) {
     const orderId = crypto.randomUUID();
     const origin = appOrigin(req);
 
+    const managedServiceSelected = Boolean(project.delivery?.managedServiceSelected);
+    if (managedServiceSelected) {
+      const existing = await getSubscriptionByUser(user.id);
+      if (existing && !['canceled','incomplete_expired'].includes(existing.status)) throw new Error('La gestione tecnica è già collegata al tuo account. Deselezionala dall’ordine e gestiscila dal Profilo Easy Come.');
+    }
+    const managedMonthlyCents = Number(process.env.EASYCOME_MANAGED_MONTHLY_CENTS || 3000);
     await createOrder({
       id: orderId, user_id: user.id, status: 'checkout_created', customer_email: email, customer_name: customerName,
       customer_phone: phone || null, tax_id: taxId || null, company_name: companyName,
-      amount_cents: price.totalCents, currency: 'eur', price_breakdown: price, project,
+      amount_cents: price.totalCents, currency: 'eur', price_breakdown: { ...price, managedMonthly: managedServiceSelected ? managedMonthlyCents / 100 : 0 }, project,
       source_url: clean(body.sourceUrl, 700) || null, prepared_filename: clean(body.preparedFilename, 250) || null, delivery_status: 'not_ready', download_count: 0,
+      purchase_type: managedServiceSelected ? 'software_plus_managed' : 'one_time', managed_service_selected: managedServiceSelected,
     });
 
     const params = new URLSearchParams();
     const add = (key, value) => { if (value !== undefined && value !== null && value !== '') params.append(key, String(value)); };
-    add('mode', 'payment');
+    add('mode', managedServiceSelected ? 'subscription' : 'payment');
     add('customer_email', email);
-    add('customer_creation', 'always');
+    if (!managedServiceSelected) add('customer_creation', 'always');
     add('client_reference_id', orderId);
     add('billing_address_collection', 'required');
     add('phone_number_collection[enabled]', 'true');
     add('allow_promotion_codes', process.env.STRIPE_ALLOW_PROMOTION_CODES === 'true' ? 'true' : 'false');
     add('automatic_tax[enabled]', process.env.STRIPE_AUTOMATIC_TAX === 'true' ? 'true' : 'false');
-    add('invoice_creation[enabled]', process.env.STRIPE_CREATE_INVOICE === 'true' ? 'true' : 'false');
+    if (!managedServiceSelected) add('invoice_creation[enabled]', process.env.STRIPE_CREATE_INVOICE === 'true' ? 'true' : 'false');
     add('line_items[0][quantity]', '1');
     add('line_items[0][price_data][currency]', 'eur');
     add('line_items[0][price_data][unit_amount]', price.totalCents);
@@ -58,10 +65,25 @@ export default async function handler(req, res) {
       : 'Sistema digitale personalizzato Easy Come. Implementazione non inclusa.');
     add('metadata[order_id]', orderId);
     add('metadata[company_name]', companyName.slice(0, 480));
-    add('metadata[price_version]', 'easycome-v7-2026-08');
+    add('metadata[price_version]', 'easycome-v8-2026-08');
     add('metadata[implementation]', project.delivery.implementationSelected ? 'included' : 'not_selected');
-    add('payment_intent_data[metadata][order_id]', orderId);
-    add('payment_intent_data[metadata][company_name]', companyName.slice(0, 480));
+    add('metadata[managed_service]', managedServiceSelected ? 'selected' : 'not_selected');
+    add('metadata[user_id]', user.id);
+    if (managedServiceSelected) {
+      add('line_items[1][quantity]', '1');
+      add('line_items[1][price_data][currency]', 'eur');
+      add('line_items[1][price_data][unit_amount]', managedMonthlyCents);
+      add('line_items[1][price_data][recurring][interval]', 'month');
+      add('line_items[1][price_data][tax_behavior]', process.env.STRIPE_TAX_BEHAVIOR || 'inclusive');
+      add('line_items[1][price_data][product_data][name]', 'Gestione tecnica Easy Come');
+      add('line_items[1][price_data][product_data][description]', 'Gestione continuativa del software e del database, aggiornamenti minori e assistenza prioritaria.');
+      add('subscription_data[metadata][order_id]', orderId);
+      add('subscription_data[metadata][user_id]', user.id);
+      add('subscription_data[metadata][plan_code]', 'managed_tech_30');
+    } else {
+      add('payment_intent_data[metadata][order_id]', orderId);
+      add('payment_intent_data[metadata][company_name]', companyName.slice(0, 480));
+    }
     add('success_url', `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`);
     add('cancel_url', `${origin}/cancel.html?order_id=${encodeURIComponent(orderId)}`);
     add('locale', 'it');
@@ -69,7 +91,7 @@ export default async function handler(req, res) {
 
     const session = await stripePost('checkout/sessions', params);
     await updateOrderById(orderId, { stripe_session_id: session.id, checkout_url: session.url, updated_at: new Date().toISOString() });
-    return json(res, 200, { url: session.url, orderId, amount: price.total, currency: 'EUR' });
+    return json(res, 200, { url: session.url, orderId, amount: price.total, currency: 'EUR', managedMonthly: managedServiceSelected ? managedMonthlyCents / 100 : 0 });
   } catch (error) {
     console.error(error);
     return json(res, 400, { error: error.message || 'Errore durante la creazione del checkout.' });

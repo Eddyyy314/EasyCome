@@ -1,22 +1,11 @@
-# V7.0.1 — Compatibilità progetti precedenti
-
-- Migrazione automatica del vecchio modulo `portal` verso `easycome_hub`.
-- Checkout compatibile con configurazioni salvate nelle versioni precedenti.
-- Rimozione dell’errore “Moduli non riconosciuti: portal”.
-
 # Changelog
 
-## 7.0.0
-
-- Account Easy Come obbligatorio prima del configuratore.
-- Stesse credenziali per gestionale ed Easy Come Hub.
-- Progetti salvati online.
-- Easy Come Hub sostituisce il portale pubblico.
-- Manuale personalizzato interattivo.
-- Supporto, bug, feature request, implementazione, formazione e aggiornamenti.
-- Sezioni dati ricostruite con wizard visuale.
-- Sei modelli di prezzo, incluso preventivo manuale.
-- Ricette di automazione guidate.
-- Sei layout professionali predefiniti.
-- Anteprima reale del gestionale.
-- Ordini associati all’utente autenticato.
+## 8.0.0
+- Nuovo profilo cliente con ordini, download, progetti, assistenza e account.
+- Richiesta soluzione completamente personalizzata e incontro iniziale.
+- Easy Come Hub ridisegnato con dashboard, manuale, ticket, feature request, incontri e onboarding.
+- Servizio opzionale Easy Come Managed a 30 € al mese.
+- Checkout Stripe misto: acquisto software una tantum + eventuale canone mensile.
+- Customer Portal Stripe per modificare il metodo di pagamento o disdire.
+- Nuova tabella Supabase `easycome_subscriptions` e campi ordine V8.
+- Anteprima e documentazione aggiornate.
