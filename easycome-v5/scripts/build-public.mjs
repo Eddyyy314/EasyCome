@@ -8,7 +8,7 @@ fs.mkdirSync(out, { recursive: true });
 
 const files = [
   'index.html', 'profilo.html', 'success.html', 'cancel.html', 'orders.html', 'termini.html', 'privacy.html',
-  'assets/styles.css', 'assets/editorial.css', 'assets/v7.css', 'assets/profile.css',
+  'assets/styles.css', 'assets/editorial.css', 'assets/v7.css', 'assets/polish.css', 'assets/profile.css',
   'js/account.js', 'js/profile.js', 'js/app.js', 'js/generator-core.js', 'js/sales-config.js', 'js/admin-config.js',
 ];
 for (const name of files) {

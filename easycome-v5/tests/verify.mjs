@@ -86,4 +86,4 @@ for(const n of ['index.html','profilo.html','assets/v7.css','assets/profile.css'
 for(const n of ['builder.html','js/zip.js','js/product-templates.js'])assert(!fs.existsSync(path.join(root,'dist-public',n)),`Build pubblica espone ${n}`);
 
 const blob=globalThis.EasyZip.createZip(browserResult.files);const zipPath=path.join(root,'tests','generated-v8.zip');fs.writeFileSync(zipPath,Buffer.from(await blob.arrayBuffer()));assert(fs.statSync(zipPath).size>100000,'ZIP V8 troppo piccolo');
-console.log(JSON.stringify({ok:true,version:'8.0.0',templates:results,zipPath},null,2));
+console.log(JSON.stringify({ok:true,version:'8.2.0',templates:results,zipPath},null,2));

@@ -9,3 +9,12 @@
 - Customer Portal Stripe per modificare il metodo di pagamento o disdire.
 - Nuova tabella Supabase `easycome_subscriptions` e campi ordine V8.
 - Anteprima e documentazione aggiornate.
+
+
+## 8.2.0 — Final polish
+- Anteprima desktop/mobile ridimensionata con viewport interna.
+- Easy Come Hub navigabile dentro l’anteprima.
+- Builder campi e variazioni prezzo senza overflow.
+- Card servizi facoltativi più compatte.
+- Copy secondario ridotto e proporzioni uniformate.
+- Migliorie responsive al gestionale e Hub generati.
