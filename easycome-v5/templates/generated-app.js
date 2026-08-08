@@ -466,8 +466,16 @@
       <input id="csvFile" type="file" accept=".csv,text/csv" hidden>`;
 
     $('#newRecord')?.addEventListener('click', () => openForm());
-    $('#search').oninput = (event) => { state.query = event.target.value; renderEntity(); };
-    $('#statusFilter')?.addEventListener('change', (event) => { state.statusFilter = event.target.value; renderEntity(); });
+    const refreshEntityContent = () => {
+      const filteredRows = filterRows(entity, state.rows);
+      const activeMode = currentMode(entity);
+      const content = $('#entityContent');
+      if (!content) return;
+      content.innerHTML = renderMode(entity, filteredRows, activeMode);
+      bindEntityActions(entity, filteredRows, activeMode);
+    };
+    $('#search').oninput = (event) => { state.query = event.target.value; refreshEntityContent(); };
+    $('#statusFilter')?.addEventListener('change', (event) => { state.statusFilter = event.target.value; refreshEntityContent(); });
     $$('[data-mode]').forEach((button) => button.onclick = () => { state.entityMode[entity.key] = button.dataset.mode; renderEntity(); });
     $('#exportExcel').onclick = () => exportExcel(entity, state.rows);
     $('#exportCsv').onclick = () => exportCsv(entity, state.rows);
@@ -522,6 +530,7 @@
       const items = byDay[day] || [];
       cells.push(`<div class="month-day ${day === now.getDate() ? 'today' : ''}" data-month-day="${day}"><header><b>${day}</b><span>${items.length || ''}</span></header>${items.slice(0,3).map((row) => `<button data-edit="${row.id}"><i></i><strong>${esc(primaryLabel(entity,row))}</strong><small>${esc(secondaryLabel(entity,row))}</small></button>`).join('')}${items.length > 3 ? `<em>+${items.length - 3} altri</em>` : ''}</div>`);
     }
+    while (cells.length % 7) cells.push('<div class="month-day muted trailing"></div>');
     return `<section class="month-shell"><header class="month-toolbar"><div><span>Calendario mensile</span><h3>${new Intl.DateTimeFormat(company.locale || 'it-IT',{month:'long',year:'numeric'}).format(now)}</h3></div><div><button class="btn btn-secondary">‹</button><button class="btn btn-secondary">Oggi</button><button class="btn btn-secondary">›</button></div></header><div class="month-weekdays">${['Lun','Mar','Mer','Gio','Ven','Sab','Dom'].map((day)=>`<b>${day}</b>`).join('')}</div><div class="month-grid">${cells.join('')}</div></section>`;
   }
 

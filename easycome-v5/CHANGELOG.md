@@ -1,3 +1,12 @@
+# Easy Come 8.3
+
+- Dati del builder separati per account.
+- Profilo visibile anche da mobile.
+- Ricerca stabile senza perdita del focus.
+- Calendario/griglia rifiniti.
+- Inbox centralizzata per assistenza e incontri.
+- Admin panel collegato automaticamente alla configurazione pubblica Supabase.
+
 # Changelog
 
 ## 8.0.0

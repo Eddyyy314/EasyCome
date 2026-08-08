@@ -69,3 +69,11 @@ export async function getSubscriptionByUser(userId) {
   const result = await request(`easycome_subscriptions?user_id=eq.${encodeURIComponent(userId)}&order=created_at.desc&limit=1&select=*`);
   return Array.isArray(result) ? result[0] || null : null;
 }
+
+export async function createSupportRequest(ticket) {
+  const result = await request('easycome_support_requests', {
+    method: 'POST',
+    body: JSON.stringify(ticket),
+  });
+  return Array.isArray(result) ? result[0] || null : result;
+}

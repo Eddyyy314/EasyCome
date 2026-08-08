@@ -256,3 +256,12 @@
   .implementation-addon,.managed-addon{grid-template-columns:20px minmax(0,1fr)!important}.implementation-addon>b,.managed-addon>b{grid-column:2;text-align:left!important;margin-top:4px}.quote-total strong{font-size:34px!important}
   .preview-overlay{padding:7px!important}.preview-overlay-head h2{font-size:15px!important}.preview-overlay .preview-stage{height:calc(100vh - 67px)}.preview-overlay .preview-window.mobile{height:calc(100vh - 125px)!important;max-height:calc(100vh - 125px)!important}
 }
+
+/* Easy Come 8.3 — account visibility and tighter top actions */
+.workspace-top{justify-content:flex-start!important;gap:10px!important}
+.workspace-top .draft-state{margin-right:2px}
+.workspace-profile-link{margin-left:auto!important;text-decoration:none;display:inline-flex;align-items:center;background:#fff;color:#171815;border:1px solid #cfc8bb;padding:9px 14px;font-size:12px}
+.mobile-header-actions{display:flex;align-items:center;gap:7px;margin-left:auto}
+.btn-profile{background:#ff6433;color:#fff;text-decoration:none;border:1px solid #ff6433}
+@media(max-width:900px){.mobile-header{gap:10px}.mobile-header .logo{min-width:0}.mobile-header .logo div{min-width:0}.mobile-header .logo strong{white-space:nowrap}.mobile-header .logo small{display:none}.mobile-header-actions .btn{padding:8px 10px!important;font-size:9px!important}}
+@media(max-width:390px){.mobile-header .logo div{display:none}.mobile-header-actions{gap:5px}.mobile-header-actions .btn{padding:8px 9px!important}}

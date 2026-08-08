@@ -1,6 +1,6 @@
 function publicConfig() {
   const url = String(process.env.SUPABASE_URL || '').replace(/\/$/, '');
-  const anon = String(process.env.SUPABASE_ANON_KEY || '');
+  const anon = String(process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || '');
   if (!url || !anon) throw new Error('Autenticazione Easy Come non configurata.');
   return { url, anon };
 }

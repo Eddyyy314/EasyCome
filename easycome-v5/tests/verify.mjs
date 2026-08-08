@@ -70,6 +70,18 @@ assert(appSource.includes("previewMode = 'dashboard'")&&!appSource.includes("pre
 assert(appSource.includes('authorization: `Bearer'),'Checkout non invia la sessione account');
 const profile=fs.readFileSync(path.join(root,'js/profile.js'),'utf8');
 for(const marker of ['easycome_orders','easycome_projects','easycome_support_requests','easycome_subscriptions','create-managed-subscription','create-billing-portal','download-order']) assert(profile.includes(marker),`Profilo incompleto: ${marker}`);
+
+assert(appSource.includes('easycome-generator-pro-draft:${userId}')||appSource.includes('easycome-generator-pro-draft:${userId}'),'Bozze non isolate per account');
+assert(appSource.includes("window.addEventListener('easycome:account-ready'")&&!appSource.includes("{ once: true }"),'Cambio account non gestito');
+const generatedApp=fs.readFileSync(path.join(root,'templates/generated-app.js'),'utf8');
+assert(generatedApp.includes('refreshEntityContent'),'Ricerca gestionale continua non corretta');
+assert(generatedApp.includes('while (cells.length % 7)'),'Calendario senza celle finali di chiusura');
+assert(fs.existsSync(path.join(root,'api/support-request.js')),'Manca endpoint inbox supporto');
+assert(profile.includes("fetch('/api/support-request'"),'Profilo non inoltra le richieste alla inbox centrale');
+const hubTemplate=fs.readFileSync(path.join(root,'templates/generated-hub.js'),'utf8');
+assert(hubTemplate.includes('/api/support-request'),'Hub generato non inoltra le richieste alla inbox centrale');
+const mainIndex=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert(mainIndex.includes('workspace-profile-link')&&mainIndex.includes('mobile-header-actions'),'Profilo non visibile nel builder desktop/mobile');
 const checkout=fs.readFileSync(path.join(root,'api/create-checkout-session.js'),'utf8');
 for(const marker of ["mode', managedServiceSelected ? 'subscription' : 'payment'",'recurring][interval]','EASYCOME_MANAGED_MONTHLY_CENTS','subscription_data[metadata]'])assert(checkout.includes(marker),`Checkout abbonamento incompleto: ${marker}`);
 const webhook=fs.readFileSync(path.join(root,'api/stripe-webhook.js'),'utf8');
@@ -86,4 +98,4 @@ for(const n of ['index.html','profilo.html','assets/v7.css','assets/profile.css'
 for(const n of ['builder.html','js/zip.js','js/product-templates.js'])assert(!fs.existsSync(path.join(root,'dist-public',n)),`Build pubblica espone ${n}`);
 
 const blob=globalThis.EasyZip.createZip(browserResult.files);const zipPath=path.join(root,'tests','generated-v8.zip');fs.writeFileSync(zipPath,Buffer.from(await blob.arrayBuffer()));assert(fs.statSync(zipPath).size>100000,'ZIP V8 troppo piccolo');
-console.log(JSON.stringify({ok:true,version:'8.2.0',templates:results,zipPath},null,2));
+console.log(JSON.stringify({ok:true,version:'8.3.0',templates:results,zipPath},null,2));

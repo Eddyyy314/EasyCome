@@ -396,7 +396,7 @@ const global = { EasyZip: { createZipBytes }, ECProductTemplates, crypto: global
 
   function defaultProject() {
     return {
-      version: '8.2.0',
+      version: '8.3.0',
       generatedAt: new Date().toISOString(),
       organizationId: uuidv4(),
       company: {
@@ -2067,7 +2067,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
   function generatedPackageJson(project) {
     return JSON.stringify({
       name: slugify(project.company.name || 'easycome-gestionale'),
-      version: '8.2.0',
+      version: '8.3.0',
       private: true,
       scripts: { dev: 'npx serve .', preview: 'npx serve .', 'deploy:supabase': 'supabase db push' },
     }, null, 2);

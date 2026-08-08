@@ -70,7 +70,8 @@
     { id:'overdue', icon:'!', name:'Pagamento o pratica in ritardo', description:'Crea un avviso quando una scadenza non viene chiusa.', flow:{name:'Avviso ritardo',trigger:'date_reached',entity:'payments',action:'notify',target:'team',message:'Controllare la voce scaduta.'} },
   ];
 
-  let project = normalizeProject(loadDraft() || G.defaultProject());
+  let activeUserId = '';
+  let project = normalizeProject(G.defaultProject());
   let currentStep = 0;
   let customFieldDraft = [];
   let sectionDraft = { label: '', singular: '' };
@@ -102,12 +103,30 @@
   }
 
   let cloudSaveTimer;
+  const legacyDraftKey = 'easycome-generator-pro-draft';
+  const draftKey = (userId = activeUserId) => userId ? `easycome-generator-pro-draft:${userId}` : '';
   function saveDraft() {
-    try { localStorage.setItem('easycome-generator-pro-draft', JSON.stringify(project)); } catch (_) {}
+    if (!activeUserId) return;
+    try { localStorage.setItem(draftKey(), JSON.stringify(project)); } catch (_) {}
     clearTimeout(cloudSaveTimer);
     cloudSaveTimer = setTimeout(() => window.EasyComeAccount?.saveProject?.(project), 700);
   }
-  function loadDraft() { try { return JSON.parse(localStorage.getItem('easycome-generator-pro-draft') || 'null'); } catch (_) { return null; } }
+  function loadDraft(userId) {
+    if (!userId) return null;
+    try { return JSON.parse(localStorage.getItem(draftKey(userId)) || 'null'); } catch (_) { return null; }
+  }
+  function legacyDraftForUser(user) {
+    try {
+      const value = JSON.parse(localStorage.getItem(legacyDraftKey) || 'null');
+      const draftEmail = String(value?.company?.email || '').trim().toLowerCase();
+      const userEmail = String(user?.email || '').trim().toLowerCase();
+      if (value && draftEmail && userEmail && draftEmail === userEmail) {
+        localStorage.removeItem(legacyDraftKey);
+        return value;
+      }
+    } catch (_) {}
+    return null;
+  }
   function toast(message) { const node = document.createElement('div'); node.className = 'toast'; node.textContent = message; document.body.appendChild(node); setTimeout(() => node.remove(), 2500); }
   function initials() { return (project.company.name || 'EC').split(/\s+/).slice(0, 2).map((item) => item[0]).join('').toUpperCase(); }
   function logoMarkup() { return project.company.logoData ? `<img src="${project.company.logoData}" alt="">` : esc(initials()); }
@@ -704,12 +723,27 @@
 
   window.addEventListener('easycome:account-ready', async (event) => {
     const user = event.detail?.user;
-    if (user?.email && !project.company.email) project.company.email = user.email;
+    if (!user?.id) return;
+    const switchedAccount = Boolean(activeUserId && activeUserId !== user.id);
+    activeUserId = user.id;
     const saved = await window.EasyComeAccount?.loadLatestProject?.();
-    if (saved) project = normalizeProject(saved);
+    const local = loadDraft(user.id);
+    const legacy = legacyDraftForUser(user);
+    project = normalizeProject(saved || local || legacy || G.defaultProject());
+    if (!project.company.email) project.company.email = user.email || '';
+    if (switchedAccount || (!saved && !local && !legacy)) {
+      currentStep = 0;
+      customFieldDraft = [];
+      sectionDraft = { label: '', singular: '' };
+      automationDraft = { name: '', trigger: 'record_created', entity: '', action: 'notify', target: '', message: '', enabled: true };
+      previewMode = 'dashboard';
+      previewDevice = 'desktop';
+      previewEntityKey = '';
+      previewHubTab = 'home';
+    }
     saveDraft();
     render();
-  }, { once: true });
+  });
 
   render();
 }());
