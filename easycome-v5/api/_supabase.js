@@ -77,3 +77,22 @@ export async function createSupportRequest(ticket) {
   });
   return Array.isArray(result) ? result[0] || null : result;
 }
+
+export async function getSupportRequestById(id) {
+  const result = await request(`easycome_support_requests?id=eq.${encodeURIComponent(id)}&select=*`);
+  return Array.isArray(result) ? result[0] || null : null;
+}
+
+export async function updateSupportRequestById(id, patch) {
+  return request(`easycome_support_requests?id=eq.${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(patch), prefer: 'return=minimal' });
+}
+
+export async function createSupportMessage(message) {
+  const result = await request('easycome_support_messages', { method: 'POST', body: JSON.stringify(message) });
+  return Array.isArray(result) ? result[0] || null : result;
+}
+
+export async function isAdminUser(userId) {
+  const result = await request(`easycome_admins?user_id=eq.${encodeURIComponent(userId)}&select=user_id&limit=1`);
+  return Array.isArray(result) && result.length > 0;
+}

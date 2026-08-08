@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { authenticatedUser } from './_auth.js';
 import { json, readJson } from './_responses.js';
-import { createSupportRequest } from './_supabase.js';
+import { createSupportRequest, createSupportMessage } from './_supabase.js';
 
 const allowedKinds = new Set(['bug','support','feature','implementation','training','billing','consultation','custom_solution','managed_service']);
 const allowedPriorities = new Set(['low','normal','high','urgent']);
@@ -57,8 +57,19 @@ export default async function handler(req, res) {
       updated_at: new Date().toISOString(),
     };
     const saved = await createSupportRequest(ticket);
-    await forwardNotification(saved || ticket);
-    return json(res, 200, { ok: true, request: saved || ticket });
+    const finalTicket = saved || ticket;
+    await createSupportMessage({
+      id: crypto.randomUUID(),
+      request_id: finalTicket.id,
+      user_id: user.id,
+      sender_role: 'client',
+      body: description,
+      read_by_client: true,
+      read_by_admin: false,
+      created_at: new Date().toISOString(),
+    });
+    await forwardNotification(finalTicket);
+    return json(res, 200, { ok: true, request: finalTicket });
   } catch (error) {
     console.error(error);
     return json(res, 400, { error: error?.message || 'Impossibile inviare la richiesta.' });

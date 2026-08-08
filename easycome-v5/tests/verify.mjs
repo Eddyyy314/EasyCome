@@ -98,4 +98,12 @@ for(const n of ['index.html','profilo.html','assets/v7.css','assets/profile.css'
 for(const n of ['builder.html','js/zip.js','js/product-templates.js'])assert(!fs.existsSync(path.join(root,'dist-public',n)),`Build pubblica espone ${n}`);
 
 const blob=globalThis.EasyZip.createZip(browserResult.files);const zipPath=path.join(root,'tests','generated-v8.zip');fs.writeFileSync(zipPath,Buffer.from(await blob.arrayBuffer()));assert(fs.statSync(zipPath).size>100000,'ZIP V8 troppo piccolo');
-console.log(JSON.stringify({ok:true,version:'8.3.0',templates:results,zipPath},null,2));
+const adminHtml=fs.readFileSync(path.join(root,'orders.html'),'utf8');
+const adminJs=fs.readFileSync(path.join(root,'js/admin.js'),'utf8');
+const adminSql=fs.readFileSync(path.join(root,'SUPABASE_V84_ADMIN_UPGRADE.sql'),'utf8');
+for(const marker of ['Control Room','Inbox','Clienti','Managed','Agenda','Sistema']) assert(adminHtml.includes(marker),`Control Room incompleta: ${marker}`);
+for(const marker of ['easycome_support_messages','easycome_customer_admin','easycome_admin_tasks','sendReply','openClient','runHealth']) assert(adminJs.includes(marker),`Admin JS incompleto: ${marker}`);
+for(const marker of ['easycome_support_messages','easycome_customer_admin','easycome_admin_tasks','profiles_admin_read','projects_admin_read']) assert(adminSql.includes(marker),`Upgrade V8.4 incompleto: ${marker}`);
+assert(fs.existsSync(path.join(root,'api/support-message.js'))&&fs.existsSync(path.join(root,'api/admin-health.js')),'Endpoint amministrazione/chat mancanti');
+assert(fs.existsSync(path.join(root,'dist-public','admin.html'))&&fs.existsSync(path.join(root,'dist-public','assets/admin.css'))&&fs.existsSync(path.join(root,'dist-public','js/admin.js')),'Build pubblica admin incompleta');
+console.log(JSON.stringify({ok:true,version:'8.4.0',templates:results,zipPath},null,2));

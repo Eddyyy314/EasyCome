@@ -27,3 +27,12 @@
 - Card servizi facoltativi più compatte.
 - Copy secondario ridotto e proporzioni uniformate.
 - Migliorie responsive al gestionale e Hub generati.
+
+## 8.4.0 — Control Room
+- Nuova pagina `/admin` con overview operativa.
+- Inbox conversazioni cliente ↔ Easy Come con non letti, priorità e stato.
+- Rubrica clienti con note private, tag, lifecycle e follow-up.
+- Viste Progetti, Ordini, Managed, Incontri, Agenda, Attività e Sistema.
+- Thread messaggi persistenti in Supabase.
+- Follow-up cliente dalla sezione Assistenza del Profilo.
+- Endpoint `/api/support-message` e `/api/admin-health`.
