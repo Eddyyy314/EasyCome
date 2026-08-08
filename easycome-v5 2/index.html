@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Easy Come Studio — Costruisci il sistema digitale della tua impresa</title>
+  <meta name="description" content="Componi gestionale, sito, app PWA, automazioni e database della tua impresa. Prova tutto in anteprima prima del pagamento.">
+  <meta name="theme-color" content="#ff6b35">
+  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/editorial.css">
+  <link rel="stylesheet" href="assets/v7.css">
+  <link rel="stylesheet" href="assets/polish.css">
+</head>
+<body class="editorial-site">
+  <div id="accountGate"></div>
+  <div class="app-shell">
+    <aside class="leftbar">
+      <a class="logo" href="#" aria-label="Easy Come">
+        <span>EC</span>
+        <div><strong>Easy Come Studio</strong><small>sistemi digitali per imprese</small></div>
+      </a>
+      <div class="intro-copy">
+        <span class="eyebrow light">UN SISTEMA DIGITALE COSTRUITO SUL TUO LAVORO</span>
+        <h2>Componi il tuo sistema. Provalo. Poi decidi.</h2>
+        <p>Gestionale, sito, app installabile, Excel, database e automazioni: scegli ciò che serve e naviga il risultato prima di pagare.</p>
+      </div>
+      <nav id="stepList" class="step-list"></nav>
+      <div class="left-footer">
+        <strong>Software da €99 una tantum</strong>
+        <span>Anteprima prima dell’acquisto</span>
+        <small>Implementazione e gestione tecnica a 30 €/mese sono sempre facoltative.</small>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="mobile-header">
+        <a class="logo dark" href="#"><span>EC</span><div><strong>Easy Come Studio</strong><small>sistemi digitali per imprese</small></div></a>
+        <div class="mobile-header-actions"><a href="/profilo.html" class="btn btn-profile btn-small">Profilo</a><button id="globalPreviewMobile" class="btn btn-secondary btn-small">Anteprima</button></div>
+      </header>
+      <div class="workspace-top">
+        <div class="draft-state"><i></i><span>Salvato</span></div>
+        <button id="globalPreview" class="btn btn-preview">Anteprima</button>
+        <a href="/profilo.html" class="btn btn-profile workspace-profile-link">Profilo</a>
+      </div>
+      <section id="panel" class="panel"></section>
+      <footer class="flow-footer">
+        <button id="previous" class="btn btn-secondary">Indietro</button>
+        <div class="progress-mobile" id="progressMobile"></div>
+        <button id="next" class="btn btn-primary">Continua</button>
+      </footer>
+    </main>
+
+    <aside class="summary" id="summary"></aside>
+  </div>
+
+  <div id="previewRoot"></div>
+  <div id="generationRoot"></div>
+  <div id="checkoutRoot"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/account.js"></script>
+  <script src="js/generator-core.js"></script>
+  <script src="js/sales-config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
