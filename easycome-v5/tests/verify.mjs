@@ -81,7 +81,7 @@ assert(profile.includes("fetch('/api/support-request'"),'Profilo non inoltra le 
 const hubTemplate=fs.readFileSync(path.join(root,'templates/generated-hub.js'),'utf8');
 assert(hubTemplate.includes('/api/support-request'),'Hub generato non inoltra le richieste alla inbox centrale');
 const mainIndex=fs.readFileSync(path.join(root,'index.html'),'utf8');
-assert(mainIndex.includes('workspace-profile-link')&&mainIndex.includes('mobile-header-actions'),'Profilo non visibile nel builder desktop/mobile');
+assert(mainIndex.includes('desktopAccountSlot')&&mainIndex.includes('mobileAccountSlot'),'Account non visibile nel builder desktop/mobile');
 const checkout=fs.readFileSync(path.join(root,'api/create-checkout-session.js'),'utf8');
 for(const marker of ["mode', managedServiceSelected ? 'subscription' : 'payment'",'recurring][interval]','EASYCOME_MANAGED_MONTHLY_CENTS','subscription_data[metadata]'])assert(checkout.includes(marker),`Checkout abbonamento incompleto: ${marker}`);
 const webhook=fs.readFileSync(path.join(root,'api/stripe-webhook.js'),'utf8');

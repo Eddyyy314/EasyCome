@@ -218,26 +218,48 @@
   }
 
   function renderBadge() {
-    const host = document.querySelector('.workspace-top');
-    if (!host || !state.session) return;
-    let el = document.getElementById('accountBadge');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'accountBadge';
-      el.className = 'account-badge';
-      host.appendChild(el);
-    }
+    if (!state.session) return;
     const email = state.session.user.email || '';
     const name = state.session.user.user_metadata?.full_name || email.split('@')[0];
-    el.innerHTML = `<button id="accountMenu"><b>${esc(name.slice(0, 1).toUpperCase())}</b><span><strong>${esc(name)}</strong><small>${esc(email)}</small></span></button><div class="account-menu hidden"><a href="/profilo.html" id="myProfile">Profilo, ordini e assistenza</a><button id="accountLogout">Esci</button></div>`;
-    el.querySelector('#accountMenu').onclick = () => el.querySelector('.account-menu').classList.toggle('hidden');
-    el.querySelector('#accountLogout').onclick = async () => {
-      const client = await ensureClient();
-      await client.auth.signOut();
-      state.session = null;
-      state.tab = 'login';
-      renderGate();
+    const initial = esc(name.slice(0, 1).toUpperCase());
+
+    const mountBadge = (slotSelector, suffix, compact = false) => {
+      const slot = document.querySelector(slotSelector);
+      if (!slot) return;
+      let el = slot.querySelector('.account-badge');
+      if (!el) {
+        el = document.createElement('div');
+        el.className = `account-badge${compact ? ' account-badge-compact' : ''}`;
+        slot.appendChild(el);
+      }
+      const menuId = `accountMenu-${suffix}`;
+      const logoutId = `accountLogout-${suffix}`;
+      el.innerHTML = `<button id="${menuId}" class="account-trigger" aria-label="Apri account"><b>${initial}</b>${compact ? '' : `<span><strong>${esc(name)}</strong><small>Account</small></span>`}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5 10 12l5-4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="account-menu hidden"><a href="/profilo.html">Profilo e ordini</a><a href="/profilo.html?tab=support">Assistenza</a><button id="${logoutId}">Esci</button></div>`;
+      el.querySelector(`#${CSS.escape(menuId)}`).onclick = (event) => {
+        event.stopPropagation();
+        document.querySelectorAll('.account-menu').forEach(menu => {
+          if (menu !== el.querySelector('.account-menu')) menu.classList.add('hidden');
+        });
+        el.querySelector('.account-menu').classList.toggle('hidden');
+      };
+      el.querySelector(`#${CSS.escape(logoutId)}`).onclick = async () => {
+        const client = await ensureClient();
+        await client.auth.signOut();
+        state.session = null;
+        state.tab = 'login';
+        renderGate();
+      };
     };
+
+    mountBadge('#desktopAccountSlot', 'desktop');
+    mountBadge('#mobileAccountSlot', 'mobile', true);
+
+    if (!state.accountMenuOutsideBound) {
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('.account-badge')) document.querySelectorAll('.account-menu').forEach(menu => menu.classList.add('hidden'));
+      });
+      state.accountMenuOutsideBound = true;
+    }
   }
 
   async function accessToken() {

@@ -260,8 +260,23 @@
 /* Easy Come 8.3 — account visibility and tighter top actions */
 .workspace-top{justify-content:flex-start!important;gap:10px!important}
 .workspace-top .draft-state{margin-right:2px}
-.workspace-profile-link{margin-left:auto!important;text-decoration:none;display:inline-flex;align-items:center;background:#fff;color:#171815;border:1px solid #cfc8bb;padding:9px 14px;font-size:12px}
 .mobile-header-actions{display:flex;align-items:center;gap:7px;margin-left:auto}
-.btn-profile{background:#ff6433;color:#fff;text-decoration:none;border:1px solid #ff6433}
 @media(max-width:900px){.mobile-header{gap:10px}.mobile-header .logo{min-width:0}.mobile-header .logo div{min-width:0}.mobile-header .logo strong{white-space:nowrap}.mobile-header .logo small{display:none}.mobile-header-actions .btn{padding:8px 10px!important;font-size:9px!important}}
 @media(max-width:390px){.mobile-header .logo div{display:none}.mobile-header-actions{gap:5px}.mobile-header-actions .btn{padding:8px 9px!important}}
+
+/* V8.3.2 — account control integrated into the product chrome */
+#desktopAccountSlot{margin-left:auto;display:flex;align-items:center}
+#mobileAccountSlot{display:flex;align-items:center}
+.account-badge{margin-left:0!important;position:relative}
+.account-badge>.account-trigger{height:36px;border:1px solid #cfc8bb!important;background:transparent!important;border-radius:999px!important;padding:3px 8px 3px 4px!important;gap:7px!important;color:#171815;box-shadow:none!important}
+.account-badge>.account-trigger:hover{background:#fff!important;border-color:#171815!important}
+.account-badge>.account-trigger>b{width:28px!important;height:28px!important;border-radius:50%!important;background:#171815!important;color:#fff!important;font-size:10px!important}
+.account-badge>.account-trigger span{display:grid!important;line-height:1.05!important;padding-right:1px}
+.account-badge>.account-trigger strong{font-size:9px!important;font-weight:800!important;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.account-badge>.account-trigger small{font-size:7px!important;color:#7a756d!important;margin-top:3px}
+.account-badge>.account-trigger svg{width:13px;height:13px;opacity:.55}
+.account-badge-compact>.account-trigger{width:34px!important;height:34px!important;padding:2px!important;display:grid!important;place-items:center!important;border-color:rgba(255,255,255,.22)!important;color:#fff!important}
+.account-badge-compact>.account-trigger>b{width:28px!important;height:28px!important;background:#fff!important;color:#171815!important}
+.account-badge-compact>.account-trigger svg{display:none}
+.account-badge-compact .account-menu{right:0;top:42px}
+@media(max-width:900px){#desktopAccountSlot{display:none}.mobile-header-actions{gap:7px}.mobile-header-actions #globalPreviewMobile{height:34px!important;padding:7px 10px!important}.account-badge-compact>.account-trigger:hover{background:rgba(255,255,255,.08)!important}}
