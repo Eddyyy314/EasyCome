@@ -26,5 +26,35 @@
     }
   ],
   "buildCommand": "node scripts/build-public.mjs",
-  "outputDirectory": "dist-public"
+  "outputDirectory": "dist-public",
+  "rewrites": [
+    {
+      "source": "/accedi",
+      "destination": "/accedi.html"
+    },
+    {
+      "source": "/studio",
+      "destination": "/studio.html"
+    },
+    {
+      "source": "/profilo",
+      "destination": "/profilo.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/ordini",
+      "destination": "/orders.html"
+    },
+    {
+      "source": "/termini",
+      "destination": "/termini.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    }
+  ]
 }
