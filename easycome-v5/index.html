@@ -15,6 +15,7 @@
 @media(max-width:700px){.section-shell{width:min(100% - 28px,1240px)}.site-header{width:calc(100% - 28px);height:70px}.desktop-nav,.header-actions .text-link{display:none}.header-actions .button{min-height:38px;padding:0 12px;font-size:10px}.mobile-menu{top:70px;left:14px;right:14px}.hero{min-height:auto;padding:54px 0 70px;gap:38px}.hero-copy h1{font-size:clamp(48px,15vw,72px);margin-top:13px}.hero-copy>p{font-size:15px}.hero-actions{flex-direction:column;align-items:stretch}.hero-actions .button{width:100%}.hero-facts{display:grid;grid-template-columns:1fr 1fr;gap:15px}.product-stage{padding:10px 0 0}.browser-frame{min-height:385px;box-shadow:9px 10px 0 #0001}.browser-top{height:34px}.product-shell{grid-template-columns:74px 1fr;min-height:350px}.product-side{padding:12px 7px}.mini-logo{width:24px;height:24px;margin-bottom:15px}.product-side nav span{font-size:5.7px;padding:6px 4px}.product-main{padding:13px 11px;overflow:hidden}.product-heading h3{font-size:18px}.product-heading button{font-size:6px;padding:6px}.stat-row{margin:10px 0}.stat-row article{padding:9px 5px}.stat-row strong{font-size:13px}.stat-row span{font-size:5px}.product-grid{grid-template-columns:1fr}.activity-card{display:none}.agenda-card{min-height:150px;padding:9px}.agenda-line{padding:7px 0}.stage-note{display:none}.problem-band{padding:78px 0}.problem-inner h2{font-size:52px;margin-bottom:45px}.problem-grid{grid-template-columns:1fr}.problem-grid article{min-height:150px}.problem-grid h3{margin-top:36px}.how,.demo,.pricing,.faq{padding-top:82px;padding-bottom:86px}.section-intro h2{font-size:45px}.steps-grid article{display:block}.step-visual{height:190px;margin:18px 0}.outcomes{padding:82px 0}.outcomes-inner{gap:45px}.outcomes-copy h2{font-size:47px}.outcome-list article{grid-template-columns:105px 1fr}.demo-tabs{overflow-x:auto}.demo-tabs button{white-space:nowrap}.demo-window{min-height:430px}.demo-view{grid-template-columns:72px 1fr;min-height:430px}.demo-view aside{padding:18px 7px}.demo-view aside b{font-size:11px;margin-bottom:15px}.demo-view aside span{font-size:5.8px;padding:7px 4px}.demo-view main{padding:25px 16px;overflow:hidden}.demo-view main>h3,.demo-list-head h3{font-size:26px;margin-bottom:22px}.demo-kpis{grid-template-columns:1fr}.demo-kpis>b{padding:10px;border-right:0;border-bottom:1px solid #ddd;font-size:20px}.demo-kpis>b:last-child{border:0}.demo-bars{height:80px}.demo-list-head{display:block}.demo-list-head button{margin-bottom:12px}.fake-row{grid-template-columns:1.2fr .7fr}.fake-row span:last-child{display:none}.hub-actions{grid-template-columns:1fr}.hub-actions article{min-height:90px;padding:15px}.hub-actions b{margin-bottom:15px}.pricing-grid{grid-template-columns:1fr}.main-price{grid-row:auto}.price-card{min-height:0}.custom-section{padding:70px 0}.custom-inner h2{font-size:82px}.site-footer{grid-template-columns:1fr 1fr;gap:28px}.site-footer>div:first-child{grid-column:1/-1}.site-footer>small{grid-column:1/-1}.final-cta{padding-bottom:90px}.final-cta h2{font-size:52px}}
 
 </style>
+  <link rel="stylesheet" href="assets/privacy.css">
 </head>
 <body>
   <header class="site-header" id="siteHeader">
@@ -119,7 +120,7 @@
     <section class="final-cta section-shell"><span class="kicker">EASY COME</span><h2>Raccontaci come lavori.<br><em>Costruiamo il resto.</em></h2><a class="button button-orange large" href="accedi.html?mode=signup&next=/studio">Crea il tuo sistema <span>→</span></a></section>
   </main>
 
-  <footer class="site-footer"><div><a class="brand" href="index.html"><span class="brand-mark">EC</span><span class="brand-name">Easy Come</span></a><p>Software costruito intorno alle piccole imprese.</p></div><div><strong>Prodotto</strong><a href="#come-funziona">Come funziona</a><a href="#prezzi">Prezzi</a><a href="accedi.html?mode=login&next=/studio">Accedi</a></div><div><strong>Legale</strong><a href="termini.html">Termini</a><a href="privacy.html">Privacy</a></div><small>© 2026 Easy Come</small></footer>
+  <footer class="site-footer"><div><a class="brand" href="index.html"><span class="brand-mark">EC</span><span class="brand-name">Easy Come</span></a><p>Software costruito intorno alle piccole imprese.</p></div><div><strong>Prodotto</strong><a href="#come-funziona">Come funziona</a><a href="#prezzi">Prezzi</a><a href="accedi.html?mode=login&next=/studio">Accedi</a></div><div><strong>Legale</strong><a href="termini.html">Termini</a><a href="privacy.html">Privacy</a><a href="cookie.html">Cookie</a><a href="#" data-open-cookie-settings>Preferenze privacy</a></div><small>© 2026 Easy Come</small></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script id="easycome-home-inline">
@@ -133,5 +134,7 @@ initSession();
 })();
 
 </script>
+  <script src="js/legal-config.js"></script>
+  <script src="js/privacy-consent.js"></script>
 </body>
 </html>

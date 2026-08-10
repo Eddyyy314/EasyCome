@@ -3,7 +3,7 @@ import { authenticatedUser } from './_auth.js';
 import { json, readJson } from './_responses.js';
 import { createSupportRequest, createSupportMessage } from './_supabase.js';
 
-const allowedKinds = new Set(['bug','support','feature','implementation','training','billing','consultation','custom_solution','managed_service']);
+const allowedKinds = new Set(['bug','support','feature','implementation','training','billing','consultation','custom_solution','managed_service','privacy']);
 const allowedPriorities = new Set(['low','normal','high','urgent']);
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 

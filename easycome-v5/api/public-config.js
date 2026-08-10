@@ -31,5 +31,11 @@ export default async function handler(req, res) {
     supabaseUrl,
     supabaseAnonKey,
     appUrl: String(process.env.APP_URL || 'https://easy-come.it').replace(/\/$/, ''),
+    legal: {
+      controllerName: String(process.env.LEGAL_CONTROLLER_NAME || ''),
+      privacyEmail: String(process.env.LEGAL_PRIVACY_EMAIL || ''),
+      address: String(process.env.LEGAL_ADDRESS || ''),
+      vatNumber: String(process.env.LEGAL_VAT_NUMBER || ''),
+    },
   });
 }
