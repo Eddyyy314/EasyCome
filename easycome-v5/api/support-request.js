@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { authenticatedUser } from './_auth.js';
 import { json, readJson } from './_responses.js';
 import { createSupportRequest, createSupportMessage } from './_supabase.js';
+import { notifyAdmin } from './_notify.js';
 
 const allowedKinds = new Set(['bug','support','feature','implementation','training','billing','consultation','custom_solution','managed_service','privacy']);
 const allowedPriorities = new Set(['low','normal','high','urgent']);
@@ -13,20 +14,6 @@ function cors(res) {
   res.setHeader('access-control-allow-headers', 'authorization, content-type');
 }
 
-async function forwardNotification(ticket) {
-  const url = String(process.env.EASYCOME_SUPPORT_WEBHOOK_URL || '').trim();
-  if (!url) return;
-  try {
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ event: 'easycome.support.created', ticket }),
-      signal: AbortSignal.timeout(5000),
-    });
-  } catch (error) {
-    console.warn('Support webhook non raggiungibile:', error?.message || error);
-  }
-}
 
 export default async function handler(req, res) {
   cors(res);
@@ -68,7 +55,17 @@ export default async function handler(req, res) {
       read_by_admin: false,
       created_at: new Date().toISOString(),
     });
-    await forwardNotification(finalTicket);
+    const special = ['consultation','custom_solution'].includes(kind);
+    await notifyAdmin({
+      eventKey: `support-request:${finalTicket.id}`,
+      eventType: special ? 'meeting.created' : 'support.created',
+      severity: priority === 'urgent' ? 'urgent' : special ? 'high' : 'normal',
+      title: special ? 'Nuova richiesta di incontro / su misura' : `Nuova richiesta: ${subject}`,
+      body: `${finalTicket.company_name || finalTicket.customer_email} · ${kind} · ${description.slice(0, 900)}`,
+      userId: user.id,
+      requestId: finalTicket.id,
+      metadata: { kind, priority },
+    });
     return json(res, 200, { ok: true, request: finalTicket });
   } catch (error) {
     console.error(error);

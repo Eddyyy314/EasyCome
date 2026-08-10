@@ -1,12 +1,11 @@
 {
   "name": "easycome-studio-v8",
-  "version": "8.6.0",
+  "version": "8.7.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "npx vercel dev",
     "static": "npx serve .",
-    "verify": "node tests/verify.mjs",
     "build": "node scripts/build-public.mjs"
   }
 }

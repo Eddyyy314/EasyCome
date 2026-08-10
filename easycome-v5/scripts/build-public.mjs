@@ -7,9 +7,9 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 
 const files = [
-  'index.html', 'studio.html', 'accedi.html', 'profilo.html', 'success.html', 'cancel.html', 'admin.html', 'orders.html', 'termini.html', 'privacy.html', 'cookie.html',
+  'index.html', 'studio.html', 'accedi.html', 'profilo.html', 'success.html', 'cancel.html', 'admin.html', 'orders.html', 'termini.html', 'rimborsi.html', 'recesso.html', 'privacy.html', 'cookie.html',
   'assets/styles.css', 'assets/privacy.css', 'assets/editorial.css', 'assets/v7.css', 'assets/polish.css', 'assets/profile.css', 'assets/admin.css', 'assets/auth.css',
-  'js/legal-config.js', 'js/legal-page.js', 'js/privacy-consent.js', 'js/auth-page.js', 'js/account.js', 'js/profile.js', 'js/app.js', 'js/generator-core.js', 'js/sales-config.js', 'js/admin-config.js', 'js/admin.js',
+  'js/legal-config.js', 'js/legal-page.js', 'js/recesso.js', 'js/privacy-consent.js', 'js/auth-page.js', 'js/account.js', 'js/profile.js', 'js/app.js', 'js/generator-core.js', 'js/sales-config.js', 'js/admin-config.js', 'js/admin.js',
 ];
 for (const name of files) {
   const source = path.join(root, name);

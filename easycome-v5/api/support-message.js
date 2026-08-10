@@ -2,10 +2,10 @@ import crypto from 'node:crypto';
 import { authenticatedUser } from './_auth.js';
 import { json, readJson } from './_responses.js';
 import { createSupportMessage, getSupportRequestById, updateSupportRequestById } from './_supabase.js';
+import { notifyAdmin } from './_notify.js';
 
 const clean = (value, max = 12000) => String(value ?? '').trim().slice(0, max);
 function cors(res){res.setHeader('access-control-allow-origin','*');res.setHeader('access-control-allow-methods','POST, OPTIONS');res.setHeader('access-control-allow-headers','authorization, content-type');}
-async function forwardNotification(payload){const url=String(process.env.EASYCOME_SUPPORT_WEBHOOK_URL||'').trim();if(!url)return;try{await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(5000)});}catch(error){console.warn('Support webhook non raggiungibile:',error?.message||error)}}
 export default async function handler(req,res){
   cors(res);if(req.method==='OPTIONS')return json(res,200,{ok:true});if(req.method!=='POST')return json(res,405,{error:'Metodo non consentito.'});
   try{
@@ -15,7 +15,16 @@ export default async function handler(req,res){
     const message={id:crypto.randomUUID(),request_id:requestId,user_id:user.id,sender_role:'client',body:text,read_by_client:true,read_by_admin:false,created_at:new Date().toISOString()};
     const saved=await createSupportMessage(message);
     await updateSupportRequestById(requestId,{status:'received',updated_at:new Date().toISOString()});
-    await forwardNotification({event:'easycome.support.message',ticket,message:saved||message});
+    await notifyAdmin({
+      eventKey: `support-message:${saved?.id || message.id}`,
+      eventType: 'support.message',
+      severity: ticket.priority === 'urgent' ? 'urgent' : 'normal',
+      title: `Nuovo messaggio: ${ticket.subject}`,
+      body: `${ticket.company_name || ticket.customer_email} · ${text.slice(0, 1000)}`,
+      userId: user.id,
+      requestId,
+      metadata: { kind: ticket.kind },
+    });
     return json(res,200,{ok:true,message:saved||message});
   }catch(error){console.error(error);return json(res,400,{error:error?.message||'Impossibile inviare il messaggio.'})}
 }

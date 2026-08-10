@@ -252,7 +252,7 @@
       }
       const menuId = `accountMenu-${suffix}`;
       const logoutId = `accountLogout-${suffix}`;
-      el.innerHTML = `<button id="${menuId}" class="account-trigger" aria-label="Apri account"><b>${initial}</b>${compact ? '' : `<span><strong>${esc(name)}</strong><small>Account</small></span>`}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5 10 12l5-4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="account-menu hidden"><a href="/profilo.html">Profilo e ordini</a><a href="/profilo.html?tab=support">Assistenza</a><button id="${logoutId}">Esci</button></div>`;
+      el.innerHTML = `<button id="${menuId}" class="account-trigger" aria-label="Apri account"><b>${initial}</b>${compact ? '' : `<span><strong>${esc(name)}</strong><small>Account</small></span>`}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5 10 12l5-4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="account-menu hidden"><a href="/profilo.html">Profilo e ordini</a><a href="/profilo.html?tab=support">Assistenza</a><a href="/recesso">Recedere dal contratto</a><button id="${logoutId}">Esci</button></div>`;
       el.querySelector(`#${CSS.escape(menuId)}`).onclick = (event) => {
         event.stopPropagation();
         document.querySelectorAll('.account-menu').forEach(menu => {

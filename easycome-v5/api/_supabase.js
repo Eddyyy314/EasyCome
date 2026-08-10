@@ -96,3 +96,23 @@ export async function isAdminUser(userId) {
   const result = await request(`easycome_admins?user_id=eq.${encodeURIComponent(userId)}&select=user_id&limit=1`);
   return Array.isArray(result) && result.length > 0;
 }
+
+export async function createAdminNotification(notification) {
+  const result = await request('easycome_admin_notifications?on_conflict=event_key', {
+    method: 'POST',
+    body: JSON.stringify(notification),
+    headers: { prefer: 'resolution=ignore-duplicates,return=representation' },
+  });
+  return Array.isArray(result) ? result[0] || null : result;
+}
+
+export async function createWithdrawal(row) {
+  const result = await request('easycome_withdrawals', { method: 'POST', body: JSON.stringify(row) });
+  return Array.isArray(result) ? result[0] || null : result;
+}
+
+export async function updateWithdrawalById(id, patch) {
+  return request(`easycome_withdrawals?id=eq.${encodeURIComponent(id)}`, {
+    method: 'PATCH', body: JSON.stringify(patch), prefer: 'return=minimal',
+  });
+}

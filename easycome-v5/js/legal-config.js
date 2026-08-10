@@ -1,12 +1,15 @@
 window.EASYCOME_LEGAL = Object.freeze({
-  version: '1.0',
-  lastUpdated: '9 agosto 2026',
+  version: '1.1',
+  lastUpdated: '10 agosto 2026',
   controller: {
     brand: 'Easy Come',
     legalName: '',
     address: '',
     privacyEmail: '',
-    vatNumber: ''
+    supportEmail: '',
+    vatNumber: '',
+    rea: '',
+    pec: ''
   },
   consent: {
     analyticsEnabled: false,

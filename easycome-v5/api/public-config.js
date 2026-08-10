@@ -34,8 +34,11 @@ export default async function handler(req, res) {
     legal: {
       controllerName: String(process.env.LEGAL_CONTROLLER_NAME || ''),
       privacyEmail: String(process.env.LEGAL_PRIVACY_EMAIL || ''),
+      supportEmail: String(process.env.LEGAL_SUPPORT_EMAIL || process.env.EASYCOME_NOTIFICATION_EMAIL || process.env.LEGAL_PRIVACY_EMAIL || ''),
       address: String(process.env.LEGAL_ADDRESS || ''),
       vatNumber: String(process.env.LEGAL_VAT_NUMBER || ''),
+      rea: String(process.env.LEGAL_REA || ''),
+      pec: String(process.env.LEGAL_PEC || ''),
     },
   });
 }

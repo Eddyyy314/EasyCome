@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     const body = await readJson(req);
     const project = compactProject(body.project || {});
     const customer = body.customer || {};
+    const legal = body.legal || {};
     const email = clean(user.email || customer.email || project.company.email, 220).toLowerCase();
     const customerName = clean(customer.customerName, 160);
     const companyName = clean(customer.companyName || project.company.name, 180);
@@ -24,6 +25,18 @@ export default async function handler(req, res) {
     if (project.company.name.length < 3) throw new Error('Nome azienda non valido.');
     if (!validEmail(email)) throw new Error('Email non valida.');
     if (!customerName) throw new Error('Inserisci nome e cognome.');
+    if (legal.termsAccepted !== true) throw new Error('Devi accettare i Termini e condizioni prima del pagamento.');
+    if (legal.immediatePerformance !== true) throw new Error('Per la consegna immediata devi richiedere espressamente l’avvio della fornitura digitale.');
+    const legalAcceptance = {
+      terms_accepted: true,
+      immediate_performance_requested: true,
+      terms_version: clean(legal.termsVersion || 'EC-TOS-2026-08-10-v1', 80),
+      refund_policy_version: clean(legal.refundPolicyVersion || 'EC-REF-2026-08-10-v1', 80),
+      client_accepted_at: clean(legal.acceptedAt, 80) || null,
+      server_recorded_at: new Date().toISOString(),
+      user_id: user.id,
+      email,
+    };
 
     const price = calculateServerPrice(project);
     if (price.totalCents < 50) throw new Error('Importo non valido.');
@@ -42,6 +55,7 @@ export default async function handler(req, res) {
       amount_cents: price.totalCents, currency: 'eur', price_breakdown: { ...price, managedMonthly: managedServiceSelected ? managedMonthlyCents / 100 : 0 }, project,
       source_url: clean(body.sourceUrl, 700) || null, prepared_filename: clean(body.preparedFilename, 250) || null, delivery_status: 'not_ready', download_count: 0,
       purchase_type: managedServiceSelected ? 'software_plus_managed' : 'one_time', managed_service_selected: managedServiceSelected,
+      legal_acceptance: legalAcceptance,
     });
 
     const params = new URLSearchParams();
@@ -69,6 +83,8 @@ export default async function handler(req, res) {
     add('metadata[implementation]', project.delivery.implementationSelected ? 'included' : 'not_selected');
     add('metadata[managed_service]', managedServiceSelected ? 'selected' : 'not_selected');
     add('metadata[user_id]', user.id);
+    add('metadata[terms_version]', legalAcceptance.terms_version);
+    add('metadata[immediate_performance]', 'requested');
     if (managedServiceSelected) {
       add('line_items[1][quantity]', '1');
       add('line_items[1][price_data][currency]', 'eur');
