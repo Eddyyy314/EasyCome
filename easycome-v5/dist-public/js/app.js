@@ -620,7 +620,8 @@
       </div>
       <div class="checkout-form-wrap"><form id="checkoutForm" class="checkout-form"><span class="checkout-label">DATI PER L’ORDINE</span><h3>A chi intestiamo il progetto?</h3><p>Questi dati vengono associati al pagamento e alla consegna del pacchetto software.</p>
         <div class="form-grid two"><label class="field"><span>Nome e cognome</span><input name="customerName" required autocomplete="name" value=""></label><label class="field"><span>Email</span><input name="email" required type="email" autocomplete="email" value="${esc(project.company.email || '')}"></label><label class="field"><span>Telefono</span><input name="phone" autocomplete="tel"></label><label class="field"><span>Partita IVA / CF</span><input name="taxId" autocomplete="off"></label><label class="field full"><span>Ragione sociale</span><input name="companyName" required value="${esc(project.company.name || '')}"></label></div>
-        <label class="legal-check"><input type="checkbox" name="terms" required><span>Accetto i <a href="${esc(SALES.termsUrl || '#')}" target="_blank" rel="noopener">termini del servizio</a> e confermo di aver letto la <a href="${esc(SALES.privacyUrl || '#')}" target="_blank" rel="noopener">privacy policy</a>.</span></label>
+        <label class="legal-check"><input type="checkbox" name="terms" required><span>Accetto i <a href="${esc(SALES.termsUrl || '/termini')}" target="_blank" rel="noopener">Termini e condizioni</a> e confermo di aver letto la <a href="${esc(SALES.privacyUrl || '/privacy')}" target="_blank" rel="noopener">Privacy Policy</a> e la <a href="/rimborsi" target="_blank" rel="noopener">politica rimborsi e recesso</a>.</span></label>
+        <label class="legal-check"><input type="checkbox" name="immediatePerformance" required><span>Chiedo che la fornitura digitale e gli eventuali servizi selezionati inizino subito dopo il pagamento. Se acquisto come consumatore, riconosco che l'inizio della fornitura del contenuto digitale può comportare la perdita del diritto di recesso nei casi previsti dalla legge e che, per i servizi già iniziati, possono applicarsi le regole sul corrispettivo proporzionale.</span></label>
         <div id="checkoutError"></div><button class="btn btn-primary checkout-button" id="payButton" type="submit">${project.delivery.managedServiceSelected ? `Paga ${money(price.total)} e attiva 30 € / mese` : `Vai al pagamento sicuro · ${money(price.total)}`}</button><div class="secure-row"><span>🔒</span><span>I dati della carta vengono gestiti direttamente da Stripe.</span></div>
       </form></div>
     </section></div>`;
@@ -649,6 +650,13 @@
           body: JSON.stringify({
             project: projectForCheckout(),
             customer,
+            legal: {
+              termsAccepted: customer.terms === 'on',
+              immediatePerformance: customer.immediatePerformance === 'on',
+              termsVersion: 'EC-TOS-2026-08-10-v1',
+              refundPolicyVersion: 'EC-REF-2026-08-10-v1',
+              acceptedAt: new Date().toISOString(),
+            },
             preparedFilename: preparedResult?.filename || '',
             sourceUrl: window.location.href,
           }),

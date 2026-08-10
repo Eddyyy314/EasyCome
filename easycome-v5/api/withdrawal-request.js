@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
-import { json, readJson } from './_responses.js';
-import { createWithdrawal, getOrderById, updateWithdrawalById } from './_supabase.js';
-import { notifyAdmin, sendWithdrawalAcknowledgement } from './_notify.js';
+import { json, readJson } from '../server/_responses.js';
+import { createWithdrawal, getOrderById, updateWithdrawalById } from '../server/_supabase.js';
+import { notifyAdmin, sendWithdrawalAcknowledgement } from '../server/_notify.js';
 
 const clean = (value, max = 3000) => String(value ?? '').trim().slice(0, max);
 const validEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);

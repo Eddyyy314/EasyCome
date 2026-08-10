@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
-import { authenticatedUser } from './_auth.js';
-import { appOrigin, json, readJson } from './_responses.js';
-import { createOrder, updateOrderById, getSubscriptionByUser } from './_supabase.js';
-import { stripePost } from './_stripe.js';
+import { authenticatedUser } from '../server/_auth.js';
+import { appOrigin, json, readJson } from '../server/_responses.js';
+import { createOrder, updateOrderById, getSubscriptionByUser } from '../server/_supabase.js';
+import { stripePost } from '../server/_stripe.js';
 
 const clean=(v,max=200)=>String(v||'').trim().slice(0,max);
 

@@ -1,7 +1,7 @@
-import { ECGenerator } from './_generator-node.js';
-import { createZipBytes } from './_zip-node.js';
-import { getOrderById, getOrderBySession, updateOrderById } from './_supabase.js';
-import { stripeGet } from './_stripe.js';
+import { ECGenerator } from '../server/_generator-node.js';
+import { createZipBytes } from '../server/_zip-node.js';
+import { getOrderById, getOrderBySession, updateOrderById } from '../server/_supabase.js';
+import { stripeGet } from '../server/_stripe.js';
 
 function safeName(value) {
   return String(value || 'gestionale-easycome').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80) || 'gestionale-easycome';

@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
-import { calculateServerPrice, compactProject } from './_pricing.js';
-import { createOrder, updateOrderById, getSubscriptionByUser } from './_supabase.js';
-import { appOrigin, json, readJson } from './_responses.js';
-import { stripePost } from './_stripe.js';
-import { authenticatedUser } from './_auth.js';
+import { calculateServerPrice, compactProject } from '../server/_pricing.js';
+import { createOrder, updateOrderById, getSubscriptionByUser } from '../server/_supabase.js';
+import { appOrigin, json, readJson } from '../server/_responses.js';
+import { stripePost } from '../server/_stripe.js';
+import { authenticatedUser } from '../server/_auth.js';
 
 const clean = (value, max = 200) => String(value || '').trim().slice(0, max);
 const validEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);

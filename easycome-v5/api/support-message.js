@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
-import { authenticatedUser } from './_auth.js';
-import { json, readJson } from './_responses.js';
-import { createSupportMessage, getSupportRequestById, updateSupportRequestById } from './_supabase.js';
-import { notifyAdmin } from './_notify.js';
+import { authenticatedUser } from '../server/_auth.js';
+import { json, readJson } from '../server/_responses.js';
+import { createSupportMessage, getSupportRequestById, updateSupportRequestById } from '../server/_supabase.js';
+import { notifyAdmin } from '../server/_notify.js';
 
 const clean = (value, max = 12000) => String(value ?? '').trim().slice(0, max);
 function cors(res){res.setHeader('access-control-allow-origin','*');res.setHeader('access-control-allow-methods','POST, OPTIONS');res.setHeader('access-control-allow-headers','authorization, content-type');}

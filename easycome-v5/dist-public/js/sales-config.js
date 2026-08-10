@@ -14,8 +14,8 @@ window.EASYCOME_SALES = {
 
   supportEmail: 'ciao@easycome.it',
   whatsapp: '',
-  termsUrl: '/termini.html',
-  privacyUrl: '/privacy.html',
+  termsUrl: '/termini',
+  privacyUrl: '/privacy',
 
   // Metti true soltanto nella copia interna non pubblica.
   internalDownloadEnabled: false,

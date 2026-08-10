@@ -1,4 +1,4 @@
-import { json } from './_responses.js';
+import { json } from '../server/_responses.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return json(res, 405, { error: 'Metodo non consentito.' });

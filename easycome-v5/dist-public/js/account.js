@@ -31,6 +31,24 @@
     return 'Non riesco a collegare il tuo account in questo momento. Riprova tra qualche secondo.';
   }
 
+  function redirectToAuth() {
+    const next = encodeURIComponent('/studio');
+    location.replace(`/accedi?mode=login&next=${next}`);
+  }
+
+  function renderStudioLoading(text = 'Apro il tuo Studio…') {
+    shell?.classList.add('account-pending');
+    gate.classList.remove('hidden');
+    gate.innerHTML = `<div class="studio-auth-state"><span class="studio-auth-spinner"></span><strong>${esc(text)}</strong></div>`;
+  }
+
+  function renderStudioError(text) {
+    shell?.classList.add('account-pending');
+    gate.classList.remove('hidden');
+    gate.innerHTML = `<div class="studio-auth-state studio-auth-error"><b>EC</b><strong>Studio non disponibile.</strong><p>${esc(text)}</p><div><button id="retryStudioAuth">Riprova</button><a href="/">Torna alla home</a></div></div>`;
+    gate.querySelector('#retryStudioAuth')?.addEventListener('click', () => init(true));
+  }
+
   function showShell() {
     if (!state.session) return;
     gate.innerHTML = '';
@@ -234,7 +252,7 @@
       }
       const menuId = `accountMenu-${suffix}`;
       const logoutId = `accountLogout-${suffix}`;
-      el.innerHTML = `<button id="${menuId}" class="account-trigger" aria-label="Apri account"><b>${initial}</b>${compact ? '' : `<span><strong>${esc(name)}</strong><small>Account</small></span>`}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5 10 12l5-4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="account-menu hidden"><a href="/profilo.html">Profilo e ordini</a><a href="/profilo.html?tab=support">Assistenza</a><button id="${logoutId}">Esci</button></div>`;
+      el.innerHTML = `<button id="${menuId}" class="account-trigger" aria-label="Apri account"><b>${initial}</b>${compact ? '' : `<span><strong>${esc(name)}</strong><small>Account</small></span>`}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5 10 12l5-4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="account-menu hidden"><a href="/profilo.html">Profilo e ordini</a><a href="/profilo.html?tab=support">Assistenza</a><a href="/recesso">Recedere dal contratto</a><button id="${logoutId}">Esci</button></div>`;
       el.querySelector(`#${CSS.escape(menuId)}`).onclick = (event) => {
         event.stopPropagation();
         document.querySelectorAll('.account-menu').forEach(menu => {
@@ -246,8 +264,7 @@
         const client = await ensureClient();
         await client.auth.signOut();
         state.session = null;
-        state.tab = 'login';
-        renderGate();
+        location.href = '/';
       };
     };
 
@@ -300,7 +317,7 @@
   async function init(force = false) {
     state.ready = false;
     state.initError = null;
-    renderGate('Collegamento sicuro al tuo spazio Easy Come…', { disabled: true });
+    renderStudioLoading();
     try {
       const client = await ensureClient(force);
       const { data, error } = await client.auth.getSession();
@@ -309,16 +326,16 @@
       client.auth.onAuthStateChange((_event, session) => {
         state.session = session;
         if (session) showShell();
-        else if (state.ready) renderGate();
+        else if (state.ready) redirectToAuth();
       });
       state.ready = true;
       if (state.session) showShell();
-      else renderGate();
+      else redirectToAuth();
     } catch (err) {
       state.initError = err;
       state.client = null;
       state.ready = false;
-      renderGate(humanConfigError(err), { disabled: true, retry: true });
+      renderStudioError(humanConfigError(err));
     }
   }
 

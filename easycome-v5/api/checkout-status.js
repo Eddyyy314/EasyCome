@@ -1,6 +1,6 @@
-import { getOrderById, getOrderBySession, updateOrderById } from './_supabase.js';
-import { json } from './_responses.js';
-import { stripeGet } from './_stripe.js';
+import { getOrderById, getOrderBySession, updateOrderById } from '../server/_supabase.js';
+import { json } from '../server/_responses.js';
+import { stripeGet } from '../server/_stripe.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return json(res, 405, { error: 'Metodo non consentito.' });

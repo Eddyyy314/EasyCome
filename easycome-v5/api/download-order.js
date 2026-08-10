@@ -1,7 +1,7 @@
-import { authenticatedUser } from './_auth.js';
-import { ECGenerator } from './_generator-node.js';
-import { createZipBytes } from './_zip-node.js';
-import { getOrderById, updateOrderById } from './_supabase.js';
+import { authenticatedUser } from '../server/_auth.js';
+import { ECGenerator } from '../server/_generator-node.js';
+import { createZipBytes } from '../server/_zip-node.js';
+import { getOrderById, updateOrderById } from '../server/_supabase.js';
 
 const safeName=(v)=>String(v||'gestionale-easycome').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,80)||'gestionale-easycome';
 export default async function handler(req,res){

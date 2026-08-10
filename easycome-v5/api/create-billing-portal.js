@@ -1,7 +1,7 @@
-import { authenticatedUser } from './_auth.js';
-import { appOrigin, json } from './_responses.js';
-import { getSubscriptionByUser } from './_supabase.js';
-import { stripePost } from './_stripe.js';
+import { authenticatedUser } from '../server/_auth.js';
+import { appOrigin, json } from '../server/_responses.js';
+import { getSubscriptionByUser } from '../server/_supabase.js';
+import { stripePost } from '../server/_stripe.js';
 
 export default async function handler(req,res){
   if(req.method!=='POST') return json(res,405,{error:'Metodo non consentito.'});
