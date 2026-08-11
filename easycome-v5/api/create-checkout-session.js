@@ -103,7 +103,9 @@ export default async function handler(req, res) {
     add('success_url', `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`);
     add('cancel_url', `${origin}/cancel.html?order_id=${encodeURIComponent(orderId)}`);
     add('locale', 'it');
-    add('submit_type', 'pay');
+    // Some Stripe API versions reject submit_type='pay' for subscription mode.
+    // Let Stripe choose the correct recurring CTA in subscription mode.
+    if (!managedServiceSelected) add('submit_type', 'pay');
 
     const session = await stripePost('checkout/sessions', params);
     await updateOrderById(orderId, { stripe_session_id: session.id, checkout_url: session.url, updated_at: new Date().toISOString() });
