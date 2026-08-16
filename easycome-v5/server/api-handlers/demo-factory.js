@@ -1,12 +1,13 @@
 import crypto from 'node:crypto';
 import { requireEasyComeAdmin } from '../_demo-auth.js';
 import { textSearch, placeDetails } from '../_google-places.js';
+import { findPublicBusinessEmail } from '../_email-discovery.js';
 import { seenPlaceIds, createCampaign, insertTargets, recentCampaigns, campaignTargets, markCampaign } from '../_demo-store.js';
-import { buildQueryPlan, classifyPlace, buildDemoModel, demoSlug, outreachMessage } from '../_demo-factory-core.js';
+import { buildQueryPlan, classifyPlace, buildDemoModel, demoSlug, demoPrice, outreachMessage, outreachSubject } from '../_demo-factory-core.js';
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function baseUrl(req){return String(process.env.APP_URL||`${req.headers?.['x-forwarded-proto']||'https'}://${req.headers?.host||'easy-come.it'}`).replace(/\/$/,'')}
-function publicPlace(place){return {id:place.id||'',name:place.displayName?.text||'Azienda',address:place.formattedAddress||'',website:place.websiteUri||'',phone:place.nationalPhoneNumber||'',category:place.primaryTypeDisplayName?.text||place.primaryType||'Attività',primaryType:place.primaryType||'',types:place.types||[]}}
+function publicPlace(place){return {id:place.id||'',name:place.displayName?.text||'Azienda',address:place.formattedAddress||'',website:place.websiteUri||'',email:'',category:place.primaryTypeDisplayName?.text||place.primaryType||'Attività',primaryType:place.primaryType||'',types:place.types||[]}}
 
 export default async function handler(req,res){
   try{
@@ -19,8 +20,15 @@ export default async function handler(req,res){
     if(req.method!=='POST')return res.status(405).json({error:'Metodo non consentito.'});
     const action=String(req.body?.action||'generate');
     if(action==='hydrate'){
-      const ids=[...new Set((req.body?.placeIds||[]).map(String).filter(Boolean))].slice(0,20);const details=[];
-      for(const id of ids){try{details.push(publicPlace(await placeDetails(id)))}catch(e){details.push({id,error:e.message})}}
+      const ids=[...new Set((req.body?.placeIds||[]).map(String).filter(Boolean))].slice(0,5);
+      const details=await Promise.all(ids.map(async id=>{
+        try{
+          const raw=await placeDetails(id);
+          const place=publicPlace(raw);
+          place.email=place.website ? await findPublicBusinessEmail(place.website) : '';
+          return place;
+        }catch(e){return {id,error:e.message}}
+      }));
       return res.status(200).json({places:details});
     }
     if(action!=='generate')return res.status(400).json({error:'Azione non valida.'});
@@ -43,8 +51,9 @@ export default async function handler(req,res){
             const templateId=classifyPlace(p);
             if((templateCounts.get(templateId)||0)>=maxPerTemplate)continue;
             inBatch.add(p.id); templateCounts.set(templateId,(templateCounts.get(templateId)||0)+1); acceptedFromQuery++;
-            const slug=demoSlug(p.id); const model=buildDemoModel(templateId,p.id); const now=new Date(); const expires=new Date(now.getTime()+7*86400000);
-            selected.push({place:p, row:{campaign_id:campaignId,place_id:p.id,demo_slug:slug,template_id:templateId,demo_config:model,status:'generated',expires_at:expires.toISOString(),created_at:now.toISOString()}});
+            const slug=demoSlug(p.id); const model=buildDemoModel(templateId,p.id); const quotedPrice=demoPrice(p,templateId); const snap=publicPlace(p); const now=new Date(); const expires=new Date(now.getTime()+7*86400000);
+            const demoConfig={...model,quotedPrice,placeSnapshot:{id:snap.id,name:snap.name,address:snap.address,category:snap.category,primaryType:snap.primaryType,types:snap.types}};
+            selected.push({place:p, row:{campaign_id:campaignId,place_id:p.id,demo_slug:slug,template_id:templateId,demo_config:demoConfig,status:'generated',expires_at:expires.toISOString(),created_at:now.toISOString()}});
             if(selected.length>=limit||acceptedFromQuery>=perQueryCap)break;
           }
           if(selected.length>=limit)break;
@@ -59,7 +68,7 @@ export default async function handler(req,res){
       await insertTargets(selected.map(x=>x.row));
       await markCampaign(campaignId,{status:selected.length===limit?'completed':'partial',generated_count:selected.length,queries_run:queriesRun,finished_at:new Date().toISOString()});
       const origin=baseUrl(req);
-      const targets=selected.map(({place,row})=>{const detail=publicPlace(place);const demoUrl=`${origin}/demo.html?d=${encodeURIComponent(row.demo_slug)}`;return {...detail,id:row.place_id,demoSlug:row.demo_slug,demoUrl,templateId:row.template_id,templateLabel:row.demo_config?.label||row.template_id,expiresAt:row.expires_at,message:outreachMessage(place,demoUrl)}});
+      const targets=selected.map(({place,row})=>{const detail=publicPlace(place);const demoUrl=`${origin}/demo.html?d=${encodeURIComponent(row.demo_slug)}`;const price=Number(row.demo_config?.quotedPrice||demoPrice(place,row.template_id));return {...detail,id:row.place_id,demoSlug:row.demo_slug,demoUrl,templateId:row.template_id,templateLabel:row.demo_config?.label||row.template_id,expiresAt:row.expires_at,price,subject:outreachSubject(place),message:outreachMessage(place,demoUrl,price)}});
       return res.status(200).json({campaign:{...campaign,status:selected.length===limit?'completed':'partial',generated_count:selected.length,queries_run:queriesRun},targets,stats:{requested:limit,generated:selected.length,alreadySeen:existing.size,queriesRun,rawSeen,failedQueries},warning:selected.length<limit?`Trovate ${selected.length} nuove attività prima del limite di sicurezza delle query. Premi di nuovo Genera: i Place ID già usati resteranno esclusi.`:''});
     }catch(error){await markCampaign(campaignId,{status:'failed',generated_count:selected.length,queries_run:queriesRun,finished_at:new Date().toISOString(),error_message:String(error.message||error).slice(0,800)}).catch(()=>{});throw error}
   }catch(error){console.error(error);return res.status(400).json({error:error.message||'Errore Demo Factory.'})}

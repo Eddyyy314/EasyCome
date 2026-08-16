@@ -1,6 +1,6 @@
 // Google Places (New) adapter.
-// Keep Text Search lean: website/phone are Enterprise fields, so we do not request
-// them during discovery. They can be loaded later with Place Details when needed.
+// Keep Text Search lean: the public website is requested only for selected prospects,
+// because it is needed to discover a public business email.
 const searchFieldMask = [
   'places.id',
   'places.displayName',
@@ -51,7 +51,7 @@ export async function textSearch(textQuery,pageSize=10,pageToken=''){
 
 export async function placeDetails(placeId){
   if(!placeId) throw new Error('Place ID mancante.');
-  const mask='id,displayName,formattedAddress,websiteUri,nationalPhoneNumber,primaryType,primaryTypeDisplayName,types,businessStatus';
+  const mask='id,displayName,formattedAddress,websiteUri,primaryType,primaryTypeDisplayName,types,businessStatus';
   const r=await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=it&regionCode=IT`,{
     headers:{'X-Goog-Api-Key':apiKey(),'X-Goog-FieldMask':mask}
   });

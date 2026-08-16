@@ -187,7 +187,19 @@ export function demoSlug(placeId) {
   return `ec-${crypto.createHash('sha256').update(String(placeId)+':easycome-demo-v9').digest('hex').slice(0,18)}`;
 }
 
-export function outreachMessage(place, demoUrl) {
+export function demoPrice(place, templateId) {
+  const project = buildProject(place, templateId, '');
+  const raw = Number(ECGenerator.calculatePrice(project).total || 99);
+  // Tied to the actual generated modules/entities, presented as a clean commercial price.
+  return Math.max(99, Math.ceil((raw + 1) / 10) * 10 - 1);
+}
+
+export function outreachSubject(place) {
   const name = place.displayName?.text || 'la vostra attività';
-  return `Buongiorno,\n\nabbiamo preparato gratuitamente un’anteprima di come potrebbe essere un gestionale Easy Come configurato per ${name}.\n\nPotete provarla qui, senza registrazione e senza impegno:\n${demoUrl}\n\nI dati all’interno sono dimostrativi: serve solo per farvi vedere concretamente come potrebbe funzionare.\n\nSe vi piace, potete poi personalizzarlo sui vostri processi reali.\n\nUn saluto,\nEasy Come`;
+  return `Abbiamo preparato una demo Easy Come per ${name}`;
+}
+
+export function outreachMessage(place, demoUrl, price = 99) {
+  const name = place.displayName?.text || 'la vostra attività';
+  return `Buongiorno,\n\nsono Edoardo di Easy Come. Siamo una startup che sta innovando il modo in cui le piccole attività accedono a gestionali su misura: semplici, personalizzati e a costi accessibili.\n\nAbbiamo preparato gratuitamente una demo pensata per ${name}, partendo dal vostro tipo di attività e dai processi che un gestionale potrebbe semplificare.\n\nPotete provarla qui, senza registrazione e senza impegno:\n${demoUrl}\n\nLa configurazione mostrata nella demo ha un prezzo indicativo di €${price} una tantum. I nostri gestionali partono da €99 e il prezzo cambia soltanto in base alle funzioni che servono davvero.\n\nI dati presenti nell’anteprima sono dimostrativi: l’obiettivo è farvi vedere concretamente come potrebbe funzionare prima di acquistare qualsiasi cosa.\n\nSe vi piace, dal link potete personalizzarla sul vostro lavoro.\n\nUn saluto,\nEdoardo La Neve\nEasy Come\nEdoardoLaNeve8@gmail.com`;
 }
