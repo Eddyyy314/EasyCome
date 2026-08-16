@@ -1,6 +1,6 @@
 (function(){'use strict';
 const $=s=>document.querySelector(s);const cfg=window.EASYCOME_ADMIN||{};let db=null,session=null,targets=[];
-const SENDER_EMAIL='EdoardoLaNeve8@gmail.com';
+const SENDER_EMAIL='edoardolaneve8@gmail.com';
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 function toast(t){const n=document.createElement('div');n.className='toast';n.textContent=t;document.body.appendChild(n);setTimeout(()=>n.remove(),2400)}
 async function ensureDb(){if(db)return db;let c=cfg;if(!c.supabaseUrl||!c.supabaseAnonKey){const r=await fetch('/api/public-config',{cache:'no-store'});if(!r.ok)throw new Error('Configurazione Easy Come non disponibile.');c=await r.json()}db=supabase.createClient(c.supabaseUrl,c.supabaseAnonKey);return db}

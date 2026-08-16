@@ -7,6 +7,9 @@
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (match) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[match]));
   const money = (value) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(Number(value || 0));
+  const URL_PARAMS = new URLSearchParams(location.search);
+  const PROSPECT_DEMO_SLUG = URL_PARAMS.get('demo') || '';
+  const PROSPECT_MODE = Boolean(PROSPECT_DEMO_SLUG && URL_PARAMS.get('source') === 'prospect');
 
   const steps = [
     { id: 'idea', label: 'Attività', subtitle: 'Chi sei e cosa vuoi semplificare' },
@@ -174,9 +177,15 @@
     $$('.step-item').forEach((button) => button.onclick = () => { currentStep = Number(button.dataset.step); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
   }
 
+  function prospectBanner() {
+    if (!PROSPECT_MODE || !project.demoSource?.generatedForDemo) return '';
+    const quoted = Number(project.demoSource?.quotedPrice || G.calculatePrice(project).total || 99);
+    return `<div class="prospect-prefill-banner"><span>DEMO GIÀ CARICATA</span><div><strong>Stai personalizzando la configurazione vista nella demo.</strong><small>Le funzioni selezionate sono già quelle dell’anteprima. Puoi toglierle, aggiungerne altre e il prezzo si aggiorna automaticamente.</small></div><b>${money(quoted)}</b></div>`;
+  }
+
   function renderPanel() {
     const functions = [ideaStep, modulesStep, structureStep, logicStep, designStep, previewStep, deliveryStep];
-    $('#panel').innerHTML = functions[currentStep]();
+    $('#panel').innerHTML = prospectBanner() + functions[currentStep]();
     bindPanel();
   }
 
@@ -256,7 +265,7 @@
     return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 3</span><h1>Costruisci la mappa del tuo lavoro.</h1><p>Ogni sezione è un’area reale della tua attività: clienti, pratiche, mezzi, corsi, immobili, commesse o qualsiasi cosa vuoi gestire.</p></div><div class="heading-badge">${entities.length} aree · ${customCount} su misura</div></div>
       <section class="data-map structure-map">
         <div class="data-map-head"><div><span class="micro-label">IL TUO GESTIONALE</span><h2>Queste saranno le voci principali</h2><p>Le aree incluse arrivano dalle funzioni scelte. Quelle arancioni sono costruite da te.</p></div></div>
-        <div class="entity-showcase structure-canvas">${entities.map((entity) => `<article class="entity-showcase-card ${entity.custom ? 'custom' : ''}"><header><span class="entity-showcase-icon">${entity.custom ? '✦' : esc(entity.label.slice(0,1))}</span><div><strong>${esc(entity.label)}</strong><small>${entity.custom ? 'Sezione su misura' : 'Inclusa automaticamente'}</small></div>${entity.custom ? `<div class="entity-card-actions"><button class="edit-entity" data-key="${esc(entity.key)}">Modifica</button><button class="icon-button remove-entity" data-key="${esc(entity.key)}" aria-label="Elimina">×</button></div>` : '<span class="included-tag">Inclusa</span>'}</header><div class="field-chip-row">${entity.fields.slice(0,5).map((field)=>`<span>${esc(field.label)}</span>`).join('')}${entity.fields.length>5?`<span class="more-chip">+${entity.fields.length-5}</span>`:''}</div></article>`).join('')}
+        <div class="entity-showcase structure-canvas">${entities.map((entity) => `<article class="entity-showcase-card ${entity.custom ? 'custom' : ''}"><header><span class="entity-showcase-icon">${entity.custom ? '✦' : esc(entity.label.slice(0,1))}</span><div><strong>${esc(entity.label)}</strong><small>${entity.custom ? 'Sezione su misura' : 'Inclusa automaticamente'}</small></div>${entity.custom ? `<div class="entity-card-actions"><button class="edit-entity" data-key="${esc(entity.key)}">Modifica</button><button class="icon-button remove-entity" data-key="${esc(entity.key)}" aria-label="Elimina">×</button></div>` : entity.key === 'pricing_rules' ? '<div class="entity-card-actions"><button class="configure-pricing">Configura</button><span class="included-tag">Inclusa</span></div>' : '<span class="included-tag">Inclusa</span>'}</header><div class="field-chip-row">${entity.fields.slice(0,5).map((field)=>`<span>${esc(field.label)}</span>`).join('')}${entity.fields.length>5?`<span class="more-chip">+${entity.fields.length-5}</span>`:''}</div></article>`).join('')}
           <button id="openSectionComposer" class="add-section-tile"><span>＋</span><strong>Aggiungi una sezione</strong><small>Creala da zero o parti da un modello</small><b>+ ${money(6)}</b></button>
         </div>
       </section>
@@ -429,7 +438,25 @@
   }
 
   function bindModules() {
-    $$('.module-card:not([disabled])').forEach((card) => card.onclick = () => { const id = card.dataset.module; project.modules = project.modules.includes(id) ? project.modules.filter((item) => item !== id) : [...project.modules, id]; project.delivery.previewApproved = false; render(); });
+    $$('.module-card:not([disabled])').forEach((card) => card.onclick = () => {
+      const id = card.dataset.module;
+      const selected = project.modules.includes(id);
+      if (id === 'dynamic_pricing') {
+        if (selected) {
+          project.modules = project.modules.filter((item) => item !== id);
+          if (project.pricing.mode === 'dynamic') project.pricing.mode = 'none';
+        } else {
+          project.modules = [...project.modules, id];
+          project.pricing.mode = 'dynamic';
+          project.pricing.enabled = true;
+          if (!project.pricing.basePrice) project.pricing.basePrice = 50;
+        }
+      } else {
+        project.modules = selected ? project.modules.filter((item) => item !== id) : [...project.modules, id];
+      }
+      project.delivery.previewApproved = false;
+      render();
+    });
   }
 
   function bindStructure() {
@@ -440,6 +467,7 @@
     const resetComposer = () => { sectionComposerOpen=false; selectedSectionPresetId=''; editingSectionKey=''; customFieldDraft=[]; sectionDraft={label:'',singular:''}; };
     const openFreshComposer = () => { sectionComposerOpen=true; selectedSectionPresetId=''; editingSectionKey=''; customFieldDraft=[]; sectionDraft={label:'',singular:''}; renderPanel(); };
     const openButton=$('#openSectionComposer'); if(openButton)openButton.onclick=openFreshComposer;
+    $$('.configure-pricing').forEach((button)=>button.onclick=()=>{currentStep=3;render();window.scrollTo({top:0,behavior:'smooth'});});
     ['#closeSectionComposer','#cancelSectionComposer'].forEach((selector)=>{const button=$(selector);if(button)button.onclick=()=>{resetComposer();renderPanel();};});
     $$('.remove-entity').forEach((button)=>button.onclick=()=>{project.customEntities=project.customEntities.filter((entity)=>entity.key!==button.dataset.key);project.delivery.previewApproved=false;render();});
     $$('.edit-entity').forEach((button)=>button.onclick=()=>{
@@ -792,7 +820,7 @@
 
 
   async function loadDemoProjectFromUrl(user) {
-    const slug = new URLSearchParams(location.search).get('demo');
+    const slug = PROSPECT_DEMO_SLUG;
     if (!slug) return null;
     try {
       const response = await fetch(`/api/demo-public?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' });
@@ -801,8 +829,9 @@
       const incoming = data.project;
       // Prospect demos must never inherit the currently logged-in Easy Come account.
       // Contact details stay intentionally empty until the prospect enters their own data.
-      incoming.company = { ...(incoming.company || {}), email: '', phone: incoming.company?.phone || '' };
+      incoming.company = { ...(incoming.company || {}), email: '', phone: '' };
       incoming.delivery = { ...(incoming.delivery || {}), previewApproved: true };
+      incoming.demoSource = { ...(incoming.demoSource || {}), generatedForDemo: true, slug, quotedPrice: Number(data.price || incoming.demoSource?.quotedPrice || 99) };
       return incoming;
     } catch (error) {
       console.warn('Impossibile precaricare la demo:', error);
@@ -821,7 +850,17 @@
     const legacy = demoProject ? null : legacyDraftForUser(user);
     project = normalizeProject(demoProject || saved || local || legacy || G.defaultProject());
     if (!demoProject && !project.company.email) project.company.email = user.email || '';
-    if (switchedAccount || (!saved && !local && !legacy)) {
+    if (demoProject) {
+      // A prospect must start from the exact product shown in the demo, not from a fresh configurator.
+      currentStep = 1;
+      customFieldDraft = [];
+      sectionDraft = { label: '', singular: '' };
+      automationDraft = { name: '', trigger: 'record_created', entity: '', action: 'notify', target: '', message: '', enabled: true };
+      previewMode = 'dashboard';
+      previewDevice = 'desktop';
+      previewEntityKey = '';
+      previewHubTab = 'home';
+    } else if (switchedAccount || (!saved && !local && !legacy)) {
       currentStep = 0;
       customFieldDraft = [];
       sectionDraft = { label: '', singular: '' };
