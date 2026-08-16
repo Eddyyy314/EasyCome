@@ -29,6 +29,14 @@
   "outputDirectory": "dist-public",
   "rewrites": [
     {
+      "source": "/demo",
+      "destination": "/demo.html"
+    },
+    {
+      "source": "/factory",
+      "destination": "/factory.html"
+    },
+    {
       "source": "/accedi",
       "destination": "/accedi.html"
     },

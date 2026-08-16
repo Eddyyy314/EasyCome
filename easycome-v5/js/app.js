@@ -75,6 +75,9 @@
   let currentStep = 0;
   let customFieldDraft = [];
   let sectionDraft = { label: '', singular: '' };
+  let sectionComposerOpen = false;
+  let selectedSectionPresetId = '';
+  let editingSectionKey = '';
   let automationDraft = { name: '', trigger: 'record_created', entity: '', action: 'notify', target: '', message: '', enabled: true };
   let previewMode = 'dashboard';
   let previewDevice = 'desktop';
@@ -207,21 +210,57 @@
 
   function structureStep() {
     const entities = G.buildEntities(project);
-    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 3</span><h1>Cosa vuoi tenere sotto controllo?</h1><p>Le sezioni sono le aree del gestionale: pazienti, pratiche, veicoli, commesse, corsi o qualsiasi elemento del tuo lavoro.</p></div><div class="heading-badge">${entities.length} aree operative</div></div>
-      <section class="data-map">
-        <div class="data-map-head"><div><span class="micro-label">STRUTTURA ATTUALE</span><h2>Il gestionale è già organizzato così</h2><p>Apri ogni area nell’anteprima finale. I campi indicano le informazioni che potrai inserire.</p></div></div>
-        <div class="entity-showcase">${entities.map((entity) => `<article class="entity-showcase-card ${entity.custom ? 'custom' : ''}"><header><span class="entity-showcase-icon">${entity.custom ? '✦' : esc(entity.label.slice(0,1))}</span><div><strong>${esc(entity.label)}</strong><small>${entity.custom ? 'Creata da te' : 'Aggiunta dalle funzioni scelte'}</small></div>${entity.custom ? `<button class="icon-button remove-entity" data-key="${esc(entity.key)}" aria-label="Elimina">×</button>` : '<span class="included-tag">Inclusa</span>'}</header><div class="field-chip-row">${entity.fields.slice(0,6).map((field)=>`<span>${esc(field.label)}</span>`).join('')}${entity.fields.length>6?`<span class="more-chip">+${entity.fields.length-6}</span>`:''}</div></article>`).join('')}</div>
+    const customCount = project.customEntities.length;
+    const composerTitle = editingSectionKey ? 'Modifica la tua sezione' : 'Costruisci una nuova sezione';
+    const composerSubtitle = editingSectionKey ? 'Cambia nome, ordine e informazioni senza perdere la struttura del progetto.' : 'Parti da una base oppure costruiscila da zero. La vedi mentre la componi.';
+    const previewLabel = sectionDraft.label.trim() || 'Nuova sezione';
+    const previewSingular = sectionDraft.singular.trim() || previewLabel.replace(/i$/i,'o');
+    const previewFields = customFieldDraft.slice(0,5);
+    const composer = !sectionComposerOpen ? '' : `
+      <section class="section-composer">
+        <div class="section-composer-head">
+          <div><span class="micro-label">${editingSectionKey ? 'MODIFICA AREA' : 'NUOVA AREA'}</span><h2>${composerTitle}</h2><p>${composerSubtitle}</p></div>
+          <div class="section-composer-actions"><span class="price-pill">${editingSectionKey ? 'Incluso' : '+ ' + money(6)}</span><button id="closeSectionComposer" class="composer-close" aria-label="Chiudi">×</button></div>
+        </div>
+        <div class="composer-template-block">
+          <div class="composer-block-title"><strong>Da dove vuoi partire?</strong><small>Un clic prepara già nomi e campi. Poi puoi cambiare tutto.</small></div>
+          <div class="section-preset-grid composer-presets">
+            <button class="section-preset blank ${selectedSectionPresetId==='blank'?'active':''}" data-section-preset="blank"><b>＋</b><span><strong>Da zero</strong><small>Costruisci la tua area</small></span></button>
+            ${SECTION_PRESETS.map((preset)=>`<button class="section-preset ${selectedSectionPresetId===preset.id?'active':''}" data-section-preset="${preset.id}"><b>${preset.icon}</b><span><strong>${esc(preset.label)}</strong><small>${preset.fields.length} campi pronti</small></span></button>`).join('')}
+          </div>
+        </div>
+        <div class="section-composer-grid">
+          <div class="composer-editor">
+            <div class="composer-card identity-card">
+              <div class="composer-card-head"><span>1</span><div><strong>Come la chiamate?</strong><small>Usa le stesse parole che usate davvero al lavoro.</small></div></div>
+              <div class="form-grid two compact"><label class="field"><span>Nome nel menu</span><input id="entityLabel" value="${esc(sectionDraft.label)}" placeholder="Es. Pazienti"></label><label class="field"><span>Una singola voce</span><input id="entitySingular" value="${esc(sectionDraft.singular)}" placeholder="Es. Paziente"></label></div>
+            </div>
+            <div class="composer-card fields-card">
+              <div class="composer-card-head"><span>2</span><div><strong>Quali informazioni vuoi vedere?</strong><small>Trascina mentalmente il flusso: metti prima ciò che consulti più spesso.</small></div><em>${customFieldDraft.length} campi</em></div>
+              <div class="draft-fields composer-field-list">${customFieldDraft.map((field,index)=>`<div class="draft-field composer-field-row"><div class="field-order-controls"><button class="move-draft-field" data-index="${index}" data-dir="-1" ${index===0?'disabled':''}>↑</button><button class="move-draft-field" data-index="${index}" data-dir="1" ${index===customFieldDraft.length-1?'disabled':''}>↓</button></div><span class="field-main"><strong>${esc(field.label)}</strong><small>${fieldTypeLabel(field.type)}</small></span><button class="required-toggle ${field.required?'active':''}" data-index="${index}" title="Campo obbligatorio">${field.required?'Obbligatorio':'Facoltativo'}</button><button class="icon-button remove-draft-field" data-index="${index}" aria-label="Rimuovi">×</button></div>`).join('')||'<div class="empty-section-fields"><b>Ancora nessun campo</b><span>Scegli una base sopra oppure aggiungi la prima informazione qui sotto.</span></div>'}</div>
+              <div class="quick-field-row composer-quick-fields"><span>Aggiungi al volo</span>${[['Stato','select'],['Scadenza','date'],['Responsabile','text'],['Importo','currency'],['Note','longtext']].map(([label,type])=>`<button class="quick-field" data-quick-field="${label}" data-quick-type="${type}">+ ${label}</button>`).join('')}</div>
+              <details class="custom-field-details" ${customFieldDraft.length===0?'open':''}><summary>+ Crea un campo personalizzato</summary><div class="field-adder clearer composer-field-adder"><label><span>Nome campo</span><input id="fieldLabel" placeholder="Es. Prossimo controllo"></label><label><span>Tipo</span><select id="fieldType"><option value="text">Testo breve</option><option value="longtext">Note lunghe</option><option value="number">Numero</option><option value="currency">Importo</option><option value="date">Data</option><option value="datetime">Data e ora</option><option value="email">Email</option><option value="phone">Telefono</option><option value="boolean">Sì / No</option><option value="select">Elenco di scelte</option></select></label><label id="fieldOptionsWrap" class="hidden"><span>Scelte possibili</span><input id="fieldOptions" placeholder="Nuovo, In corso, Completato"></label><label class="inline-check"><input id="fieldRequired" type="checkbox"> Obbligatorio</label><button id="addField" class="btn btn-secondary">Aggiungi campo</button></div></details>
+            </div>
+          </div>
+          <aside class="section-live-preview">
+            <div class="live-preview-label"><span>ANTEPRIMA LIVE</span><small>Così la ritroverai nel gestionale</small></div>
+            <div class="mini-product-shell">
+              <div class="mini-product-sidebar"><i>EC</i><span class="active">${esc(previewLabel)}</span><span>Dashboard</span><span>Attività</span></div>
+              <div class="mini-product-main"><small>${esc(previewLabel).toUpperCase()}</small><h3>${esc(previewLabel)}</h3><div class="mini-record-card"><header><strong>Nuovo ${esc(previewSingular)}</strong><b>＋</b></header>${previewFields.map((field)=>`<label><span>${esc(field.label)}${field.required?' *':''}</span><i>${field.type==='date'?'gg/mm/aaaa':field.type==='currency'?'0,00 €':field.type==='select'?'Seleziona…':'Inserisci…'}</i></label>`).join('')}${previewFields.length===0?'<div class="mini-preview-empty">I campi compariranno qui mentre li aggiungi.</div>':''}${customFieldDraft.length>5?`<div class="mini-preview-more">+ altri ${customFieldDraft.length-5} campi</div>`:''}<button>Salva ${esc(previewSingular)}</button></div></div>
+            </div>
+            <div class="composer-price-note"><strong>${editingSectionKey?'Modifica inclusa':'Questa sezione costa '+money(6)+' una tantum'}</strong><small>I primi 6 campi sono inclusi. Dal settimo: +1 € per campo.</small></div>
+          </aside>
+        </div>
+        <div class="section-composer-footer"><button id="cancelSectionComposer" class="btn btn-secondary">Annulla</button><button id="addEntity" class="btn btn-primary create-section-button">${editingSectionKey?'Salva modifiche':'Aggiungi “'+esc(previewLabel)+'” al gestionale'}</button></div>
+      </section>`;
+    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 3</span><h1>Costruisci la mappa del tuo lavoro.</h1><p>Ogni sezione è un’area reale della tua attività: clienti, pratiche, mezzi, corsi, immobili, commesse o qualsiasi cosa vuoi gestire.</p></div><div class="heading-badge">${entities.length} aree · ${customCount} su misura</div></div>
+      <section class="data-map structure-map">
+        <div class="data-map-head"><div><span class="micro-label">IL TUO GESTIONALE</span><h2>Queste saranno le voci principali</h2><p>Le aree incluse arrivano dalle funzioni scelte. Quelle arancioni sono costruite da te.</p></div></div>
+        <div class="entity-showcase structure-canvas">${entities.map((entity) => `<article class="entity-showcase-card ${entity.custom ? 'custom' : ''}"><header><span class="entity-showcase-icon">${entity.custom ? '✦' : esc(entity.label.slice(0,1))}</span><div><strong>${esc(entity.label)}</strong><small>${entity.custom ? 'Sezione su misura' : 'Inclusa automaticamente'}</small></div>${entity.custom ? `<div class="entity-card-actions"><button class="edit-entity" data-key="${esc(entity.key)}">Modifica</button><button class="icon-button remove-entity" data-key="${esc(entity.key)}" aria-label="Elimina">×</button></div>` : '<span class="included-tag">Inclusa</span>'}</header><div class="field-chip-row">${entity.fields.slice(0,5).map((field)=>`<span>${esc(field.label)}</span>`).join('')}${entity.fields.length>5?`<span class="more-chip">+${entity.fields.length-5}</span>`:''}</div></article>`).join('')}
+          <button id="openSectionComposer" class="add-section-tile"><span>＋</span><strong>Aggiungi una sezione</strong><small>Creala da zero o parti da un modello</small><b>+ ${money(6)}</b></button>
+        </div>
       </section>
-      <section class="builder-card section-wizard"><div class="section-title"><div><span class="micro-label">NUOVA AREA</span><h2>Aggiungi una sezione in tre mosse</h2><p>Scegli un esempio oppure crea un’area con le parole che usate già in azienda.</p></div><span class="price-pill">+ ${money(6)}</span></div>
-        <div class="wizard-step"><span>1</span><div><strong>Parti da un esempio</strong><small>Puoi cambiare tutto dopo.</small></div></div>
-        <div class="section-preset-grid">${SECTION_PRESETS.map((preset)=>`<button class="section-preset" data-section-preset="${preset.id}"><b>${preset.icon}</b><span><strong>${esc(preset.label)}</strong><small>${preset.fields.length} campi pronti</small></span></button>`).join('')}</div>
-        <div class="wizard-step"><span>2</span><div><strong>Dai un nome all’area</strong><small>Usa il linguaggio reale della tua attività.</small></div></div>
-        <div class="form-grid two compact"><label class="field"><span>Nome nel menu</span><input id="entityLabel" value="${esc(sectionDraft.label)}" placeholder="Es. Pazienti"></label><label class="field"><span>Una singola voce si chiama…</span><input id="entitySingular" value="${esc(sectionDraft.singular)}" placeholder="Es. Paziente"></label></div>
-        <div class="wizard-step"><span>3</span><div><strong>Scegli le informazioni</strong><small>I primi sei campi sono inclusi.</small></div></div>
-        <div class="field-builder"><div class="field-builder-head"><strong>Campi della sezione</strong><span>${customFieldDraft.length} selezionati</span></div><div class="draft-fields visual">${customFieldDraft.map((field,index)=>`<div class="draft-field"><span><strong>${esc(field.label)}</strong><small>${fieldTypeLabel(field.type)}${field.required?' · obbligatorio':''}</small></span><button class="icon-button remove-draft-field" data-index="${index}">×</button></div>`).join('')||'<div class="empty-mini">Scegli un esempio sopra oppure aggiungi il primo campo.</div>'}</div>
-          <div class="quick-field-row"><span>Campi rapidi</span>${[['Stato','select'],['Scadenza','date'],['Responsabile','text'],['Importo','currency'],['Note','longtext']].map(([label,type])=>`<button class="quick-field" data-quick-field="${label}" data-quick-type="${type}">+ ${label}</button>`).join('')}</div>
-          <div class="field-adder clearer"><label><span>Nome campo</span><input id="fieldLabel" placeholder="Es. Prossimo controllo"></label><label><span>Tipo</span><select id="fieldType"><option value="text">Testo breve</option><option value="longtext">Note lunghe</option><option value="number">Numero</option><option value="currency">Importo</option><option value="date">Data</option><option value="datetime">Data e ora</option><option value="email">Email</option><option value="phone">Telefono</option><option value="boolean">Sì / No</option><option value="select">Elenco di scelte</option></select></label><label id="fieldOptionsWrap" class="hidden"><span>Scelte possibili</span><input id="fieldOptions" placeholder="Nuovo, In corso, Completato"></label><label class="inline-check"><input id="fieldRequired" type="checkbox"> Obbligatorio</label><button id="addField" class="btn btn-secondary">+ Aggiungi</button></div>
-        </div><button id="addEntity" class="btn btn-primary create-section-button">Crea la sezione “${esc(sectionDraft.label || 'Nuova area')}”</button></section>`;
+      ${composer}`;
   }
 
   function logicStep() {
@@ -398,40 +437,56 @@
       key:G.sqlName(label), label, type, required:Boolean(required),
       options:type==='select'?['Nuovo','In corso','Completato']:undefined,
     }));
+    const resetComposer = () => { sectionComposerOpen=false; selectedSectionPresetId=''; editingSectionKey=''; customFieldDraft=[]; sectionDraft={label:'',singular:''}; };
+    const openFreshComposer = () => { sectionComposerOpen=true; selectedSectionPresetId=''; editingSectionKey=''; customFieldDraft=[]; sectionDraft={label:'',singular:''}; renderPanel(); };
+    const openButton=$('#openSectionComposer'); if(openButton)openButton.onclick=openFreshComposer;
+    ['#closeSectionComposer','#cancelSectionComposer'].forEach((selector)=>{const button=$(selector);if(button)button.onclick=()=>{resetComposer();renderPanel();};});
     $$('.remove-entity').forEach((button)=>button.onclick=()=>{project.customEntities=project.customEntities.filter((entity)=>entity.key!==button.dataset.key);project.delivery.previewApproved=false;render();});
+    $$('.edit-entity').forEach((button)=>button.onclick=()=>{
+      const entity=project.customEntities.find((item)=>item.key===button.dataset.key); if(!entity)return;
+      editingSectionKey=entity.key; sectionComposerOpen=true; selectedSectionPresetId='';
+      sectionDraft={label:entity.label||'',singular:entity.singular||''}; customFieldDraft=JSON.parse(JSON.stringify(entity.fields||[])); renderPanel();
+    });
     $$('.remove-draft-field').forEach((button)=>button.onclick=()=>{customFieldDraft.splice(Number(button.dataset.index),1);renderPanel();});
+    $$('.move-draft-field').forEach((button)=>button.onclick=()=>{const index=Number(button.dataset.index),next=index+Number(button.dataset.dir);if(next<0||next>=customFieldDraft.length)return;[customFieldDraft[index],customFieldDraft[next]]=[customFieldDraft[next],customFieldDraft[index]];renderPanel();});
+    $$('.required-toggle').forEach((button)=>button.onclick=()=>{const field=customFieldDraft[Number(button.dataset.index)];if(!field)return;field.required=!field.required;renderPanel();});
     $$('.section-preset').forEach((button)=>button.onclick=()=>{
-      const preset=SECTION_PRESETS.find((item)=>item.id===button.dataset.sectionPreset);
-      if(!preset)return;
-      sectionDraft={label:preset.label,singular:preset.singular};
-      customFieldDraft=presetToFields(preset);
-      renderPanel();
-      toast(`Base “${preset.label}” caricata. Puoi modificarla.`);
+      const id=button.dataset.sectionPreset; sectionComposerOpen=true; editingSectionKey=''; selectedSectionPresetId=id;
+      if(id==='blank'){sectionDraft={label:'',singular:''};customFieldDraft=[];renderPanel();return;}
+      const preset=SECTION_PRESETS.find((item)=>item.id===id); if(!preset)return;
+      sectionDraft={label:preset.label,singular:preset.singular}; customFieldDraft=presetToFields(preset); renderPanel();
     });
     $$('.quick-field').forEach((button)=>button.onclick=()=>{
       const label=button.dataset.quickField,type=button.dataset.quickType;
       if(customFieldDraft.some((field)=>field.label.toLowerCase()===label.toLowerCase()))return toast('Questo campo è già presente.');
-      customFieldDraft.push({key:G.sqlName(label),label,type,required:false,options:type==='select'?['Nuovo','In corso','Completato']:undefined});
-      renderPanel();
+      customFieldDraft.push({key:G.sqlName(label),label,type,required:false,options:type==='select'?['Nuovo','In corso','Completato']:undefined}); renderPanel();
     });
-    $('#entityLabel').oninput=(event)=>{sectionDraft.label=event.target.value;const button=$('#addEntity');if(button)button.textContent=`Crea la sezione “${sectionDraft.label||'Nuova area'}”`;};
-    $('#entitySingular').oninput=(event)=>sectionDraft.singular=event.target.value;
-    $('#fieldType').onchange=(event)=>$('#fieldOptionsWrap').classList.toggle('hidden',event.target.value!=='select');
-    $('#addField').onclick=()=>{
-      const label=$('#fieldLabel').value.trim();if(!label)return toast('Scrivi il nome del campo.');
-      const type=$('#fieldType').value;
-      if(customFieldDraft.some((field)=>field.label.toLowerCase()===label.toLowerCase()))return toast('Esiste già un campo con questo nome.');
-      customFieldDraft.push({key:G.sqlName(label),label,type,required:$('#fieldRequired').checked,options:type==='select'?$('#fieldOptions').value.split(',').map((item)=>item.trim()).filter(Boolean):undefined});
-      renderPanel();
+    const updateComposerNames = () => {
+      const label=(sectionDraft.label||'').trim()||'Nuova sezione';
+      const singular=(sectionDraft.singular||'').trim()||label;
+      const sidebar=$('.mini-product-sidebar span.active'); if(sidebar)sidebar.textContent=label;
+      const kicker=$('.mini-product-main>small'); if(kicker)kicker.textContent=label.toUpperCase();
+      const title=$('.mini-product-main>h3'); if(title)title.textContent=label;
+      const recordTitle=$('.mini-record-card header strong'); if(recordTitle)recordTitle.textContent=`Nuovo ${singular}`;
+      const saveButton=$('.mini-record-card>button'); if(saveButton)saveButton.textContent=`Salva ${singular}`;
+      const submit=$('#addEntity'); if(submit)submit.textContent=editingSectionKey?'Salva modifiche':`Aggiungi “${label}” al gestionale`;
     };
-    $('#addEntity').onclick=()=>{
-      const label=(sectionDraft.label||$('#entityLabel').value).trim(),singular=(sectionDraft.singular||$('#entitySingular').value||label).trim();
-      if(!label)return toast('Dai un nome alla sezione.');
-      if(!customFieldDraft.length)return toast('Aggiungi almeno un campo.');
-      const key=G.sqlName(label);
-      if(G.buildEntities(project).some((entity)=>entity.key===key))return toast('Esiste già una sezione con questo nome.');
-      project.customEntities.push({key,label,singular,fields:customFieldDraft});
-      customFieldDraft=[];sectionDraft={label:'',singular:''};project.delivery.previewApproved=false;toast('Sezione creata.');render();
+    const entityLabel=$('#entityLabel'); if(entityLabel)entityLabel.oninput=(event)=>{sectionDraft.label=event.target.value;updateComposerNames();};
+    const entitySingular=$('#entitySingular'); if(entitySingular)entitySingular.oninput=(event)=>{sectionDraft.singular=event.target.value;updateComposerNames();};
+    const fieldType=$('#fieldType'); if(fieldType)fieldType.onchange=(event)=>{const wrap=$('#fieldOptionsWrap');if(wrap)wrap.classList.toggle('hidden',event.target.value!=='select');};
+    const addField=$('#addField'); if(addField)addField.onclick=()=>{
+      const input=$('#fieldLabel'); const label=input?.value.trim()||''; if(!label)return toast('Scrivi il nome del campo.');
+      const type=$('#fieldType')?.value||'text'; if(customFieldDraft.some((field)=>field.label.toLowerCase()===label.toLowerCase()))return toast('Esiste già un campo con questo nome.');
+      customFieldDraft.push({key:G.sqlName(label),label,type,required:Boolean($('#fieldRequired')?.checked),options:type==='select'?($('#fieldOptions')?.value||'').split(',').map((item)=>item.trim()).filter(Boolean):undefined}); renderPanel();
+    };
+    const addEntity=$('#addEntity'); if(addEntity)addEntity.onclick=()=>{
+      const label=(sectionDraft.label||'').trim(),singular=(sectionDraft.singular||sectionDraft.label||'').trim();
+      if(!label)return toast('Dai un nome alla sezione.'); if(!customFieldDraft.length)return toast('Aggiungi almeno un campo.');
+      const key=G.sqlName(label); const duplicate=G.buildEntities(project).some((entity)=>entity.key===key && entity.key!==editingSectionKey); if(duplicate)return toast('Esiste già una sezione con questo nome.');
+      const payload={key,label,singular:singular||label,fields:JSON.parse(JSON.stringify(customFieldDraft))};
+      if(editingSectionKey){const index=project.customEntities.findIndex((entity)=>entity.key===editingSectionKey);if(index>=0)project.customEntities[index]=payload;toast('Sezione aggiornata.');}
+      else {project.customEntities.push(payload);toast('Sezione aggiunta al gestionale.');}
+      resetComposer(); project.delivery.previewApproved=false; render();
     };
   }
 
@@ -729,15 +784,34 @@
   $('#globalPreview').onclick = openPreviewOverlay;
   $('#globalPreviewMobile').onclick = openPreviewOverlay;
 
+
+  async function loadDemoProjectFromUrl(user) {
+    const slug = new URLSearchParams(location.search).get('demo');
+    if (!slug) return null;
+    try {
+      const response = await fetch(`/api/demo-public?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' });
+      const data = await response.json();
+      if (!response.ok || !data.project) throw new Error(data.error || 'Demo non disponibile.');
+      const incoming = data.project;
+      incoming.company = { ...(incoming.company || {}), email: user?.email || incoming.company?.email || '' };
+      incoming.delivery = { ...(incoming.delivery || {}), previewApproved: true };
+      return incoming;
+    } catch (error) {
+      console.warn('Impossibile precaricare la demo:', error);
+      return null;
+    }
+  }
+
   window.addEventListener('easycome:account-ready', async (event) => {
     const user = event.detail?.user;
     if (!user?.id) return;
     const switchedAccount = Boolean(activeUserId && activeUserId !== user.id);
     activeUserId = user.id;
-    const saved = await window.EasyComeAccount?.loadLatestProject?.();
-    const local = loadDraft(user.id);
-    const legacy = legacyDraftForUser(user);
-    project = normalizeProject(saved || local || legacy || G.defaultProject());
+    const demoProject = await loadDemoProjectFromUrl(user);
+    const saved = demoProject ? null : await window.EasyComeAccount?.loadLatestProject?.();
+    const local = demoProject ? null : loadDraft(user.id);
+    const legacy = demoProject ? null : legacyDraftForUser(user);
+    project = normalizeProject(demoProject || saved || local || legacy || G.defaultProject());
     if (!project.company.email) project.company.email = user.email || '';
     if (switchedAccount || (!saved && !local && !legacy)) {
       currentStep = 0;
