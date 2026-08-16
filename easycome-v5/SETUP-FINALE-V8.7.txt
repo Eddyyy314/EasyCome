@@ -1,0 +1,59 @@
+EASY COME V8.7 — FINAL LAUNCH SETUP
+
+1) SUPABASE
+Run once in Supabase > SQL Editor:
+SUPABASE_V87_FINAL_UPGRADE.sql
+
+This cumulative script includes the V8.4 Control Room tables/policies if they were not run yet, plus:
+- admin notifications
+- online withdrawal requests
+- legal acceptance on orders
+- tenant-isolation hardening
+- grants/RLS fixes for the Control Room
+
+2) ADMIN
+Make sure your account is in easycome_admins.
+Open:
+https://easy-come.it/admin
+
+In Sistema:
+- click "Controlla collegamenti"
+- click "Esegui audit"
+The audit creates 2 temporary accounts, checks cross-account isolation, and deletes them automatically.
+
+3) NOTIFICATIONS
+Control Room notifications work after the SQL upgrade with no external provider.
+
+For real email notifications + order/withdrawal confirmations, add on Vercel:
+RESEND_API_KEY = your Resend API key
+EASYCOME_NOTIFICATION_FROM = a verified sender, e.g. Easy Come <notifiche@your-domain>
+EASYCOME_NOTIFICATION_EMAIL = the inbox where YOU want Easy Come alerts
+LEGAL_SUPPORT_EMAIL = public support email
+
+Optional fallback:
+EASYCOME_SUPPORT_WEBHOOK_URL = a Make/Zapier/other webhook
+
+Then Redeploy and open Admin > Sistema > "Invia notifica test".
+
+IMPORTANT FOR CONSUMER SALES:
+The online withdrawal function records requests even if email is unavailable, but current consumer rules require a durable receipt without undue delay. Before enabling real B2C sales, configure Resend and verify the withdrawal-email check is green in Admin > Sistema.
+
+4) LEGAL PUBLIC DATA
+Keep/set as applicable:
+LEGAL_CONTROLLER_NAME
+LEGAL_PRIVACY_EMAIL
+LEGAL_SUPPORT_EMAIL
+LEGAL_ADDRESS
+LEGAL_VAT_NUMBER
+LEGAL_REA
+LEGAL_PEC
+
+5) NEW PUBLIC PAGES
+/termini
+/rimborsi
+/recesso
+/privacy
+/cookie
+
+6) IMPORTANT
+Terms/privacy implementation is an operational compliance layer, not a substitute for professional legal/accounting review of your exact business setup.

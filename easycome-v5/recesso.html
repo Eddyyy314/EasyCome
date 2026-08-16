@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recedere dal contratto — Easy Come</title>
+  <meta name="description" content="Funzione online per inviare una dichiarazione di recesso a Easy Come.">
+  <link rel="stylesheet" href="assets/privacy.css">
+</head>
+<body class="legal-page">
+<div class="legal-shell">
+  <header class="legal-header">
+    <a class="legal-brand" href="/"><b>EC</b><strong>Easy Come</strong></a>
+    <nav><a href="/rimborsi">Rimborsi</a><a href="/termini">Termini</a><a href="/">Home</a></nav>
+  </header>
+
+  <section class="legal-hero">
+    <div>
+      <span class="ec-consent-kicker">RECESSO ONLINE</span>
+      <h1>Recedere dal<br>contratto qui.</h1>
+      <p>Compila questa dichiarazione se vuoi esercitare un diritto di recesso applicabile al tuo contratto. L'invio non pregiudica la verifica dei presupposti previsti dalla legge.</p>
+    </div>
+    <div class="legal-meta">
+      <span>Assistenza <a data-legal-support>Da configurare prima del lancio</a></span>
+      <span>Privacy <a href="/privacy"><b>Informativa sul trattamento dei dati</b></a></span>
+    </div>
+  </section>
+
+  <main class="legal-grid">
+    <aside class="legal-toc">
+      <a href="#modulo">01 · Dichiarazione</a>
+      <a href="#info">02 · Cosa succede dopo</a>
+    </aside>
+    <div class="legal-content">
+      <section class="legal-section" id="modulo">
+        <span>01</span><h2>Dichiarazione di recesso</h2>
+        <form class="legal-form" id="withdrawalForm">
+          <label class="legal-field"><span>Nome e cognome</span><input name="name" autocomplete="name" required maxlength="160"></label>
+          <label class="legal-field"><span>Email usata per l'ordine</span><input name="email" type="email" autocomplete="email" required maxlength="220"></label>
+          <label class="legal-field"><span>Riferimento ordine</span><input name="order_ref" required maxlength="120" placeholder="ID ordine, se disponibile"></label>
+          <label class="legal-field"><span>Contratto / servizio da cui vuoi recedere</span>
+            <select name="contract_type" required>
+              <option value="">Seleziona</option>
+              <option value="software">Software / contenuto digitale</option>
+              <option value="implementation">Implementazione assistita</option>
+              <option value="managed">Easy Come Managed</option>
+              <option value="other">Altro contratto Easy Come</option>
+            </select>
+          </label>
+          <label class="legal-field"><span>Note facoltative</span><textarea name="notes" maxlength="3000" placeholder="Non sei obbligato a motivare il recesso. Usa questo spazio solo se vuoi aggiungere dettagli."></textarea></label>
+          <label class="legal-honeypot" aria-hidden="true">Sito web<input name="website" tabindex="-1" autocomplete="off"></label>
+          <label class="legal-checkline"><input type="checkbox" name="confirm" required><span>Confermo di voler inviare una dichiarazione di recesso relativa al contratto indicato.</span></label>
+          <button class="legal-submit" type="submit" id="withdrawalSubmit">Conferma recesso</button>
+          <div class="legal-result" id="withdrawalResult" role="status" aria-live="polite"></div>
+        </form>
+      </section>
+
+      <section class="legal-section" id="info">
+        <span>02</span><h2>Cosa succede dopo</h2>
+        <p>La richiesta viene registrata con data e ora e resa visibile alla Control Room Easy Come. Se il sistema email è configurato, viene inviata senza indebito ritardo una conferma all'indirizzo indicato con il riferimento della richiesta.</p>
+        <p>L'invio della dichiarazione non significa automaticamente che il rimborso sia dovuto: Easy Come verifica il contratto, la data, l'eventuale avvio della fornitura e le regole applicabili. I diritti inderogabili restano invariati.</p>
+        <p>Consulta anche la <a href="/rimborsi"><strong>politica rimborsi e recesso</strong></a>.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="legal-footer">
+    <small>© 2026 Easy Come</small>
+    <div><a href="/termini">Termini</a> · <a href="/rimborsi">Rimborsi</a> · <a href="/privacy">Privacy</a> · <a href="/cookie">Cookie</a></div>
+  </footer>
+</div>
+<script src="js/legal-config.js"></script>
+<script src="js/legal-page.js"></script>
+<script src="js/recesso.js"></script>
+<script src="js/privacy-consent.js"></script>
+</body>
+</html>
