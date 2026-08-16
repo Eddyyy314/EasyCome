@@ -3,6 +3,8 @@
 
   const gate = document.getElementById('accountGate');
   const shell = document.querySelector('.app-shell');
+  const demoSlug = new URLSearchParams(location.search).get('demo') || '';
+  const prospectMode = Boolean(demoSlug);
   const state = {
     client: null,
     session: null,
@@ -18,7 +20,11 @@
   }[c]));
 
   const emit = () => window.dispatchEvent(new CustomEvent('easycome:account-ready', {
-    detail: { session: state.session, user: state.session?.user || null }
+    detail: {
+      session: state.session,
+      user: state.session?.user || (prospectMode ? { id: `prospect:${demoSlug}`, email: '' } : null),
+      prospectMode
+    }
   }));
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -50,11 +56,11 @@
   }
 
   function showShell() {
-    if (!state.session) return;
+    if (!state.session && !prospectMode) return;
     gate.innerHTML = '';
     gate.classList.add('hidden');
     shell?.classList.remove('account-pending');
-    renderBadge();
+    if (state.session) renderBadge();
     emit();
   }
 
@@ -317,6 +323,13 @@
   async function init(force = false) {
     state.ready = false;
     state.initError = null;
+    if (prospectMode) {
+      state.ready = true;
+      state.session = null;
+      // account.js is loaded before app.js: defer the event so the Studio listener exists.
+      setTimeout(() => showShell(), 0);
+      return;
+    }
     renderStudioLoading();
     try {
       const client = await ensureClient(force);

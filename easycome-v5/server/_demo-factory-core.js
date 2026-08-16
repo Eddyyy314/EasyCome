@@ -109,22 +109,29 @@ const TEMPLATE_DEFS = {
   }
 };
 
-const rules = [
-  ['workshop', /(car_repair|auto_parts|tire_shop|car_wash|mechanic|officina|carrozzer|gommist|autoripar)/i],
-  ['booking', /(campground|rv_park|lodging|hotel|motel|bed_and_breakfast|resort|camping|camper|agritur|affittacamere|ostello)/i],
-  ['appointments', /(beauty_salon|hair_salon|barber_shop|spa|nail_salon|parruc|barber|estetic|salone|beauty|hair)/i],
-  ['membership', /(gym|fitness|yoga|sports_club|pilates|palestr|crossfit|personal trainer)/i],
-  ['health', /(dentist|doctor|dental|physiotherapist|medical|veterinary|veterin|dentist|medic|fisioterap)/i],
-  ['professional', /(lawyer|accounting|real_estate_agency|insurance_agency|consult|avvocat|commercialist|architett|ingegner|immobiliar|studio professionale)/i],
-  ['restaurant', /(restaurant|cafe|bar|bakery|meal|food|pizzeria|ristor|trattoria|osteria|panificio|pasticceria)/i],
-  ['projects', /(electrician|plumber|general_contractor|roofing|moving_company|locksmith|cleaning|idraulic|elettric|impiant|edil|fabbro|serrament|pulizie|manutenz)/i],
-  ['retail', /(store|shop|clothing|furniture|hardware|electronics|retail|negozio|boutique|ferramenta|arredamento)/i],
+const classifierRules = [
+  { id:'workshop', name:/(officina|carrozzer|gommist|autoripar|meccanic|autofficina|auto service|garage)/i, types:/(car_repair|auto_parts|tire_shop|car_wash|mechanic)/i },
+  { id:'booking', name:/(camping|campeggio|area camper|b&b|bed.?and.?breakfast|hotel|motel|resort|agritur|affittacamere|ostello|guest house)/i, types:/(campground|rv_park|lodging|hotel|motel|bed_and_breakfast|resort)/i },
+  { id:'appointments', name:/(parruc|barbier|estetic|beauty|hair|nail|salone|spa\b|wellness)/i, types:/(beauty_salon|hair_salon|barber_shop|spa|nail_salon)/i },
+  { id:'membership', name:/(palestr|fitness|crossfit|pilates|yoga|personal trainer|gym\b|sport club)/i, types:/(gym|fitness|yoga|sports_club)/i },
+  { id:'health', name:/(dentist|odontoiatr|medic|fisioterap|veterin|poliambulator|clinica|studio dentistico)/i, types:/(dentist|doctor|dental|physiotherapist|medical|veterinary)/i },
+  { id:'projects', name:/(electric|elettric|idraulic|impiant|edil|fabbro|serrament|pulizie|manutenz|termoidraul|climatizz|costruzion|ristruttur|service tecnico)/i, types:/(electrician|plumber|general_contractor|roofing|moving_company|locksmith|cleaning)/i },
+  { id:'professional', name:/(studio professionale|avvocat|commercialist|consulenz|consulent|architett|ingegner|immobiliar|assicuraz|notai|geometra)/i, types:/(lawyer|accounting|real_estate_agency|insurance_agency|consultant)/i },
+  { id:'restaurant', name:/(ristor|pizzeria|trattoria|osteria|panificio|pasticceria|caffè|cafe\b|\bbar\b|bistrot|pub\b|food)/i, types:/(restaurant|cafe|bar|bakery|meal|food)/i },
+  { id:'retail', name:/(negozio|boutique|ferramenta|arredamento|abbigliamento|elettronica|store\b|shop\b|emporio)/i, types:/(store|shop|clothing|furniture|hardware|electronics|retail)/i },
 ];
 
 export function classifyPlace(place = {}) {
-  const haystack = [place.primaryType, ...(place.types || []), place.primaryTypeDisplayName?.text, place.displayName?.text].filter(Boolean).join(' ');
-  for (const [id, regex] of rules) if (regex.test(haystack)) return id;
-  return 'custom';
+  const name = String(place.displayName?.text || '').trim();
+  const typeText = [place.primaryType, ...(place.types || []), place.primaryTypeDisplayName?.text].filter(Boolean).join(' ');
+  let best = { id:'custom', score:0 };
+  for (const rule of classifierRules) {
+    // The business name is often more informative than Google's broad primary type.
+    // Give it more weight so "Electric Service" cannot become generic consulting.
+    const score = (rule.name.test(name) ? 7 : 0) + (rule.types.test(typeText) ? 4 : 0);
+    if (score > best.score) best = { id:rule.id, score };
+  }
+  return best.id;
 }
 
 export function templateFor(id) { return TEMPLATE_DEFS[id] || TEMPLATE_DEFS.custom; }

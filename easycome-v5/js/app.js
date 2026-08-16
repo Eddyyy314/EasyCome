@@ -698,7 +698,13 @@
         }
         if (!SALES.checkoutEndpoint) throw new Error('Checkout non configurato. Inserisci checkoutEndpoint in js/sales-config.js.');
         const accessToken = await window.EasyComeAccount?.getAccessToken?.();
-        if (!accessToken) throw new Error('Accedi al tuo account Easy Come prima del pagamento.');
+        if (!accessToken) {
+          const next = encodeURIComponent(location.pathname + location.search);
+          errorBox.innerHTML = `<div class="checkout-error">Per acquistare, crea o accedi al tuo account Easy Come. La demo resta disponibile.<br><a href="/accedi?mode=signup&next=${next}" style="font-weight:900;text-decoration:underline">Crea account e continua →</a></div>`;
+          button.disabled = false;
+          button.textContent = project.delivery.managedServiceSelected ? `Paga ${money(price.total)} e attiva 30 € / mese` : `Vai al pagamento sicuro · ${money(price.total)}`;
+          return;
+        }
         const response = await fetch(SALES.checkoutEndpoint, {
           method: 'POST',
           headers: { 'content-type': 'application/json', authorization: `Bearer ${accessToken}` },
@@ -793,7 +799,9 @@
       const data = await response.json();
       if (!response.ok || !data.project) throw new Error(data.error || 'Demo non disponibile.');
       const incoming = data.project;
-      incoming.company = { ...(incoming.company || {}), email: user?.email || incoming.company?.email || '' };
+      // Prospect demos must never inherit the currently logged-in Easy Come account.
+      // Contact details stay intentionally empty until the prospect enters their own data.
+      incoming.company = { ...(incoming.company || {}), email: '', phone: incoming.company?.phone || '' };
       incoming.delivery = { ...(incoming.delivery || {}), previewApproved: true };
       return incoming;
     } catch (error) {
@@ -812,7 +820,7 @@
     const local = demoProject ? null : loadDraft(user.id);
     const legacy = demoProject ? null : legacyDraftForUser(user);
     project = normalizeProject(demoProject || saved || local || legacy || G.defaultProject());
-    if (!project.company.email) project.company.email = user.email || '';
+    if (!demoProject && !project.company.email) project.company.email = user.email || '';
     if (switchedAccount || (!saved && !local && !legacy)) {
       currentStep = 0;
       customFieldDraft = [];

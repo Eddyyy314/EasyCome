@@ -28,7 +28,7 @@ export default async function handler(req,res){
     const existing=await seenPlaceIds();
     const campaignId=crypto.randomUUID();
     const campaign=await createCampaign({id:campaignId,requested_count:limit,status:'running',source:'google_places',created_at:new Date().toISOString()});
-    const plan=buildQueryPlan(`${existing.size}:${campaignId}`,240); const selected=[]; const inBatch=new Set(); let queriesRun=0; let rawSeen=0; let failedQueries=0; let firstGoogleError='';
+    const plan=buildQueryPlan(`${existing.size}:${campaignId}`,240); const selected=[]; const inBatch=new Set(); const templateCounts=new Map(); const maxPerTemplate=Math.max(2,Math.ceil(limit*0.20)); const perQueryCap=limit<=10?1:2; let queriesRun=0; let rawSeen=0; let failedQueries=0; let firstGoogleError='';
     try{
       const concurrency=6;
       for(let offset=0;offset<plan.length && selected.length<limit;offset+=concurrency){
@@ -37,11 +37,15 @@ export default async function handler(req,res){
         queriesRun+=wave.length;
         for(const result of settled){
           if(result.status!=='fulfilled'){ failedQueries++; if(!firstGoogleError) firstGoogleError=String(result.reason?.message||result.reason||'Errore Google Places'); continue; }
+          let acceptedFromQuery=0;
           for(const p of result.value.places||[]){
             rawSeen++; if(!p.id||p.businessStatus==='CLOSED_PERMANENTLY'||existing.has(p.id)||inBatch.has(p.id))continue;
-            inBatch.add(p.id); const templateId=classifyPlace(p); const slug=demoSlug(p.id); const model=buildDemoModel(templateId,p.id); const now=new Date(); const expires=new Date(now.getTime()+7*86400000);
+            const templateId=classifyPlace(p);
+            if((templateCounts.get(templateId)||0)>=maxPerTemplate)continue;
+            inBatch.add(p.id); templateCounts.set(templateId,(templateCounts.get(templateId)||0)+1); acceptedFromQuery++;
+            const slug=demoSlug(p.id); const model=buildDemoModel(templateId,p.id); const now=new Date(); const expires=new Date(now.getTime()+7*86400000);
             selected.push({place:p, row:{campaign_id:campaignId,place_id:p.id,demo_slug:slug,template_id:templateId,demo_config:model,status:'generated',expires_at:expires.toISOString(),created_at:now.toISOString()}});
-            if(selected.length>=limit)break;
+            if(selected.length>=limit||acceptedFromQuery>=perQueryCap)break;
           }
           if(selected.length>=limit)break;
         }
