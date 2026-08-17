@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { requireEasyComeAdmin } from '../_demo-auth.js';
 import { textSearch, placeDetails } from '../_google-places.js';
 import { discoverPublicBusinessContacts } from '../_email-discovery.js';
-import { seenPlaceIds, createCampaign, insertTargets, recentCampaigns, campaignTargets, markCampaign } from '../_demo-store.js';
+import { seenPlaceIds, createCampaign, insertTargets, recentCampaigns, campaignTargets, markCampaign, targetBySlug, updateTarget } from '../_demo-store.js';
 import { buildQueryPlan, classifyPlace, buildDemoModel, demoSlug, demoPrice, outreachMessage, outreachSubject, outreachShortMessage, prospectScores } from '../_demo-factory-core.js';
 import { sendLiberoOutreach } from '../_libero-mail.js';
 
@@ -22,7 +22,23 @@ export default async function handler(req,res){
     const action=String(req.body?.action||'generate');
     if(action==='send-email'){
       const sent=await sendLiberoOutreach({to:req.body?.to,subject:req.body?.subject,message:req.body?.message});
-      return res.status(200).json(sent);
+      const demoSlug=String(req.body?.demoSlug||'').trim();
+      let trackingSaved=false;
+      if(demoSlug){
+        try{
+          const target=await targetBySlug(demoSlug);
+          if(target){
+            const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
+            const outreach=current.outreach&&typeof current.outreach==='object'?current.outreach:{};
+            const event={status:sent.status,from:sent.from,to:sent.to,messageId:sent.messageId,response:sent.response,accepted:sent.accepted,rejected:sent.rejected,sentAt:sent.sentAt};
+            const history=Array.isArray(outreach.emailHistory)?outreach.emailHistory.slice(-19):[];
+            history.push(event);
+            await updateTarget(target.id,{demo_config:{...current,outreach:{...outreach,lastEmail:event,emailHistory:history}}});
+            trackingSaved=true;
+          }
+        }catch(err){console.warn('Email inviata ma tracking Demo Factory non salvato:',err?.message||err)}
+      }
+      return res.status(200).json({...sent,trackingSaved});
     }
     if(action==='hydrate'){
       const ids=[...new Set((req.body?.placeIds||[]).map(String).filter(Boolean))].slice(0,5);

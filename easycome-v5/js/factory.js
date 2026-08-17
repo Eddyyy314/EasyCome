@@ -13,6 +13,13 @@ function normalizePhone(raw=''){let d=String(raw).replace(/\D/g,'');if(d.startsW
 function whatsappUrl(x){const msg=x.shortMessage||x.message||'';if(x.whatsapp){try{const u=new URL(x.whatsapp);u.searchParams.set('text',msg);return u.href}catch{}}const phone=normalizePhone(x.phone||'');return phone?`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`:''}
 function scoreLabel(n){n=Number(n)||0;return n>=82?'ALTISSIMO':n>=70?'ALTO':n>=55?'BUONO':'MEDIO'}
 function potentialCell(x){const n=Number(x.potential)||0;const reason=(x.potentialReasons||[]).join(' · ');return `<div class="score-wrap"><span class="score potential-score">${n}/100</span><strong>${scoreLabel(n)}</strong>${reason?`<small>${esc(reason)}</small>`:''}</div>`}
+function emailDeliveryMarkup(x){
+  const d=x.emailDelivery;if(!d)return '';
+  const when=d.sentAt?new Date(d.sentAt).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+  const id=String(d.messageId||'');
+  const shortId=id.length>34?id.slice(0,31)+'…':id;
+  return `<div class="smtp-state ok"><strong>✓ Accettata da Libero</strong><span>${esc(when)} · ${esc(d.to||x.email||'')}</span>${shortId?`<small title="${esc(id)}">ID: ${esc(shortId)}</small>`:''}<em>Il server ha preso in carico il messaggio; consegna e apertura dipendono dal provider destinatario.</em></div>`;
+}
 function channelButtons(x){const parts=[];
   if(x.email)parts.push(`<button class="contact-btn email" data-send-email="${x._i}">✉ Invia email</button>`);
   const wa=whatsappUrl(x);if(wa)parts.push(`<a class="contact-btn whatsapp" href="${esc(wa)}" target="_blank" rel="noreferrer">💬 ${x.whatsapp?'WhatsApp':'Prova WA'}</a>`);
@@ -23,7 +30,7 @@ function channelButtons(x){const parts=[];
   if(x.mapsUrl)parts.push(`<a class="contact-btn maps" href="${esc(x.mapsUrl)}" target="_blank" rel="noreferrer">⌖ Maps</a>`);
   const score=Number(x.contactability)||0;
   const label=x.contactPending?'Ricerca canali…':parts.length?`Contattabilità ${score}/100`:'Nessun contatto trovato';
-  return `<div class="contact-box"><small>${esc(label)}</small><div class="contact-actions">${parts.join('')}</div>${!x.contactPending&&!x.email&&!x.phone&&!x.website?'<span class="offline-opportunity">★ Potenziale offline: da verificare manualmente</span>':''}</div>`;
+  return `<div class="contact-box"><small>${esc(label)}</small><div class="contact-actions">${parts.join('')}</div>${emailDeliveryMarkup(x)}${!x.contactPending&&!x.email&&!x.phone&&!x.website?'<span class="offline-opportunity">★ Potenziale offline: da verificare manualmente</span>':''}</div>`;
 }
 function renderRows(){
   if(!targets.length){$('#rows').innerHTML='<tr><td colspan="7"><div class="empty">Nessuna demo in questo batch.</div></td></tr>';return}
@@ -39,7 +46,7 @@ function renderRows(){
   </tr>`).join('');
   document.querySelectorAll('[data-copy-link]').forEach(b=>b.onclick=()=>copy(targets[Number(b.dataset.copyLink)].demoUrl,'Link demo copiato'));
   document.querySelectorAll('[data-copy-msg]').forEach(b=>b.onclick=()=>copy(targets[Number(b.dataset.copyMsg)].shortMessage||targets[Number(b.dataset.copyMsg)].message,'Messaggio copiato'));
-  document.querySelectorAll('[data-send-email]').forEach(b=>b.onclick=async()=>{const x=targets[Number(b.dataset.sendEmail)];if(!x?.email)return;if(!confirm(`Inviare la demo a ${x.email} da ${SENDER_EMAIL}?`))return;const original=b.textContent;b.disabled=true;b.textContent='Invio…';try{const d=await api('/api/demo-factory',{method:'POST',body:JSON.stringify({action:'send-email',to:x.email,subject:x.subject||`Demo Easy Come per ${x.name}`,message:x.message||''})});toast(`Email inviata da ${d.from||SENDER_EMAIL} a ${d.to||x.email} ✅`);b.textContent='✓ Inviata'}catch(e){toast(e.message||'Invio email non riuscito');b.disabled=false;b.textContent=original}});
+  document.querySelectorAll('[data-send-email]').forEach(b=>b.onclick=async()=>{const x=targets[Number(b.dataset.sendEmail)];if(!x?.email)return;if(!confirm(`Inviare la demo a ${x.email} da ${SENDER_EMAIL}?`))return;const original=b.textContent;b.disabled=true;b.textContent='Invio…';try{const d=await api('/api/demo-factory',{method:'POST',body:JSON.stringify({action:'send-email',demoSlug:x.demoSlug,to:x.email,subject:x.subject||`Demo Easy Come per ${x.name}`,message:x.message||''})});x.emailDelivery=d;toast(`Libero SMTP ha accettato l’email per ${d.to||x.email} ✅`);renderRows()}catch(e){toast(e.message||'Invio email non riuscito');b.disabled=false;b.textContent=original}});
 }
 async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg)}catch{prompt('Copia:',text)}}
 async function hydrateContacts(){

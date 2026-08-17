@@ -47,10 +47,21 @@ export async function sendLiberoOutreach({ to, subject, message }) {
     text,
   });
 
+  const accepted = Array.isArray(result?.accepted) ? result.accepted.map(String) : [];
+  const rejected = Array.isArray(result?.rejected) ? result.rejected.map(String) : [];
+  if (!accepted.length && rejected.length) throw new Error(`Libero SMTP ha rifiutato il destinatario: ${rejected.join(', ')}`);
+
   return {
     ok: true,
+    status: 'accepted_by_smtp',
+    statusLabel: 'Accettata da Libero SMTP',
     from: user,
     to: recipient,
+    accepted,
+    rejected,
+    pending: Array.isArray(result?.pending) ? result.pending.map(String) : [],
+    response: String(result?.response || '').slice(0, 500),
     messageId: result?.messageId || '',
+    sentAt: new Date().toISOString(),
   };
 }
