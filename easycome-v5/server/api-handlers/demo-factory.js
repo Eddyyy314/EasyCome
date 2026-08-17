@@ -44,6 +44,10 @@ export default async function handler(req,res){
     }
     if(req.method!=='POST')return res.status(405).json({error:'Metodo non consentito.'});
     const action=String(req.body?.action||'generate');
+    if(action==='send-test'){
+      const sent=await sendLiberoOutreach({to:req.body?.to,subject:req.body?.subject,message:req.body?.message});
+      return res.status(200).json({...sent,test:true,trackingSaved:false});
+    }
     if(action==='send-email'){
       const sent=await sendLiberoOutreach({to:req.body?.to,subject:req.body?.subject,message:req.body?.message});
       const demoSlug=String(req.body?.demoSlug||'').trim();
@@ -54,7 +58,7 @@ export default async function handler(req,res){
           if(target){
             const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
             const outreach=current.outreach&&typeof current.outreach==='object'?current.outreach:{};
-            const event={status:sent.status,from:sent.from,to:sent.to,messageId:sent.messageId,response:sent.response,accepted:sent.accepted,rejected:sent.rejected,sentAt:sent.sentAt};
+            const event={status:sent.status,from:sent.from,to:sent.to,messageId:sent.messageId,response:sent.response,accepted:sent.accepted,rejected:sent.rejected,sentAt:sent.sentAt,sentCopy:sent.sentCopy||null};
             const history=Array.isArray(outreach.emailHistory)?outreach.emailHistory.slice(-19):[];
             history.push(event);
             await updateTarget(target.id,{demo_config:{...current,outreach:{...outreach,lastEmail:event,emailHistory:history,contactStatus:'contacted',contactedAt:event.sentAt,contactedVia:'email'}}});
