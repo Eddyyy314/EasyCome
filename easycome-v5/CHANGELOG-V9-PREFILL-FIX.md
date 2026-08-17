@@ -6,5 +6,5 @@
 - Il totale iniziale dello Studio viene allineato al prezzo mostrato nella demo.
 - Il modulo **Prezzi dinamici** ora è cliccabile: selezionarlo attiva automaticamente la modalità prezzi dinamici; rimuoverlo la disattiva.
 - Nella Struttura, la sezione Regole prezzo ha un pulsante Configura che porta direttamente alle regole di prezzo.
-- Email mittente outreach corretta in `edoardolaneve8@gmail.com`.
+- Email mittente outreach corretta in `infoeasycome@libero.it`.
 - Le demo prospect non ereditano email o telefono dell'account Easy Come eventualmente aperto nel browser.

@@ -155,7 +155,7 @@ export function buildDemoModel(templateId, placeId) {
 
 export function buildProject(place, templateId, ownerEmail='') {
   const t = templateFor(templateId); const p = ECGenerator.defaultProject();
-  p.version = '9.0.0-demo';
+  p.version = '10.0.0-demo';
   p.company.name = place.displayName?.text || 'La tua attività';
   p.company.industry = place.primaryTypeDisplayName?.text || t.label;
   p.company.description = `Sistema Easy Come configurato in anteprima per una realtà ${t.label.toLowerCase()}. I dati presenti nella demo sono fittizi.`;
@@ -184,7 +184,7 @@ export function buildQueryPlan(seedValue='0', max=220) {
 }
 
 export function demoSlug(placeId) {
-  return `ec-${crypto.createHash('sha256').update(String(placeId)+':easycome-demo-v9').digest('hex').slice(0,18)}`;
+  return `ec-${crypto.createHash('sha256').update(String(placeId)+':easycome-demo-v10').digest('hex').slice(0,18)}`;
 }
 
 export function demoPrice(place, templateId) {
@@ -201,5 +201,55 @@ export function outreachSubject(place) {
 
 export function outreachMessage(place, demoUrl, price = 99) {
   const name = place.displayName?.text || 'la vostra attività';
-  return `Buongiorno,\n\nsono Edoardo di Easy Come. Siamo una startup che sta innovando il modo in cui le piccole attività accedono a gestionali su misura: semplici, personalizzati e a costi accessibili.\n\nAbbiamo preparato gratuitamente una demo pensata per ${name}, partendo dal vostro tipo di attività e dai processi che un gestionale potrebbe semplificare.\n\nPotete provarla qui, senza registrazione e senza impegno:\n${demoUrl}\n\nLa configurazione mostrata nella demo ha un prezzo indicativo di €${price} una tantum. I nostri gestionali partono da €99 e il prezzo cambia soltanto in base alle funzioni che servono davvero.\n\nI dati presenti nell’anteprima sono dimostrativi: l’obiettivo è farvi vedere concretamente come potrebbe funzionare prima di acquistare qualsiasi cosa.\n\nSe vi piace, dal link potete personalizzarla sul vostro lavoro.\n\nUn saluto,\nEdoardo La Neve\nEasy Come\nedoardolaneve8@gmail.com`;
+  return `Buongiorno,\n\nsono Edoardo di Easy Come. Siamo una startup che sta innovando il modo in cui le piccole attività accedono a gestionali su misura: semplici, personalizzati e a costi accessibili.\n\nAbbiamo preparato gratuitamente una demo pensata per ${name}, partendo dal vostro tipo di attività e dai processi che un gestionale potrebbe semplificare.\n\nPotete provarla qui, senza registrazione e senza impegno:\n${demoUrl}\n\nLa configurazione mostrata nella demo ha un prezzo indicativo di €${price} una tantum. I nostri gestionali partono da €99 e il prezzo cambia soltanto in base alle funzioni che servono davvero.\n\nI dati presenti nell’anteprima sono dimostrativi: l’obiettivo è farvi vedere concretamente come potrebbe funzionare prima di acquistare qualsiasi cosa.\n\nSe vi piace, dal link potete personalizzarla sul vostro lavoro.\n\nUn saluto,\nEdoardo La Neve\nEasy Come\ninfoeasycome@libero.it`;
+}
+
+
+const TEMPLATE_POTENTIAL = {
+  workshop:78, booking:76, appointments:69, membership:72, health:70,
+  professional:66, restaurant:75, retail:70, projects:82, custom:62
+};
+
+export function prospectScores(place = {}, templateId = 'custom', contacts = {}) {
+  const hasWebsite = Boolean(place.websiteUri || contacts.website);
+  const hasEmail = Boolean(contacts.email);
+  const hasPhone = Boolean(place.nationalPhoneNumber || contacts.phone);
+  const hasSocial = Boolean(contacts.instagram || contacts.facebook);
+  const hasWhatsapp = Boolean(contacts.whatsapp);
+  const hasContactPage = Boolean(contacts.contactPage);
+
+  let contactability = 0;
+  if (hasEmail) contactability += 35;
+  if (hasPhone) contactability += 24;
+  if (hasWhatsapp) contactability += 20;
+  if (contacts.instagram) contactability += 9;
+  if (contacts.facebook) contactability += 6;
+  if (hasContactPage) contactability += 4;
+  if (hasWebsite) contactability += 2;
+  contactability = Math.max(0, Math.min(100, contactability));
+
+  // Separate "how easy it is to reach" from "how interesting it is".
+  // A low digital footprint can be a positive sales signal for Easy Come.
+  let potential = TEMPLATE_POTENTIAL[templateId] ?? 62;
+  if (!hasWebsite) potential += 10;
+  if (!hasEmail) potential += 6;
+  if (!hasSocial) potential += 5;
+  if (!hasWhatsapp) potential += 2;
+  if (!hasPhone) potential += 2;
+  if (hasWebsite && hasEmail && hasSocial) potential -= 5;
+  potential = Math.max(35, Math.min(99, potential));
+
+  const reasons = [];
+  if (!hasWebsite && !hasSocial) reasons.push('presenza digitale minima');
+  else if (!hasWebsite) reasons.push('nessun sito rilevato');
+  if (!hasEmail) reasons.push('nessuna email pubblica');
+  if (['workshop','projects','booking','restaurant'].includes(templateId)) reasons.push('alto fit operativo');
+  if (!reasons.length) reasons.push('buon fit Easy Come');
+
+  return { contactability, potential, reasons: reasons.slice(0,2) };
+}
+
+export function outreachShortMessage(place, demoUrl, price = 99) {
+  const name = place.displayName?.text || 'la vostra attività';
+  return `Buongiorno! Sono Edoardo di Easy Come. Abbiamo preparato gratuitamente una demo di un gestionale già configurato per ${name}. Potete provarla qui: ${demoUrl}\n\nLa configurazione mostrata parte da €${price} una tantum (Easy Come parte da €99) e potete modificarla prima di decidere. Se vi va, mi farebbe piacere sapere cosa ne pensate.`;
 }
