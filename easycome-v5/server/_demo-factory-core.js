@@ -155,7 +155,7 @@ export function buildDemoModel(templateId, placeId) {
 
 export function buildProject(place, templateId, ownerEmail='') {
   const t = templateFor(templateId); const p = ECGenerator.defaultProject();
-  p.version = '10.0.0-demo';
+  p.version = '12.0.0-demo';
   p.company.name = place.displayName?.text || 'La tua attività';
   p.company.industry = place.primaryTypeDisplayName?.text || t.label;
   p.company.description = `Sistema Easy Come configurato in anteprima per una realtà ${t.label.toLowerCase()}. I dati presenti nella demo sono fittizi.`;
@@ -165,7 +165,7 @@ export function buildProject(place, templateId, ownerEmail='') {
   p.modules = [...new Set(t.modules || ['crm','tasks','easycome_hub'])];
   p.customEntities = structuredClone(t.customEntities || []);
   p.pricing.mode = t.pricingMode || 'manual_quote'; p.pricing.enabled = p.pricing.mode !== 'none';
-  p.delivery.packagePrice = 99; p.delivery.implementationSelected=false; p.delivery.managedServiceSelected=false; p.delivery.previewApproved=true;
+  p.delivery.packagePrice = 198; p.delivery.implementationSelected=false; p.delivery.managedServiceSelected=false; p.delivery.previewApproved=true;
   p.templateId = templateId;
   p.demoSource = { type:'google_places', placeId:place.id || '', generatedForDemo:true };
   return p;
@@ -189,9 +189,9 @@ export function demoSlug(placeId) {
 
 export function demoPrice(place, templateId) {
   const project = buildProject(place, templateId, '');
-  const raw = Number(ECGenerator.calculatePrice(project).total || 99);
+  const raw = Number(ECGenerator.calculatePrice(project).total || 198);
   // Tied to the actual generated modules/entities, presented as a clean commercial price.
-  return Math.max(99, Math.ceil((raw + 1) / 10) * 10 - 1);
+  return Math.max(198, Math.ceil((raw + 2) / 20) * 20 - 2);
 }
 
 export function outreachSubject(place) {
@@ -199,9 +199,9 @@ export function outreachSubject(place) {
   return `Abbiamo preparato una demo Easy Come per ${name}`;
 }
 
-export function outreachMessage(place, demoUrl, price = 99) {
+export function outreachMessage(place, demoUrl, price = 198) {
   const name = place.displayName?.text || 'la vostra attività';
-  return `Buongiorno,\n\nsono Edoardo di Easy Come. Siamo una startup che sta innovando il modo in cui le piccole attività accedono a gestionali su misura: semplici, personalizzati e a costi accessibili.\n\nAbbiamo preparato gratuitamente una demo pensata per ${name}, partendo dal vostro tipo di attività e dai processi che un gestionale potrebbe semplificare.\n\nPotete provarla qui, senza registrazione e senza impegno:\n${demoUrl}\n\nLa configurazione mostrata nella demo ha un prezzo indicativo di €${price} una tantum. I nostri gestionali partono da €99 e il prezzo cambia soltanto in base alle funzioni che servono davvero.\n\nI dati presenti nell’anteprima sono dimostrativi: l’obiettivo è farvi vedere concretamente come potrebbe funzionare prima di acquistare qualsiasi cosa.\n\nSe vi piace, dal link potete personalizzarla sul vostro lavoro.\n\nUn saluto,\nEdoardo La Neve\nEasy Come\ninfoeasycome@libero.it`;
+  return `Buongiorno,\n\nsono Edoardo di Easy Come. Siamo una startup che sta innovando il modo in cui le piccole attività accedono a gestionali su misura: semplici, personalizzati e a costi accessibili.\n\nAbbiamo preparato gratuitamente una demo pensata per ${name}, partendo dal vostro tipo di attività e dai processi che un gestionale potrebbe semplificare.\n\nPotete provarla qui, senza registrazione e senza impegno:\n${demoUrl}\n\nLa configurazione mostrata nella demo ha un prezzo indicativo di €${price} una tantum. I nostri gestionali partono da €198 e il prezzo cambia soltanto in base alle funzioni che servono davvero.\n\nI dati presenti nell’anteprima sono dimostrativi: l’obiettivo è farvi vedere concretamente come potrebbe funzionare prima di acquistare qualsiasi cosa.\n\nSe vi piace, dal link potete personalizzarla sul vostro lavoro.\n\nUn saluto,\nEdoardo La Neve\nEasy Come\ninfoeasycome@libero.it`;
 }
 
 
@@ -249,7 +249,7 @@ export function prospectScores(place = {}, templateId = 'custom', contacts = {})
   return { contactability, potential, reasons: reasons.slice(0,2) };
 }
 
-export function outreachShortMessage(place, demoUrl, price = 99) {
+export function outreachShortMessage(place, demoUrl, price = 198) {
   const name = place.displayName?.text || 'la vostra attività';
-  return `Buongiorno! Sono Edoardo di Easy Come. Abbiamo preparato gratuitamente una demo di un gestionale già configurato per ${name}. Potete provarla qui: ${demoUrl}\n\nLa configurazione mostrata parte da €${price} una tantum (Easy Come parte da €99) e potete modificarla prima di decidere. Se vi va, mi farebbe piacere sapere cosa ne pensate.`;
+  return `Buongiorno! Sono Edoardo di Easy Come. Abbiamo preparato gratuitamente una demo di un gestionale già configurato per ${name}. Potete provarla qui: ${demoUrl}\n\nLa configurazione mostrata parte da €${price} una tantum (Easy Come parte da €198) e potete modificarla prima di decidere. Se vi va, mi farebbe piacere sapere cosa ne pensate.`;
 }

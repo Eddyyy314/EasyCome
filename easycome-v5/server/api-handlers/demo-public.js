@@ -19,10 +19,10 @@ export default async function handler(req,res){
     const price=Number(target.demo_config?.quotedPrice||demoPrice(raw,target.template_id));
     // Keep the Studio starting total identical to the price shown in the demo.
     // From that exact starting configuration, adding/removing modules changes the total normally.
-    const rawProjectTotal=Number(ECGenerator.calculatePrice(project).total||99);
-    project.delivery.packagePrice=Math.max(0,Number(project.delivery.packagePrice||99)+(price-rawProjectTotal));
+    const rawProjectTotal=Number(ECGenerator.calculatePrice(project).total||198);
+    project.delivery.packagePrice=Math.max(0,Number(project.delivery.packagePrice||198)+(price-rawProjectTotal));
     project.demoSource={...(project.demoSource||{}),quotedPrice:price,slug};
     res.setHeader('cache-control','private, no-store, max-age=0');
-    return res.status(200).json({slug,place,model,project,price,startingPrice:99,expiresAt:target.expires_at,views:count,templateLabel:t.label,googleMapsAttribution:true});
+    return res.status(200).json({slug,place,model,project,price,startingPrice:198,expiresAt:target.expires_at,views:count,templateLabel:t.label,googleMapsAttribution:true});
   }catch(error){console.error(error);return res.status(400).json({error:error.message||'Errore caricamento demo.'})}
 }

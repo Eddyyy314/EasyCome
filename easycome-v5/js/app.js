@@ -104,6 +104,7 @@
     p.delivery.previewApproved = Boolean(p.delivery.previewApproved);
     p.delivery.implementationSelected = Boolean(p.delivery.implementationSelected);
     p.delivery.managedServiceSelected = Boolean(p.delivery.managedServiceSelected);
+    if (Number(p.delivery.packagePrice) === 99) p.delivery.packagePrice = 198;
     p.templateId = p.templateId || 'custom';
     return p;
   }
@@ -179,7 +180,7 @@
 
   function prospectBanner() {
     if (!PROSPECT_MODE || !project.demoSource?.generatedForDemo) return '';
-    const quoted = Number(project.demoSource?.quotedPrice || G.calculatePrice(project).total || 99);
+    const quoted = Number(project.demoSource?.quotedPrice || G.calculatePrice(project).total || 198);
     return `<div class="prospect-prefill-banner"><span>DEMO GIÀ CARICATA</span><div><strong>Stai personalizzando la configurazione vista nella demo.</strong><small>Le funzioni selezionate sono già quelle dell’anteprima. Puoi toglierle, aggiungerne altre e il prezzo si aggiorna automaticamente.</small></div><b>${money(quoted)}</b></div>`;
   }
 
@@ -207,8 +208,8 @@
 
   function modulesStep() {
     const categories = [...new Set(G.MODULES.map((item) => item.category))];
-    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 2</span><h1>Scegli soltanto ciò che serve.</h1><p>I moduli hanno prezzi piccoli e trasparenti. Clienti, attività, dashboard e gestione dati sono già compresi nel pacchetto.</p></div><div class="heading-badge">Base ${money(99)}</div></div>
-      <div class="saving-note">✓ Extra ridotti: la maggior parte costa tra €8 e €20 una tantum</div>
+    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 2</span><h1>Scegli soltanto ciò che serve.</h1><p>I moduli hanno prezzi piccoli e trasparenti. Clienti, attività, dashboard e gestione dati sono già compresi nel pacchetto.</p></div><div class="heading-badge">Base ${money(198)}</div></div>
+      <div class="saving-note">✓ Extra ridotti: la maggior parte costa tra €16 e €40 una tantum</div>
       ${categories.map((category) => `<section class="module-section"><div class="section-title"><h2>${esc(category)}</h2><span>${G.MODULES.filter((item) => item.category === category).length} funzioni</span></div><div class="module-grid">${G.MODULES.filter((item) => item.category === category).map(moduleCard).join('')}</div></section>`).join('')}`;
   }
 
@@ -229,7 +230,7 @@
       <section class="section-composer">
         <div class="section-composer-head">
           <div><span class="micro-label">${editingSectionKey ? 'MODIFICA AREA' : 'NUOVA AREA'}</span><h2>${composerTitle}</h2><p>${composerSubtitle}</p></div>
-          <div class="section-composer-actions"><span class="price-pill">${editingSectionKey ? 'Incluso' : '+ ' + money(6)}</span><button id="closeSectionComposer" class="composer-close" aria-label="Chiudi">×</button></div>
+          <div class="section-composer-actions"><span class="price-pill">${editingSectionKey ? 'Incluso' : '+ ' + money(12)}</span><button id="closeSectionComposer" class="composer-close" aria-label="Chiudi">×</button></div>
         </div>
         <div class="composer-template-block">
           <div class="composer-block-title"><strong>Da dove vuoi partire?</strong><small>Un clic prepara già nomi e campi. Poi puoi cambiare tutto.</small></div>
@@ -257,7 +258,7 @@
               <div class="mini-product-sidebar"><i>EC</i><span class="active">${esc(previewLabel)}</span><span>Dashboard</span><span>Attività</span></div>
               <div class="mini-product-main"><small>${esc(previewLabel).toUpperCase()}</small><h3>${esc(previewLabel)}</h3><div class="mini-record-card"><header><strong>Nuovo ${esc(previewSingular)}</strong><b>＋</b></header>${previewFields.map((field)=>`<label><span>${esc(field.label)}${field.required?' *':''}</span><i>${field.type==='date'?'gg/mm/aaaa':field.type==='currency'?'0,00 €':field.type==='select'?'Seleziona…':'Inserisci…'}</i></label>`).join('')}${previewFields.length===0?'<div class="mini-preview-empty">I campi compariranno qui mentre li aggiungi.</div>':''}${customFieldDraft.length>5?`<div class="mini-preview-more">+ altri ${customFieldDraft.length-5} campi</div>`:''}<button>Salva ${esc(previewSingular)}</button></div></div>
             </div>
-            <div class="composer-price-note"><strong>${editingSectionKey?'Modifica inclusa':'Questa sezione costa '+money(6)+' una tantum'}</strong><small>I primi 6 campi sono inclusi. Dal settimo: +1 € per campo.</small></div>
+            <div class="composer-price-note"><strong>${editingSectionKey?'Modifica inclusa':'Questa sezione costa '+money(12)+' una tantum'}</strong><small>I primi 6 campi sono inclusi. Dal settimo: +2 € per campo.</small></div>
           </aside>
         </div>
         <div class="section-composer-footer"><button id="cancelSectionComposer" class="btn btn-secondary">Annulla</button><button id="addEntity" class="btn btn-primary create-section-button">${editingSectionKey?'Salva modifiche':'Aggiungi “'+esc(previewLabel)+'” al gestionale'}</button></div>
@@ -266,7 +267,7 @@
       <section class="data-map structure-map">
         <div class="data-map-head"><div><span class="micro-label">IL TUO GESTIONALE</span><h2>Queste saranno le voci principali</h2><p>Le aree incluse arrivano dalle funzioni scelte. Quelle arancioni sono costruite da te.</p></div></div>
         <div class="entity-showcase structure-canvas">${entities.map((entity) => `<article class="entity-showcase-card ${entity.custom ? 'custom' : ''}"><header><span class="entity-showcase-icon">${entity.custom ? '✦' : esc(entity.label.slice(0,1))}</span><div><strong>${esc(entity.label)}</strong><small>${entity.custom ? 'Sezione su misura' : 'Inclusa automaticamente'}</small></div>${entity.custom ? `<div class="entity-card-actions"><button class="edit-entity" data-key="${esc(entity.key)}">Modifica</button><button class="icon-button remove-entity" data-key="${esc(entity.key)}" aria-label="Elimina">×</button></div>` : entity.key === 'pricing_rules' ? '<div class="entity-card-actions"><button class="configure-pricing">Configura</button><span class="included-tag">Inclusa</span></div>' : '<span class="included-tag">Inclusa</span>'}</header><div class="field-chip-row">${entity.fields.slice(0,5).map((field)=>`<span>${esc(field.label)}</span>`).join('')}${entity.fields.length>5?`<span class="more-chip">+${entity.fields.length-5}</span>`:''}</div></article>`).join('')}
-          <button id="openSectionComposer" class="add-section-tile"><span>＋</span><strong>Aggiungi una sezione</strong><small>Creala da zero o parti da un modello</small><b>+ ${money(6)}</b></button>
+          <button id="openSectionComposer" class="add-section-tile"><span>＋</span><strong>Aggiungi una sezione</strong><small>Creala da zero o parti da un modello</small><b>+ ${money(12)}</b></button>
         </div>
       </section>
       ${composer}`;
@@ -280,7 +281,7 @@
         <div class="price-mode-grid">${PRICE_MODES.map((mode)=>`<button class="price-mode-card ${currentMode===mode.id?'active':''}" data-price-mode="${mode.id}"><b>${mode.icon}</b><span><strong>${mode.name}</strong><small>${mode.description}</small></span><i>${currentMode===mode.id?'✓':''}</i></button>`).join('')}</div>
         <div class="pricing-explainer">${pricingBuilder()}</div>
       </section>
-      <section class="builder-card recipe-builder"><div class="section-title"><div><span class="micro-label">AUTOMAZIONI GUIDATE</span><h2>Cosa vuoi che succeda da solo?</h2><p>Scegli un risultato. Easy Come prepara il flusso tecnico; potrai rifinirlo durante l’implementazione.</p></div><span class="price-pill">${money(4)} ciascuna</span></div>
+      <section class="builder-card recipe-builder"><div class="section-title"><div><span class="micro-label">AUTOMAZIONI GUIDATE</span><h2>Cosa vuoi che succeda da solo?</h2><p>Scegli un risultato. Easy Come prepara il flusso tecnico; potrai rifinirlo durante l’implementazione.</p></div><span class="price-pill">${money(8)} ciascuna</span></div>
         <div class="automation-recipe-grid">${AUTOMATION_RECIPES.map((recipe)=>{const added=project.automations.some((flow)=>flow.recipeId===recipe.id);return `<button class="automation-recipe ${added?'added':''}" data-recipe="${recipe.id}" ${added?'disabled':''}><b>${recipe.icon}</b><span><strong>${recipe.name}</strong><small>${recipe.description}</small></span><i>${added?'Aggiunta':'+'}</i></button>`}).join('')}</div>
         <div class="automation-list improved">${project.automations.map((flow,index)=>`<article class="automation-row"><span class="automation-bolt">⚡</span><div><strong>${esc(flow.name)}</strong><small>Quando: ${esc(triggerLabel(flow.trigger))} · Azione: ${esc(actionLabel(flow.action))}</small></div><button class="icon-button remove-automation" data-index="${index}">×</button></article>`).join('')||'<div class="empty-mini">Nessuna automazione selezionata. Puoi aggiungerla anche più avanti.</div>'}</div>
         <details class="advanced-automation"><summary>Configurazione avanzata <span>per chi sa già cosa vuole</span></summary><div class="form-grid two compact automation-form"><label class="field"><span>Nome del flusso</span><input id="automationName" value="${esc(automationDraft.name)}" placeholder="Es. Avvisa il team"></label><label class="field"><span>Su quale sezione?</span><select id="automationEntity"><option value="">Qualsiasi sezione</option>${entities.map((entity)=>`<option value="${entity.key}" ${automationDraft.entity===entity.key?'selected':''}>${esc(entity.label)}</option>`).join('')}</select></label><label class="field"><span>Quando parte?</span><select id="automationTrigger">${G.AUTOMATION_TRIGGERS.map((item)=>`<option value="${item.id}" ${automationDraft.trigger===item.id?'selected':''}>${esc(item.label)}</option>`).join('')}</select></label><label class="field"><span>Cosa deve fare?</span><select id="automationAction">${G.AUTOMATION_ACTIONS.map((item)=>`<option value="${item.id}" ${automationDraft.action===item.id?'selected':''}>${esc(item.label)}</option>`).join('')}</select></label><label class="field full"><span>Destinatario, URL o nuovo stato</span><input id="automationTarget" value="${esc(automationDraft.target)}" placeholder="Es. {{email}}, team, URL Make/n8n"></label><label class="field full"><span>Messaggio o istruzione</span><textarea id="automationMessage" placeholder="Cosa deve comunicare o creare?">${esc(automationDraft.message)}</textarea></label></div><button id="addAutomation" class="btn btn-secondary">Aggiungi flusso avanzato</button></details>
@@ -831,7 +832,7 @@
       // Contact details stay intentionally empty until the prospect enters their own data.
       incoming.company = { ...(incoming.company || {}), email: '', phone: '' };
       incoming.delivery = { ...(incoming.delivery || {}), previewApproved: true };
-      incoming.demoSource = { ...(incoming.demoSource || {}), generatedForDemo: true, slug, quotedPrice: Number(data.price || incoming.demoSource?.quotedPrice || 99) };
+      incoming.demoSource = { ...(incoming.demoSource || {}), generatedForDemo: true, slug, quotedPrice: Number(data.price || incoming.demoSource?.quotedPrice || 198) };
       return incoming;
     } catch (error) {
       console.warn('Impossibile precaricare la demo:', error);

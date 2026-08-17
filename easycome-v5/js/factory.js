@@ -8,7 +8,7 @@ async function token(){const client=await ensureDb();const {data,error}=await cl
 async function api(url,opt={}){const t=await token();const r=await fetch(url,{...opt,headers:{'content-type':'application/json',authorization:`Bearer ${t}`,...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||`Errore ${r.status}`);return d}
 function steps(n){document.querySelectorAll('.step').forEach(x=>x.classList.toggle('done',Number(x.dataset.step)<=n))}
 function setBusy(on){$('#generate').disabled=on||!adminReady;$('#limit').disabled=on;$('#generate').textContent=on?'GENERAZIONE IN CORSO…':'⚡ TROVA E GENERA LE DEMO'}
-function euro(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n)||99)}
+function euro(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n)||198)}
 function emailUrl(x){const to=String(x.email||'').trim();if(!to)return'';const subject=x.subject||`Demo Easy Come per ${x.name}`;const body=x.message||'';return `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`}
 function normalizePhone(raw=''){let d=String(raw).replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);if(d && !d.startsWith('39'))d='39'+d;return d}
 function whatsappUrl(x){const msg=x.shortMessage||x.message||'';if(x.whatsapp){try{const u=new URL(x.whatsapp);u.searchParams.set('text',msg);return u.href}catch{}}const phone=normalizePhone(x.phone||'');return phone?`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`:''}

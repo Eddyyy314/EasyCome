@@ -3,35 +3,35 @@ import { ECProductTemplates } from './_product-templates-node.js';
 const global = { EasyZip: { createZipBytes }, ECProductTemplates, crypto: globalThis.crypto };
   'use strict';
 
-  const BASE_PRICE = 99;
+  const BASE_PRICE = 198;
   const IMPLEMENTATION_PRICE = 150;
 
   const MODULES = [
     { id: 'crm', name: 'Clienti e CRM', category: 'Operatività', price: 0, included: true, description: 'Anagrafiche, contatti, note e storico.', entities: ['customers'] },
     { id: 'tasks', name: 'Attività e scadenze', category: 'Operatività', price: 0, included: true, description: 'Task, priorità, responsabili e date.', entities: ['tasks'] },
-    { id: 'bookings', name: 'Prenotazioni e risorse', category: 'Vendite', price: 10, description: 'Agenda, risorse e controllo anti-sovrapposizione.', entities: ['bookings', 'resources'] },
-    { id: 'appointments', name: 'Appuntamenti', category: 'Vendite', price: 8, description: 'Agenda, servizi e operatori.', entities: ['appointments', 'services', 'staff'] },
-    { id: 'quotes', name: 'Preventivi', category: 'Vendite', price: 6, description: 'Documenti stampabili, righe, stato, validità e totale.', entities: ['quotes', 'quote_items'] },
-    { id: 'orders', name: 'Ordini', category: 'Vendite', price: 8, description: 'Ordini, righe, totali e avanzamento.', entities: ['orders', 'order_items', 'products'] },
-    { id: 'inventory', name: 'Magazzino', category: 'Operatività', price: 10, description: 'Prodotti, giacenze registrate e movimenti manuali.', entities: ['products', 'stock_movements'] },
-    { id: 'invoices', name: 'Fatture e scadenze', category: 'Amministrazione', price: 12, description: 'Gestione interna di fatture, righe, scadenze e stato. Non sostituisce la fatturazione elettronica.', entities: ['invoices', 'invoice_items'] },
-    { id: 'payments', name: 'Registro pagamenti e caparre', category: 'Amministrazione', price: 8, description: 'Registrazione di incassi, caparre, rimborsi e metodi. Checkout online escluso.', entities: ['payments'] },
-    { id: 'expenses', name: 'Spese e fornitori', category: 'Amministrazione', price: 6, description: 'Costi, fornitori e categorie.', entities: ['suppliers', 'expenses'] },
-    { id: 'projects', name: 'Progetti e commesse', category: 'Operatività', price: 8, description: 'Progetti, fasi, budget e avanzamento.', entities: ['projects', 'tasks'] },
-    { id: 'support', name: 'Ticket e assistenza', category: 'Relazioni', price: 8, description: 'Richieste, priorità, assegnazione e SLA.', entities: ['tickets'] },
-    { id: 'staff', name: 'Personale e turni', category: 'Operatività', price: 8, description: 'Anagrafiche, ruoli, turni e agenda del personale.', entities: ['staff', 'shifts'] },
-    { id: 'documents', name: 'Documenti e allegati', category: 'Operatività', price: 4, description: 'Archivio documentale e scadenze.', entities: ['documents'] },
-    { id: 'assets', name: 'Beni e manutenzioni', category: 'Operatività', price: 10, description: 'Attrezzature, veicoli e manutenzioni.', entities: ['assets', 'maintenance'] },
-    { id: 'reports', name: 'Report e KPI', category: 'Analisi', price: 8, description: 'Dashboard calcolata dai dati, filtri, CSV, backup e grafici.', entities: [] },
+    { id: 'bookings', name: 'Prenotazioni e risorse', category: 'Vendite', price: 20, description: 'Agenda, risorse e controllo anti-sovrapposizione.', entities: ['bookings', 'resources'] },
+    { id: 'appointments', name: 'Appuntamenti', category: 'Vendite', price: 16, description: 'Agenda, servizi e operatori.', entities: ['appointments', 'services', 'staff'] },
+    { id: 'quotes', name: 'Preventivi', category: 'Vendite', price: 12, description: 'Documenti stampabili, righe, stato, validità e totale.', entities: ['quotes', 'quote_items'] },
+    { id: 'orders', name: 'Ordini', category: 'Vendite', price: 16, description: 'Ordini, righe, totali e avanzamento.', entities: ['orders', 'order_items', 'products'] },
+    { id: 'inventory', name: 'Magazzino', category: 'Operatività', price: 20, description: 'Prodotti, giacenze registrate e movimenti manuali.', entities: ['products', 'stock_movements'] },
+    { id: 'invoices', name: 'Fatture e scadenze', category: 'Amministrazione', price: 24, description: 'Gestione interna di fatture, righe, scadenze e stato. Non sostituisce la fatturazione elettronica.', entities: ['invoices', 'invoice_items'] },
+    { id: 'payments', name: 'Registro pagamenti e caparre', category: 'Amministrazione', price: 16, description: 'Registrazione di incassi, caparre, rimborsi e metodi. Checkout online escluso.', entities: ['payments'] },
+    { id: 'expenses', name: 'Spese e fornitori', category: 'Amministrazione', price: 12, description: 'Costi, fornitori e categorie.', entities: ['suppliers', 'expenses'] },
+    { id: 'projects', name: 'Progetti e commesse', category: 'Operatività', price: 16, description: 'Progetti, fasi, budget e avanzamento.', entities: ['projects', 'tasks'] },
+    { id: 'support', name: 'Ticket e assistenza', category: 'Relazioni', price: 16, description: 'Richieste, priorità, assegnazione e SLA.', entities: ['tickets'] },
+    { id: 'staff', name: 'Personale e turni', category: 'Operatività', price: 16, description: 'Anagrafiche, ruoli, turni e agenda del personale.', entities: ['staff', 'shifts'] },
+    { id: 'documents', name: 'Documenti e allegati', category: 'Operatività', price: 8, description: 'Archivio documentale e scadenze.', entities: ['documents'] },
+    { id: 'assets', name: 'Beni e manutenzioni', category: 'Operatività', price: 20, description: 'Attrezzature, veicoli e manutenzioni.', entities: ['assets', 'maintenance'] },
+    { id: 'reports', name: 'Report e KPI', category: 'Analisi', price: 16, description: 'Dashboard calcolata dai dati, filtri, CSV, backup e grafici.', entities: [] },
     { id: 'easycome_hub', name: 'Manuale & Easy Come Hub', category: 'Assistenza', price: 0, included: true, description: 'Manuale personalizzato, onboarding, supporto, bug e richiesta nuove funzioni.', entities: [] },
-    { id: 'dynamic_pricing', name: 'Prezzi dinamici', category: 'Automazioni', price: 12, description: 'Stagioni, giorni, durata, persone, extra e promo.', entities: ['pricing_rules', 'quotes'] },
-    { id: 'automations', name: 'Motore automazioni', category: 'Automazioni', price: 8, description: 'Trigger, email, webhook, task e aggiornamenti.', entities: ['automation_log'] },
-    { id: 'multiuser', name: 'Utenti, ruoli e permessi', category: 'Sicurezza', price: 6, description: 'Accessi separati per titolare e collaboratori.', entities: [] },
-    { id: 'multisite', name: 'Più sedi', category: 'Struttura', price: 10, description: 'Anagrafica sedi e attribuzione della sede ai dati operativi.', entities: ['locations'] },
-    { id: 'ai', name: 'AI tramite integrazione', category: 'Automazioni', price: 15, description: 'Bozze, riepiloghi e classificazione tramite API esterna configurata.', entities: ['ai_requests'] },
-    { id: 'website', name: 'Sito pubblico coordinato', category: 'Canali', price: 12, description: 'Sito vetrina responsive coordinato con il gestionale.', entities: [] },
-    { id: 'mobile_app', name: 'App PWA installabile', category: 'Canali', price: 12, description: 'Web app mobile installabile con accessi rapidi e modalità offline di base.', entities: [] },
-    { id: 'branding', name: 'Brand kit completo', category: 'Identità', price: 6, description: 'Logo vettoriale, varianti, copertina social e guida visiva.', entities: [] },
+    { id: 'dynamic_pricing', name: 'Prezzi dinamici', category: 'Automazioni', price: 24, description: 'Stagioni, giorni, durata, persone, extra e promo.', entities: ['pricing_rules', 'quotes'] },
+    { id: 'automations', name: 'Motore automazioni', category: 'Automazioni', price: 16, description: 'Trigger, email, webhook, task e aggiornamenti.', entities: ['automation_log'] },
+    { id: 'multiuser', name: 'Utenti, ruoli e permessi', category: 'Sicurezza', price: 12, description: 'Accessi separati per titolare e collaboratori.', entities: [] },
+    { id: 'multisite', name: 'Più sedi', category: 'Struttura', price: 20, description: 'Anagrafica sedi e attribuzione della sede ai dati operativi.', entities: ['locations'] },
+    { id: 'ai', name: 'AI tramite integrazione', category: 'Automazioni', price: 30, description: 'Bozze, riepiloghi e classificazione tramite API esterna configurata.', entities: ['ai_requests'] },
+    { id: 'website', name: 'Sito pubblico coordinato', category: 'Canali', price: 24, description: 'Sito vetrina responsive coordinato con il gestionale.', entities: [] },
+    { id: 'mobile_app', name: 'App PWA installabile', category: 'Canali', price: 24, description: 'Web app mobile installabile con accessi rapidi e modalità offline di base.', entities: [] },
+    { id: 'branding', name: 'Brand kit completo', category: 'Identità', price: 12, description: 'Logo vettoriale, varianti, copertina social e guida visiva.', entities: [] },
   ];
 
   const ENTITY_PRESETS = {
@@ -451,10 +451,10 @@ const global = { EasyZip: { createZipBytes }, ECProductTemplates, crypto: global
       const module = MODULES.find((item) => item.id === id);
       return sum + (module ? module.price : 0);
     }, 0);
-    const customEntitiesTotal = (project.customEntities || []).length * 6;
-    const customFieldsTotal = (project.customEntities || []).reduce((sum, entity) => sum + Math.max(0, (entity.fields || []).length - 6) * 1, 0);
-    const automationTotal = (project.automations || []).length * 4;
-    const pricingRulesTotal = project.pricing && project.pricing.enabled ? Math.max(0, (project.pricing.rules || []).length - 3) * 1 : 0;
+    const customEntitiesTotal = (project.customEntities || []).length * 12;
+    const customFieldsTotal = (project.customEntities || []).reduce((sum, entity) => sum + Math.max(0, (entity.fields || []).length - 6) * 2, 0);
+    const automationTotal = (project.automations || []).length * 8;
+    const pricingRulesTotal = project.pricing && project.pricing.enabled ? Math.max(0, (project.pricing.rules || []).length - 3) * 2 : 0;
     const paidModuleCount = project.modules.filter((id) => (MODULES.find((item) => item.id === id)?.price || 0) > 0).length;
     const discountRate = paidModuleCount >= 8 ? 0.20 : paidModuleCount >= 5 ? 0.10 : 0;
     const bundleDiscount = Math.round(modulesTotal * discountRate * 100) / 100;

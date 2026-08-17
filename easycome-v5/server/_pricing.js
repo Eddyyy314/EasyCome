@@ -1,8 +1,8 @@
 export const MODULE_PRICES = Object.freeze({
-  crm: 0, tasks: 0, bookings: 10, appointments: 8, quotes: 6, orders: 8,
-  inventory: 10, invoices: 12, payments: 8, expenses: 6, projects: 8,
-  support: 8, staff: 8, documents: 4, assets: 10, reports: 8, easycome_hub: 0,
-  dynamic_pricing: 12, automations: 8, multiuser: 6, multisite: 10, ai: 15, website: 12, mobile_app: 12, branding: 6,
+  crm: 0, tasks: 0, bookings: 20, appointments: 16, quotes: 12, orders: 16,
+  inventory: 20, invoices: 24, payments: 16, expenses: 12, projects: 16,
+  support: 16, staff: 16, documents: 8, assets: 20, reports: 16, easycome_hub: 0,
+  dynamic_pricing: 24, automations: 16, multiuser: 12, multisite: 20, ai: 30, website: 24, mobile_app: 24, branding: 12,
 });
 
 const LEGACY_MODULE_ALIASES = Object.freeze({
@@ -29,19 +29,19 @@ export function calculateServerPrice(project = {}) {
 
   const modulesTotal = modules.reduce((sum, id) => sum + MODULE_PRICES[id], 0);
   const customEntities = Array.isArray(project.customEntities) ? project.customEntities : [];
-  const customEntitiesTotal = customEntities.length * 6;
+  const customEntitiesTotal = customEntities.length * 12;
   const customFieldsTotal = customEntities.reduce((sum, entity) => {
     const fields = Array.isArray(entity?.fields) ? entity.fields.length : 0;
-    return sum + Math.max(0, fields - 6);
+    return sum + Math.max(0, fields - 6) * 2;
   }, 0);
-  const automationTotal = (Array.isArray(project.automations) ? project.automations.length : 0) * 4;
+  const automationTotal = (Array.isArray(project.automations) ? project.automations.length : 0) * 8;
   const pricingRulesTotal = project.pricing?.enabled
-    ? Math.max(0, (Array.isArray(project.pricing?.rules) ? project.pricing.rules.length : 0) - 3) * 1
+    ? Math.max(0, (Array.isArray(project.pricing?.rules) ? project.pricing.rules.length : 0) - 3) * 2
     : 0;
   const paidModuleCount = modules.filter((id) => MODULE_PRICES[id] > 0).length;
   const discountRate = paidModuleCount >= 8 ? 0.20 : paidModuleCount >= 5 ? 0.10 : 0;
   const bundleDiscount = Math.round(modulesTotal * discountRate * 100) / 100;
-  const base = numberEnv('EASYCOME_BASE_PRICE', 99);
+  const base = numberEnv('EASYCOME_BASE_PRICE', 198);
   const implementationSelected = Boolean(project.delivery?.implementationSelected);
   const implementation = implementationSelected ? numberEnv('EASYCOME_IMPLEMENTATION_PRICE', 150) : 0;
   const extras = modulesTotal + customEntitiesTotal + customFieldsTotal + automationTotal + pricingRulesTotal - bundleDiscount;
