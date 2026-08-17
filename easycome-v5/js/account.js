@@ -299,6 +299,12 @@
   async function saveProject(project) {
     if (!state.session) return;
     const client = await ensureClient();
+    // Managed metadata is maintained by the Easy Come Control Room. Preserve it
+    // when the client edits the commercial project in Studio.
+    try {
+      const { data: existing } = await client.from('easycome_projects').select('project').eq('user_id', state.session.user.id).maybeSingle();
+      if (existing?.project?.managed && !project.managed) project.managed = existing.project.managed;
+    } catch (_) {}
     const payload = {
       user_id: state.session.user.id,
       name: project.company?.name || 'Nuovo progetto',

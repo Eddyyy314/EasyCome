@@ -59,7 +59,7 @@ export default async function handler(req,res){
               'Politica rimborsi: EC-REF-2026-08-10-v1',
               '',
               `Fornitore: ${process.env.LEGAL_CONTROLLER_NAME||'Easy Come'}`,
-              (process.env.LEGAL_SUPPORT_EMAIL||process.env.LEGAL_PRIVACY_EMAIL)?`Contatto: ${process.env.LEGAL_SUPPORT_EMAIL||process.env.LEGAL_PRIVACY_EMAIL}`:'',
+              `Contatto: infoeasycome@libero.it`,
               '',
               `Profilo e ordini: ${app}/profilo`,
               `Termini: ${app}/termini`,

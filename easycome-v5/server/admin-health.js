@@ -12,7 +12,7 @@ export default async function handler(req,res){
     checks.push(await timed('Supabase',async()=>{if(!supabaseUrl||!serviceKey)throw new Error('Variabili mancanti');const r=await fetch(`${supabaseUrl}/rest/v1/easycome_orders?select=id&limit=1`,{headers:{apikey:serviceKey,authorization:`Bearer ${serviceKey}`}});if(!r.ok)throw new Error(`HTTP ${r.status}`);return {detail:'Database raggiungibile'}}));
     checks.push(await timed('Stripe',async()=>{if(!stripeKey)throw new Error('STRIPE_SECRET_KEY mancante');const r=await fetch('https://api.stripe.com/v1/account',{headers:{authorization:`Bearer ${stripeKey}`}});if(!r.ok)throw new Error(`HTTP ${r.status}`);return {detail:stripeKey.startsWith('sk_live_')?'Live':'Sandbox'}}));
     checks.push({label:'Webhook Stripe',ok:Boolean(process.env.STRIPE_WEBHOOK_SECRET),ms:0,detail:process.env.STRIPE_WEBHOOK_SECRET?'Configurato':'Mancante'});
-    const emailReady=Boolean(process.env.RESEND_API_KEY&&process.env.EASYCOME_NOTIFICATION_FROM&&(process.env.EASYCOME_NOTIFICATION_EMAIL||process.env.LEGAL_SUPPORT_EMAIL||process.env.LEGAL_PRIVACY_EMAIL));
+    const emailReady=Boolean(process.env.RESEND_API_KEY&&process.env.EASYCOME_NOTIFICATION_FROM);
     const webhookReady=Boolean(process.env.EASYCOME_SUPPORT_WEBHOOK_URL);
     checks.push({label:'Notifiche',ok:emailReady||webhookReady,ms:0,detail:emailReady?'Email attiva':webhookReady?'Webhook attivo':'Solo Control Room: configura email o webhook'});
     checks.push({label:'Conferme recesso',ok:emailReady,ms:0,detail:emailReady?'Email automatica attiva':'Configura RESEND_API_KEY + EASYCOME_NOTIFICATION_FROM'});

@@ -6,6 +6,10 @@
   const slug=new URLSearchParams(location.search).get('d')||'';
   let payload=null;
   let activeIndex=0;
+  let selectedRow=0;
+  let workspaceQuery='';
+  const sandboxKey=()=>`easycome:live-demo:${slug}`;
+  let sandbox={sections:{}};
 
   async function event(name){
     fetch('/api/demo-event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({slug,event:name})}).catch(()=>{});
@@ -17,6 +21,22 @@
   }
 
   function money(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n)}
+
+
+  function loadSandbox(){
+    try{sandbox=JSON.parse(localStorage.getItem(sandboxKey())||'{"sections":{}}');if(!sandbox||typeof sandbox!=='object')throw new Error();if(!sandbox.sections)sandbox.sections={}}
+    catch(_){sandbox={sections:{}}}
+  }
+  function persistSandbox(){try{localStorage.setItem(sandboxKey(),JSON.stringify(sandbox))}catch(_){}}
+  function sectionData(label){
+    const preset=listPreset(label);const key=String(label||'sezione').toLowerCase();
+    if(!Array.isArray(sandbox.sections[key]))sandbox.sections[key]=preset.rows.map(r=>[...r]);
+    return {key,preset,rows:sandbox.sections[key]};
+  }
+  function resetSandbox(){try{localStorage.removeItem(sandboxKey())}catch(_){}sandbox={sections:{}};selectedRow=0;workspaceQuery='';renderMain();toastDemo('Dati demo ripristinati.')}
+  function toastDemo(message){const n=document.createElement('div');n.className='demo-toast';n.textContent=message;document.body.appendChild(n);requestAnimationFrame(()=>n.classList.add('show'));setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),180)},2200)}
+  function csvEscape(v){const x=String(v??'');return /[\",\n]/.test(x)?`"${x.replaceAll('\"','\"\"')}"`:x}
+  function exportSection(label){const {preset,rows}=sectionData(label);const csv=[preset.heads,...rows].map(r=>r.map(csvEscape).join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`${String(label).toLowerCase().replace(/[^a-z0-9]+/gi,'-')}-demo.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);toastDemo('CSV demo esportato.')}
 
   function initials(name){
     return String(name||'EC').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
@@ -54,8 +74,8 @@
       <section class="card table-card"><div class="card-head"><div><span>OPERATIVITÀ</span><h3>Elementi che richiedono attenzione</h3></div><button data-section-jump="1">Vedi tutto</button></div>${tableHtml(['Cliente / voce','Dettaglio','Info','Stato'],model.rows)}</section>`;
   }
 
-  function tableHtml(headings,rows){
-    return `<div class="table-wrap"><table><thead><tr>${headings.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((r,idx)=>`<tr>${r.map((c,i)=>`<td>${i===0?`<strong>${esc(c)}</strong>`:i===r.length-1?`<span class="status ${idx%3===2?'neutral':''}">${esc(c)}</span>`:esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  function tableHtml(headings,rows,interactive=false,sourceIndexes=[]){
+    return `<div class="table-wrap"><table><thead><tr>${headings.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((r,idx)=>`<tr ${interactive?`data-row-index="${sourceIndexes[idx]??idx}" class="demo-data-row ${(sourceIndexes[idx]??idx)===selectedRow?'selected':''}"`:''}>${r.map((c,i)=>`<td>${i===0?`<strong>${esc(c)}</strong>`:i===r.length-1?`<span class="status ${idx%3===2?'neutral':''}">${esc(c)}</span>`:esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   }
 
   function listPreset(label){
@@ -86,20 +106,37 @@
   }
 
   function calendarView(label){
-    const p=listPreset(label);
-    return `${topbar(p.title,p.sub)}<section class="calendar-layout"><article class="card calendar-card"><div class="calendar-head"><button>‹</button><div><span>AGOSTO 2026</span><h3>Settimana operativa</h3></div><button>›</button></div><div class="calendar-grid">${['Lun 17','Mar 18','Mer 19','Gio 20','Ven 21'].map((d,di)=>`<div class="day"><b>${d}</b>${Array.from({length:di%3+2},(_,i)=>`<span style="--shift:${15+(i*27)}%"><small>${9+i*2}:30</small>${esc(['Appuntamento','Intervento','Follow-up','Scadenza'][(di+i)%4])}</span>`).join('')}</div>`).join('')}</div></article><article class="card side-summary"><span>OGGI</span><h3>4 attività pianificate</h3><div class="summary-list">${p.rows.slice(0,4).map(r=>`<div><i></i><span><strong>${esc(r[0])}</strong><small>${esc(r[1])} · ${esc(r[2])}</small></span></div>`).join('')}</div><button>+ Nuova attività</button></article></section>`;
+    const data=sectionData(label),p=data.preset,rows=data.rows;
+    return `${topbar(p.title,p.sub)}<section class="sandbox-note"><b>MODALITÀ PROVA</b><span>Puoi creare, modificare e cancellare elementi: restano solo su questo browser e non toccano dati reali.</span><button data-reset-demo>Ripristina</button></section><section class="calendar-layout"><article class="card calendar-card"><div class="calendar-head"><button>‹</button><div><span>AGOSTO 2026</span><h3>Settimana operativa</h3></div><button>›</button></div><div class="calendar-grid">${['Lun 17','Mar 18','Mer 19','Gio 20','Ven 21'].map((d,di)=>`<div class="day"><b>${d}</b>${Array.from({length:di%3+2},(_,i)=>`<span style="--shift:${15+(i*27)}%"><small>${9+i*2}:30</small>${esc(rows[(di+i)%Math.max(rows.length,1)]?.[0]||'Attività')}</span>`).join('')}</div>`).join('')}</div></article><article class="card side-summary"><span>OGGI</span><h3>${rows.length} attività nella demo</h3><div class="summary-list">${rows.slice(0,4).map((r,i)=>`<button class="summary-demo-row" data-row-index="${i}"><i></i><span><strong>${esc(r[0])}</strong><small>${esc(r[1]||'')} · ${esc(r[2]||'')}</small></span></button>`).join('')}</div><button data-new-row>+ Nuova attività</button></article></section>`;
   }
 
   function reportView(label){
     return `${topbar(label,'Indicatori sintetici e andamento operativo')}<section class="report-grid"><article class="card report-main"><div class="card-head"><div><span>PERFORMANCE</span><h3>Andamento mensile</h3></div><b>+21,8%</b></div><div class="big-chart">${[38,52,47,66,58,73,69,81,76,88,84,94].map((h,i)=>`<div><i style="height:${h}%"></i><small>${i+1}</small></div>`).join('')}</div></article><article class="card report-side"><span>RIEPILOGO</span><div><small>Valore mese</small><strong>${money(18640)}</strong></div><div><small>Operazioni concluse</small><strong>128</strong></div><div><small>Tempo risparmiato</small><strong>31 h</strong></div><div><small>Automazioni eseguite</small><strong>246</strong></div></article></section><section class="kpis compact">${payload.model.kpis.map((x,i)=>`<article class="kpi"><span>${esc(x)}</span><strong>${esc(payload.model.values[i])}</strong><em>dato demo</em></article>`).join('')}</section>`;
   }
 
+  function modalForRow(label,index,isNew=false){
+    const {preset,rows}=sectionData(label);const current=isNew?preset.heads.map(()=> ''):(rows[index]||preset.heads.map(()=>''));
+    const modal=document.createElement('div');modal.className='demo-modal';modal.innerHTML=`<div class="demo-modal-card"><header><div><span>${isNew?'NUOVO ELEMENTO':'MODIFICA ELEMENTO'}</span><h3>${esc(preset.title)}</h3></div><button type="button" data-close>×</button></header><form id="demoEditForm"><div class="demo-form-grid">${preset.heads.map((h,i)=>`<label><span>${esc(h)}</span><input name="f${i}" value="${esc(current[i]||'')}" ${i===0?'required':''}></label>`).join('')}</div><footer><button type="button" class="ghost" data-close>Annulla</button><button type="submit">${isNew?'Crea elemento':'Salva modifiche'}</button></footer></form></div>`;document.body.appendChild(modal);
+    modal.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>modal.remove());
+    modal.querySelector('form').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.currentTarget);const row=preset.heads.map((_,i)=>String(fd.get(`f${i}`)||''));if(isNew){rows.unshift(row);selectedRow=0}else{rows[index]=row;selectedRow=index}persistSandbox();modal.remove();renderMain();toastDemo(isNew?'Elemento creato nella demo.':'Modifiche salvate nella demo.')};
+  }
+  function deleteRow(label,index){const data=sectionData(label);if(!data.rows[index])return;if(!confirm('Eliminare questo elemento dalla demo?'))return;data.rows.splice(index,1);selectedRow=Math.max(0,Math.min(selectedRow,data.rows.length-1));persistSandbox();renderMain();toastDemo('Elemento eliminato dalla demo.')}
+  function duplicateRow(label,index){const data=sectionData(label);if(!data.rows[index])return;data.rows.splice(index+1,0,[...data.rows[index]]);selectedRow=index+1;persistSandbox();renderMain();toastDemo('Elemento duplicato.')}
+  function bindWorkspace(label){
+    $$('[data-row-index]').forEach(r=>r.onclick=()=>{selectedRow=Number(r.dataset.rowIndex)||0;renderMain()});
+    $('#demoSearch')?.addEventListener('input',e=>{workspaceQuery=e.target.value;renderMain();requestAnimationFrame(()=>{const i=$('#demoSearch');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}})});
+    $('[data-new-row]')?.addEventListener('click',()=>modalForRow(label,0,true));
+    $('[data-edit-row]')?.addEventListener('click',()=>modalForRow(label,selectedRow,false));
+    $('[data-delete-row]')?.addEventListener('click',()=>deleteRow(label,selectedRow));
+    $('[data-duplicate-row]')?.addEventListener('click',()=>duplicateRow(label,selectedRow));
+    $('[data-export-demo]')?.addEventListener('click',()=>exportSection(label));
+  }
   function workspaceView(label){
     const s=String(label||'').toLowerCase();
     if(/agenda|appuntament|prenotaz|scadenz|turni|disponibil/.test(s))return calendarView(label);
     if(/report/.test(s))return reportView(label);
-    const p=listPreset(label);
-    return `${topbar(p.title,p.sub)}<section class="workspace-tools"><label>⌕ <span>Cerca in ${esc(p.title.toLowerCase())}…</span></label><button>Tutti gli stati⌄</button><button>Ordina⌄</button><i>${p.rows.length*8} risultati</i><b>+ Nuova voce</b></section><section class="work-grid"><article class="card table-card work-table">${tableHtml(p.heads,p.rows)}</article><aside class="card detail-card"><span>SCHEDA SELEZIONATA</span><h3>${esc(p.rows[0]?.[0]||p.title)}</h3>${p.heads.slice(1).map((h,i)=>`<div><small>${esc(h)}</small><strong>${esc(p.rows[0]?.[i+1]||'—')}</strong></div>`).join('')}<footer><button>Modifica</button><button>Altre azioni</button></footer></aside></section>`;
+    const {preset:p,rows}=sectionData(label);const q=workspaceQuery.trim().toLowerCase();const indexed=rows.map((r,i)=>({r,i})).filter(x=>!q||x.r.some(c=>String(c).toLowerCase().includes(q)));const shown=indexed.map(x=>x.r),indexes=indexed.map(x=>x.i);if(selectedRow>=rows.length)selectedRow=Math.max(0,rows.length-1);const selected=rows[selectedRow]||[];
+    return `${topbar(p.title,p.sub)}<section class="sandbox-note"><b>GESTIONALE IN PROVA</b><span>Qui puoi lavorare davvero sui dati demo: crea, modifica, duplica, elimina, cerca ed esporta. Le modifiche restano solo sul tuo browser.</span><button data-reset-demo>Ripristina</button></section><section class="workspace-tools live-tools"><label class="demo-search">⌕ <input id="demoSearch" value="${esc(workspaceQuery)}" placeholder="Cerca in ${esc(p.title.toLowerCase())}…"></label><button data-export-demo>Esporta CSV</button><i>${shown.length} risultati</i><b data-new-row>+ Nuova voce</b></section><section class="work-grid"><article class="card table-card work-table">${tableHtml(p.heads,shown,true,indexes)}</article><aside class="card detail-card"><span>SCHEDA SELEZIONATA</span>${selected.length?`<h3>${esc(selected[0]||p.title)}</h3>${p.heads.slice(1).map((h,i)=>`<div><small>${esc(h)}</small><strong>${esc(selected[i+1]||'—')}</strong></div>`).join('')}<footer class="demo-detail-actions"><button data-edit-row>Modifica</button><button data-duplicate-row>Duplica</button><button class="danger" data-delete-row>Elimina</button></footer>`:`<h3>Nessun elemento</h3><p>Crea una nuova voce per provare questa sezione.</p><footer><button data-new-row>+ Nuova voce</button></footer>`}</aside></section>`;
   }
 
   function renderMain(){
@@ -107,6 +144,8 @@
     const label=model.nav[activeIndex]||model.nav[0]||'Dashboard';
     $('#view').innerHTML=activeIndex===0?dashboardView():workspaceView(label);
     $$('[data-section-jump]').forEach(b=>b.onclick=()=>activate(Number(b.dataset.sectionJump||0)));
+    if(activeIndex>0)bindWorkspace(label);
+    $('[data-reset-demo]')?.addEventListener('click',resetSandbox);
   }
 
   function activate(index){
@@ -123,6 +162,7 @@
       const d=await r.json();
       if(!r.ok)throw new Error(d.error||'Demo non disponibile.');
       payload=d;
+      loadSandbox();
       const {place,model}=d;
       document.documentElement.style.setProperty('--brand',model.color||'#275dff');
       document.documentElement.style.setProperty('--accent',model.accent||'#17213b');
@@ -135,7 +175,7 @@
 
       $('#app').className='';
       const quotedPrice=Number(d.price||198);const startingPrice=Number(d.startingPrice||198);
-      $('#app').innerHTML=`<div class="demo-shell"><aside class="side"><div class="brand"><span class="brand-mark">EC</span><div><small>ANTEPRIMA CREATA PER</small><strong>${esc(place.name)}</strong></div></div><div class="demo-badge">DEMO INTERATTIVA</div><div class="side-price"><small>QUESTA CONFIGURAZIONE</small><strong>${money(quotedPrice)}</strong><span>una tantum</span></div><nav class="nav">${model.nav.map((x,i)=>`<button class="${i===activeIndex?'active':''}" data-index="${i}"><span>${sectionIcon(x)}</span><b>${esc(x)}</b></button>`).join('')}</nav><div class="side-info"><span>Questa è una simulazione</span><p>I dati operativi sono inventati. Il nome e le informazioni pubbliche dell’attività servono solo a rendere l’anteprima concreta.</p></div><div class="side-footer"><b>Easy Come</b><small>Più ordine. Meno caos.</small></div></aside><main class="main"><div class="demo-topline"><div><span class="pulse"></span> ${esc(expiry)}</div><div class="demo-quote"><span>Gestionali da ${money(startingPrice)}</span><strong>Questa demo: ${money(quotedPrice)}</strong></div><div class="top-actions"><a href="${studio}" id="topCta">Adattalo al tuo lavoro</a></div></div><div id="view"></div><section class="cta"><div><span>PREZZO INDICATIVO · ${money(quotedPrice)} UNA TANTUM</span><h2>Vuoi adattarlo davvero a come lavorate voi?</h2><p>Questa configurazione è già prezzata in base alle funzioni mostrate. Puoi modificarla e vedere il prezzo aggiornarsi prima di acquistare. I gestionali Easy Come partono da ${money(startingPrice)}.</p></div><a id="cta" href="${studio}">Personalizza questa versione →</a></section><div class="meta"><span>Demo Easy Come · dati operativi dimostrativi · prezzo indicativo</span><span class="google" translate="no">Google Maps</span></div></main></div>`;
+      $('#app').innerHTML=`<div class="demo-shell"><aside class="side"><div class="brand"><span class="brand-mark">EC</span><div><small>ANTEPRIMA CREATA PER</small><strong>${esc(place.name)}</strong></div></div><div class="demo-badge">DEMO OPERATIVA</div><div class="side-price"><small>QUESTA CONFIGURAZIONE</small><strong>${money(quotedPrice)}</strong><span>una tantum</span></div><nav class="nav">${model.nav.map((x,i)=>`<button class="${i===activeIndex?'active':''}" data-index="${i}"><span>${sectionIcon(x)}</span><b>${esc(x)}</b></button>`).join('')}</nav><div class="side-info"><span>Questa è una simulazione</span><p>I dati operativi sono inventati. Il nome e le informazioni pubbliche dell’attività servono solo a rendere l’anteprima concreta.</p></div><div class="side-footer"><b>Easy Come</b><small>Più ordine. Meno caos.</small></div></aside><main class="main"><div class="demo-topline"><div><span class="pulse"></span> ${esc(expiry)}</div><div class="demo-quote"><span>Gestionali da ${money(startingPrice)}</span><strong>Questa demo: ${money(quotedPrice)}</strong></div><div class="top-actions"><a href="${studio}" id="topCta">Personalizza il gestionale</a></div></div><div id="view"></div><section class="cta"><div><span>PREZZO INDICATIVO · ${money(quotedPrice)} UNA TANTUM</span><h2>Hai appena provato il gestionale. Ora adattalo al tuo lavoro.</h2><p>La proposta che hai provato è già caricata nel configuratore. Puoi aggiungere o togliere funzioni e vedere il prezzo aggiornarsi prima di acquistare. I gestionali Easy Come partono da ${money(startingPrice)}.</p></div><a id="cta" href="${studio}">Personalizza questa versione →</a></section><div class="meta"><span>Demo Easy Come · dati operativi dimostrativi · prezzo indicativo</span><span class="google" translate="no">Google Maps</span></div></main></div>`;
       $$('.nav button').forEach(b=>b.onclick=()=>activate(Number(b.dataset.index)));
       const saveStudioHandoff=()=>{
         // Carry the exact proposal into Studio before navigation. Studio still

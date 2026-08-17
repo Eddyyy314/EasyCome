@@ -694,13 +694,15 @@ create table if not exists public.organizations (
 create table if not exists public.organization_members (
   organization_id uuid not null references public.organizations(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
-  role text not null default 'member' check (role in ('owner','admin','member','viewer')),
+  role text not null default 'member' check (role in ('owner','admin','member','viewer','support')),
   email text,
   created_at timestamptz not null default now(),
   primary key (organization_id, user_id)
 );
 
 alter table public.organization_members add column if not exists email text;
+alter table public.organization_members drop constraint if exists organization_members_role_check;
+alter table public.organization_members add constraint organization_members_role_check check (role in ('owner','admin','member','viewer','support'));
 
 create table if not exists public.app_settings (
   organization_id uuid not null references public.organizations(id) on delete cascade,
@@ -790,11 +792,11 @@ $$;
 
 create or replace function public.org_can_read(p_organization_id uuid)
 returns boolean language sql stable security definer set search_path = public
-as $$ select public.org_role(p_organization_id) in ('owner','admin','member','viewer'); $$;
+as $$ select public.org_role(p_organization_id) in ('owner','admin','member','viewer','support'); $$;
 
 create or replace function public.org_can_write(p_organization_id uuid)
 returns boolean language sql stable security definer set search_path = public
-as $$ select public.org_role(p_organization_id) in ('owner','admin','member'); $$;
+as $$ select public.org_role(p_organization_id) in ('owner','admin','member','support'); $$;
 
 create or replace function public.org_can_admin(p_organization_id uuid)
 returns boolean language sql stable security definer set search_path = public
@@ -1034,6 +1036,7 @@ using (bucket_id = 'easycome-documents' and public.org_can_admin((storage.folder
     safeProject.company.slug = safeProject.company.slug || slugify(safeProject.company.name);
     safeProject.entities = entities;
     safeProject.price = calculatePrice(project);
+    safeProject.managed = { supportEmail: 'infoeasycome@libero.it', supportRole: 'support', accessMode: 'magic-link', ...(safeProject.managed || {}) };
     const identity = safeProject.identity || {};
     return `window.APP_CONFIG = ${JSON.stringify({
       supabaseUrl: identity.supabaseUrl || 'INSERISCI_PROJECT_URL',
@@ -1306,7 +1309,7 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   const organizationId = String(body.organizationId || '');
   const email = String(body.email || '').trim().toLowerCase();
-  const role = ['admin','member','viewer'].includes(body.role) ? body.role : 'member';
+  const role = ['admin','member','viewer','support'].includes(body.role) ? body.role : 'member';
   const redirectTo = String(body.redirectTo || '');
   if (!organizationId || !email.includes('@')) return Response.json({ error: 'Dati invito non validi' }, { status: 400 });
 
@@ -1404,7 +1407,7 @@ Il pacchetto deve essere consegnato soltanto dopo aver completato la checklist d
 
 ## Funzioni trasversali
 - login e recupero password;
-- ruoli owner, admin, member e viewer;
+- ruoli owner, admin, member, viewer e support tecnico Easy Come;
 - dashboard con KPI calcolati dai dati;
 - ricerca, filtri e ordinamento;
 - importazione ed esportazione CSV;
@@ -1434,6 +1437,7 @@ Le automazioni email, webhook, AI e pagamenti diventano operative soltanto dopo 
 - [ ] Verificato che il titolare riceva il ruolo owner.
 - [ ] Creato almeno un utente viewer e verificati i permessi di sola lettura.
 - [ ] Verificata la cancellazione soltanto con owner/admin.
+- [ ] Se Managed è attivo, abilitato il ruolo support per infoeasycome@libero.it senza condividere password cliente.
 
 ## 2. Flussi operativi
 - [ ] Creato, modificato, duplicato ed eliminato un record per ogni sezione.
