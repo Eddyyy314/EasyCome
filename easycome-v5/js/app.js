@@ -820,48 +820,120 @@
   $('#globalPreviewMobile').onclick = openPreviewOverlay;
 
 
-  async function loadDemoProjectFromUrl(user) {
-    const slug = PROSPECT_DEMO_SLUG;
-    if (!slug) return null;
+  const demoHandoffKey = (slug = PROSPECT_DEMO_SLUG) => slug ? `easycome:demo-handoff:${slug}` : '';
+
+  function sanitizeProspectProject(incoming, data = {}) {
+    const next = structuredClone(incoming || {});
+    // A prospect demo is its own source of truth. Never merge identity/contact data
+    // from a logged-in Easy Come account or from an older local/cloud draft.
+    next.company = { ...(next.company || {}), email: '', phone: '' };
+    next.delivery = { ...(next.delivery || {}), previewApproved: true };
+    next.demoSource = {
+      ...(next.demoSource || {}),
+      generatedForDemo: true,
+      slug: PROSPECT_DEMO_SLUG,
+      quotedPrice: Number(data.price || next.demoSource?.quotedPrice || 198),
+    };
+    return next;
+  }
+
+  function readDemoHandoff() {
+    const key = demoHandoffKey();
+    if (!key) return null;
     try {
-      const response = await fetch(`/api/demo-public?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' });
-      const data = await response.json();
-      if (!response.ok || !data.project) throw new Error(data.error || 'Demo non disponibile.');
-      const incoming = data.project;
-      // Prospect demos must never inherit the currently logged-in Easy Come account.
-      // Contact details stay intentionally empty until the prospect enters their own data.
-      incoming.company = { ...(incoming.company || {}), email: '', phone: '' };
-      incoming.delivery = { ...(incoming.delivery || {}), previewApproved: true };
-      incoming.demoSource = { ...(incoming.demoSource || {}), generatedForDemo: true, slug, quotedPrice: Number(data.price || incoming.demoSource?.quotedPrice || 198) };
-      return incoming;
-    } catch (error) {
-      console.warn('Impossibile precaricare la demo:', error);
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return null;
+      const saved = JSON.parse(raw);
+      const age = Date.now() - Number(saved?.savedAt || 0);
+      if (!saved?.project || age < 0 || age > 30 * 60 * 1000) {
+        sessionStorage.removeItem(key);
+        return null;
+      }
+      return sanitizeProspectProject(saved.project, { price: saved.price });
+    } catch (_) {
       return null;
     }
   }
 
-  window.addEventListener('easycome:account-ready', async (event) => {
-    const user = event.detail?.user;
-    if (!user?.id) return;
+  async function loadDemoProjectFromUrl() {
+    const slug = PROSPECT_DEMO_SLUG;
+    if (!slug) return null;
+    try {
+      const response = await fetch(`/api/demo-public?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' });
+      let data = {};
+      try { data = await response.json(); } catch (_) {}
+      if (!response.ok || !data.project) throw new Error(data.error || 'Demo non disponibile.');
+      const incoming = sanitizeProspectProject(data.project, data);
+      try {
+        sessionStorage.setItem(demoHandoffKey(slug), JSON.stringify({
+          project: incoming,
+          price: Number(data.price || incoming.demoSource?.quotedPrice || 198),
+          savedAt: Date.now(),
+        }));
+      } catch (_) {}
+      return incoming;
+    } catch (error) {
+      // If the prospect has just clicked from the demo page, use the exact snapshot
+      // that page received from the backend. This makes the handoff resilient to a
+      // transient network/API failure without ever falling back to an unrelated draft.
+      const handoff = readDemoHandoff();
+      if (handoff) return handoff;
+      throw error;
+    }
+  }
+
+  function resetComposerForDemo() {
+    currentStep = 1;
+    customFieldDraft = [];
+    sectionDraft = { label: '', singular: '' };
+    automationDraft = { name: '', trigger: 'record_created', entity: '', action: 'notify', target: '', message: '', enabled: true };
+    previewMode = 'dashboard';
+    previewDevice = 'desktop';
+    previewEntityKey = '';
+    previewHubTab = 'home';
+  }
+
+  function renderDemoLoadError(error) {
+    const panel = $('#panel');
+    if (!panel) return;
+    $('#stepList').innerHTML = '';
+    $('#summary').innerHTML = '';
+    panel.innerHTML = `<div class="prospect-prefill-error"><span>DEMO EASY COME</span><h2>Non riesco a caricare questa proposta.</h2><p>${esc(error?.message || 'Riprova tra qualche secondo.')}</p><button class="btn btn-primary" id="retryDemoPrefill">Riprova a caricare la demo</button><a class="btn btn-secondary" href="/demo?d=${encodeURIComponent(PROSPECT_DEMO_SLUG)}">Torna alla demo</a></div>`;
+    $('#retryDemoPrefill')?.addEventListener('click', () => bootstrapProspectDemo(true));
+  }
+
+  let prospectBootPromise = null;
+  async function bootstrapProspectDemo(force = false) {
+    if (!PROSPECT_MODE) return;
+    if (prospectBootPromise && !force) return prospectBootPromise;
+    prospectBootPromise = (async () => {
+      try {
+        const demoProject = await loadDemoProjectFromUrl();
+        if (!demoProject) throw new Error('La proposta non contiene una configurazione valida.');
+        activeUserId = `prospect:${PROSPECT_DEMO_SLUG}`;
+        // Critical rule: demo project wins over every cloud/local/account draft.
+        project = normalizeProject(demoProject);
+        resetComposerForDemo();
+        saveDraft();
+        render();
+      } catch (error) {
+        console.warn('Impossibile precaricare la demo:', error);
+        renderDemoLoadError(error);
+      }
+    })();
+    try { await prospectBootPromise; } finally { prospectBootPromise = null; }
+  }
+
+  async function bootstrapAccountProject(user) {
+    if (PROSPECT_MODE || !user?.id) return;
     const switchedAccount = Boolean(activeUserId && activeUserId !== user.id);
     activeUserId = user.id;
-    const demoProject = await loadDemoProjectFromUrl(user);
-    const saved = demoProject ? null : await window.EasyComeAccount?.loadLatestProject?.();
-    const local = demoProject ? null : loadDraft(user.id);
-    const legacy = demoProject ? null : legacyDraftForUser(user);
-    project = normalizeProject(demoProject || saved || local || legacy || G.defaultProject());
-    if (!demoProject && !project.company.email) project.company.email = user.email || '';
-    if (demoProject) {
-      // A prospect must start from the exact product shown in the demo, not from a fresh configurator.
-      currentStep = 1;
-      customFieldDraft = [];
-      sectionDraft = { label: '', singular: '' };
-      automationDraft = { name: '', trigger: 'record_created', entity: '', action: 'notify', target: '', message: '', enabled: true };
-      previewMode = 'dashboard';
-      previewDevice = 'desktop';
-      previewEntityKey = '';
-      previewHubTab = 'home';
-    } else if (switchedAccount || (!saved && !local && !legacy)) {
+    const saved = await window.EasyComeAccount?.loadLatestProject?.();
+    const local = loadDraft(user.id);
+    const legacy = legacyDraftForUser(user);
+    project = normalizeProject(saved || local || legacy || G.defaultProject());
+    if (!project.company.email) project.company.email = user.email || '';
+    if (switchedAccount || (!saved && !local && !legacy)) {
       currentStep = 0;
       customFieldDraft = [];
       sectionDraft = { label: '', singular: '' };
@@ -873,7 +945,16 @@
     }
     saveDraft();
     render();
+  }
+
+  window.addEventListener('easycome:account-ready', (event) => {
+    // In prospect mode account timing must never decide which project is loaded.
+    if (PROSPECT_MODE) return;
+    bootstrapAccountProject(event.detail?.user).catch((error) => console.warn('Errore caricamento progetto account:', error));
   });
 
   render();
+  // Deterministic demo bootstrap: do not wait for account.js. This removes the
+  // intermittent race where easycome:account-ready fired before app.js listened.
+  if (PROSPECT_MODE) bootstrapProspectDemo();
 }());

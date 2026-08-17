@@ -137,8 +137,17 @@
       const quotedPrice=Number(d.price||198);const startingPrice=Number(d.startingPrice||198);
       $('#app').innerHTML=`<div class="demo-shell"><aside class="side"><div class="brand"><span class="brand-mark">EC</span><div><small>ANTEPRIMA CREATA PER</small><strong>${esc(place.name)}</strong></div></div><div class="demo-badge">DEMO INTERATTIVA</div><div class="side-price"><small>QUESTA CONFIGURAZIONE</small><strong>${money(quotedPrice)}</strong><span>una tantum</span></div><nav class="nav">${model.nav.map((x,i)=>`<button class="${i===activeIndex?'active':''}" data-index="${i}"><span>${sectionIcon(x)}</span><b>${esc(x)}</b></button>`).join('')}</nav><div class="side-info"><span>Questa è una simulazione</span><p>I dati operativi sono inventati. Il nome e le informazioni pubbliche dell’attività servono solo a rendere l’anteprima concreta.</p></div><div class="side-footer"><b>Easy Come</b><small>Più ordine. Meno caos.</small></div></aside><main class="main"><div class="demo-topline"><div><span class="pulse"></span> ${esc(expiry)}</div><div class="demo-quote"><span>Gestionali da ${money(startingPrice)}</span><strong>Questa demo: ${money(quotedPrice)}</strong></div><div class="top-actions"><a href="${studio}" id="topCta">Adattalo al tuo lavoro</a></div></div><div id="view"></div><section class="cta"><div><span>PREZZO INDICATIVO · ${money(quotedPrice)} UNA TANTUM</span><h2>Vuoi adattarlo davvero a come lavorate voi?</h2><p>Questa configurazione è già prezzata in base alle funzioni mostrate. Puoi modificarla e vedere il prezzo aggiornarsi prima di acquistare. I gestionali Easy Come partono da ${money(startingPrice)}.</p></div><a id="cta" href="${studio}">Personalizza questa versione →</a></section><div class="meta"><span>Demo Easy Come · dati operativi dimostrativi · prezzo indicativo</span><span class="google" translate="no">Google Maps</span></div></main></div>`;
       $$('.nav button').forEach(b=>b.onclick=()=>activate(Number(b.dataset.index)));
-      $('#cta').onclick=()=>event('cta');
-      $('#topCta').onclick=()=>event('cta');
+      const saveStudioHandoff=()=>{
+        // Carry the exact proposal into Studio before navigation. Studio still
+        // validates/refetches the slug, but this snapshot prevents transient API
+        // timing/network issues from ever opening an unrelated or blank project.
+        try{
+          sessionStorage.setItem(`easycome:demo-handoff:${slug}`,JSON.stringify({project:d.project,price:quotedPrice,savedAt:Date.now()}));
+        }catch(_){ }
+        event('cta');
+      };
+      $('#cta').onclick=saveStudioHandoff;
+      $('#topCta').onclick=saveStudioHandoff;
       renderMain();
       event('view');
     }catch(e){fail(e.message)}

@@ -4,6 +4,7 @@ import { textSearch, placeDetails } from '../_google-places.js';
 import { discoverPublicBusinessContacts } from '../_email-discovery.js';
 import { seenPlaceIds, createCampaign, insertTargets, recentCampaigns, campaignTargets, markCampaign } from '../_demo-store.js';
 import { buildQueryPlan, classifyPlace, buildDemoModel, demoSlug, demoPrice, outreachMessage, outreachSubject, outreachShortMessage, prospectScores } from '../_demo-factory-core.js';
+import { sendLiberoOutreach } from '../_libero-mail.js';
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function baseUrl(req){return String(process.env.APP_URL||`${req.headers?.['x-forwarded-proto']||'https'}://${req.headers?.host||'easy-come.it'}`).replace(/\/$/,'')}
@@ -19,6 +20,10 @@ export default async function handler(req,res){
     }
     if(req.method!=='POST')return res.status(405).json({error:'Metodo non consentito.'});
     const action=String(req.body?.action||'generate');
+    if(action==='send-email'){
+      const sent=await sendLiberoOutreach({to:req.body?.to,subject:req.body?.subject,message:req.body?.message});
+      return res.status(200).json(sent);
+    }
     if(action==='hydrate'){
       const ids=[...new Set((req.body?.placeIds||[]).map(String).filter(Boolean))].slice(0,5);
       const details=await Promise.all(ids.map(async id=>{

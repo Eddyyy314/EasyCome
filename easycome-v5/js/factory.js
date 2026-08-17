@@ -9,13 +9,12 @@ async function api(url,opt={}){const t=await token();const r=await fetch(url,{..
 function steps(n){document.querySelectorAll('.step').forEach(x=>x.classList.toggle('done',Number(x.dataset.step)<=n))}
 function setBusy(on){$('#generate').disabled=on||!adminReady;$('#limit').disabled=on;$('#generate').textContent=on?'GENERAZIONE IN CORSO…':'⚡ TROVA E GENERA LE DEMO'}
 function euro(n){return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n)||198)}
-function emailUrl(x){const to=String(x.email||'').trim();if(!to)return'';const subject=x.subject||`Demo Easy Come per ${x.name}`;const body=x.message||'';return `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`}
 function normalizePhone(raw=''){let d=String(raw).replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);if(d && !d.startsWith('39'))d='39'+d;return d}
 function whatsappUrl(x){const msg=x.shortMessage||x.message||'';if(x.whatsapp){try{const u=new URL(x.whatsapp);u.searchParams.set('text',msg);return u.href}catch{}}const phone=normalizePhone(x.phone||'');return phone?`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`:''}
 function scoreLabel(n){n=Number(n)||0;return n>=82?'ALTISSIMO':n>=70?'ALTO':n>=55?'BUONO':'MEDIO'}
 function potentialCell(x){const n=Number(x.potential)||0;const reason=(x.potentialReasons||[]).join(' · ');return `<div class="score-wrap"><span class="score potential-score">${n}/100</span><strong>${scoreLabel(n)}</strong>${reason?`<small>${esc(reason)}</small>`:''}</div>`}
 function channelButtons(x){const parts=[];
-  if(x.email)parts.push(`<button class="contact-btn email" data-send-email="${x._i}">✉ Email</button>`);
+  if(x.email)parts.push(`<button class="contact-btn email" data-send-email="${x._i}">✉ Invia email</button>`);
   const wa=whatsappUrl(x);if(wa)parts.push(`<a class="contact-btn whatsapp" href="${esc(wa)}" target="_blank" rel="noreferrer">💬 ${x.whatsapp?'WhatsApp':'Prova WA'}</a>`);
   if(x.phone)parts.push(`<a class="contact-btn" href="tel:${esc(x.phone)}">📞 Chiama</a>`);
   if(x.instagram)parts.push(`<a class="contact-btn" href="${esc(x.instagram)}" target="_blank" rel="noreferrer">◎ Instagram</a>`);
@@ -40,7 +39,7 @@ function renderRows(){
   </tr>`).join('');
   document.querySelectorAll('[data-copy-link]').forEach(b=>b.onclick=()=>copy(targets[Number(b.dataset.copyLink)].demoUrl,'Link demo copiato'));
   document.querySelectorAll('[data-copy-msg]').forEach(b=>b.onclick=()=>copy(targets[Number(b.dataset.copyMsg)].shortMessage||targets[Number(b.dataset.copyMsg)].message,'Messaggio copiato'));
-  document.querySelectorAll('[data-send-email]').forEach(b=>b.onclick=()=>{const x=targets[Number(b.dataset.sendEmail)];const url=emailUrl(x);if(!url)return;window.location.href=url;toast('Email pronta: inviala da '+SENDER_EMAIL)});
+  document.querySelectorAll('[data-send-email]').forEach(b=>b.onclick=async()=>{const x=targets[Number(b.dataset.sendEmail)];if(!x?.email)return;if(!confirm(`Inviare la demo a ${x.email} da ${SENDER_EMAIL}?`))return;const original=b.textContent;b.disabled=true;b.textContent='Invio…';try{const d=await api('/api/demo-factory',{method:'POST',body:JSON.stringify({action:'send-email',to:x.email,subject:x.subject||`Demo Easy Come per ${x.name}`,message:x.message||''})});toast(`Email inviata da ${d.from||SENDER_EMAIL} a ${d.to||x.email} ✅`);b.textContent='✓ Inviata'}catch(e){toast(e.message||'Invio email non riuscito');b.disabled=false;b.textContent=original}});
 }
 async function copy(text,msg){try{await navigator.clipboard.writeText(text);toast(msg)}catch{prompt('Copia:',text)}}
 async function hydrateContacts(){
