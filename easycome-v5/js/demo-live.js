@@ -44,21 +44,25 @@
 
   function sectionIcon(label){
     const s=String(label||'').toLowerCase();
-    if(s.includes('dashboard'))return '⌂';
-    if(s.includes('client')||s.includes('ospit')||s.includes('pazient')||s.includes('iscritt'))return '◎';
-    if(s.includes('agenda')||s.includes('appuntament')||s.includes('prenot')||s.includes('scadenz')||s.includes('turn'))return '◷';
-    if(s.includes('pagament')||s.includes('fattur')||s.includes('cassa')||s.includes('vendit'))return '€';
-    if(s.includes('magazz')||s.includes('prodott'))return '◇';
-    if(s.includes('document'))return '▤';
-    if(s.includes('report'))return '↗';
-    if(s.includes('veicol'))return '⌁';
-    if(s.includes('intervent')||s.includes('pratic')||s.includes('trattament')||s.includes('ordini'))return '▦';
-    return '•';
+    const svg=(body)=>`<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">${body}</svg>`;
+    if(s.includes('menu'))return svg('<path d="M4 7h16M4 12h16M4 17h16"/>');
+    if(s.includes('close'))return svg('<path d="m6 6 12 12M18 6 6 18"/>');
+    if(s.includes('search'))return svg('<circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/>');
+    if(s.includes('dashboard'))return svg('<path d="M4 13h6V4H4v9Zm10 7h6V11h-6v9ZM4 20h6v-3H4v3Zm10-13h6V4h-6v3Z"/>');
+    if(s.includes('client')||s.includes('ospit')||s.includes('pazient')||s.includes('iscritt'))return svg('<circle cx="12" cy="8" r="3.2"/><path d="M5.5 20c.5-4 2.7-6 6.5-6s6 2 6.5 6"/>');
+    if(s.includes('agenda')||s.includes('appuntament')||s.includes('prenot')||s.includes('scadenz')||s.includes('turn'))return svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/>');
+    if(s.includes('pagament')||s.includes('fattur')||s.includes('cassa')||s.includes('vendit'))return svg('<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18m-5 4h2"/>');
+    if(s.includes('magazz')||s.includes('prodott'))return svg('<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>');
+    if(s.includes('document'))return svg('<path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5M9 13h6m-6 4h6"/>');
+    if(s.includes('report'))return svg('<path d="M4 20V10m5 10V4m5 16v-7m5 7V7"/>');
+    if(s.includes('veicol'))return svg('<path d="M5 16h14l-1.5-6h-11L5 16Z"/><path d="M7 10 9 6h6l2 4M7 16v2m10-2v2"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/>');
+    if(s.includes('intervent')||s.includes('pratic')||s.includes('trattament')||s.includes('ordini'))return svg('<path d="M5 4h14v16H5V4Z"/><path d="M8 8h8M8 12h8M8 16h5"/>');
+    return svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v8m-4-4h8"/>');
   }
 
   function topbar(title,subtitle){
     const {place}=payload;
-    return `<header class="view-top"><div><span class="crumb">${esc(payload.templateLabel||'GESTIONALE')} / ${esc(title.toUpperCase())}</span><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div><div class="view-user"><span>${esc(initials(place.name))}</span><div><strong>${esc(place.name)}</strong><small>Ambiente dimostrativo</small></div></div></header>`;
+    return `<header class="view-top"><div class="view-title"><span class="crumb">${esc(payload.templateLabel||'GESTIONALE')} / ${esc(title.toUpperCase())}</span><h1>${esc(title)}</h1><p>${esc(subtitle)}</p></div><div class="view-actions"><span class="sync-pill">Salvato in questo dispositivo</span><div class="view-user"><span>${esc(initials(place.name))}</span><div><strong>${esc(place.name)}</strong><small>Ambiente demo operativo</small></div></div></div></header>`;
   }
 
   function chartBars(){
@@ -67,15 +71,17 @@
 
   function dashboardView(){
     const {place,model}=payload;
+    const quick=model.nav.slice(1,4);
     return `${topbar('Panoramica',`Oggi · ${place.category}${place.address?' · '+place.address:''}`)}
-      <section class="hero"><div><span>CENTRO OPERATIVO</span><h2>Tutto sotto controllo, in un solo posto.</h2><p>Una simulazione costruita sul tipo di attività di <b>${esc(place.name)}</b>. Tutti i clienti, importi e operazioni mostrati qui sono fittizi.</p></div><button data-section-jump="1">Apri area operativa →</button></section>
-      <section class="kpis">${model.kpis.map((x,i)=>`<article class="kpi"><span>${esc(x)}</span><strong>${esc(model.values[i])}</strong><em>${i===0?'+12% rispetto a ieri':'Aggiornato adesso'}</em></article>`).join('')}</section>
-      <section class="dash-grid"><article class="card chart-card"><div class="card-head"><div><span>ANDAMENTO</span><h3>Ultimi 12 periodi</h3></div><b>+18,4%</b></div><div class="chart">${chartBars()}</div><div class="chart-axis"><span>inizio</span><span>oggi</span></div></article><article class="card"><div class="card-head"><div><span>ATTIVITÀ RECENTE</span><h3>Automazioni e aggiornamenti</h3></div><b class="live-dot">LIVE</b></div><div class="timeline">${model.activity.map((x,i)=>`<div><i></i><span><strong>${esc(x)}</strong><small>${['2 minuti fa','18 minuti fa','1 ora fa'][i]||'oggi'}</small></span></div>`).join('')}</div></article></section>
-      <section class="card table-card"><div class="card-head"><div><span>OPERATIVITÀ</span><h3>Elementi che richiedono attenzione</h3></div><button data-section-jump="1">Vedi tutto</button></div>${tableHtml(['Cliente / voce','Dettaglio','Info','Stato'],model.rows)}</section>`;
+      <section class="hero"><div><span class="hero-kicker">CENTRO OPERATIVO</span><h2>Il lavoro di oggi, senza fogli sparsi.</h2><p>Questa è una versione utilizzabile del gestionale pensata per <b>${esc(place.name)}</b>. Puoi entrare nelle sezioni, creare record e modificare i dati demo.</p></div><div class="hero-actions"><button class="secondary-action" data-section-jump="1">Apri operatività</button><button class="primary-action" data-quick-new>+ Nuova voce</button></div></section>
+      <section class="kpis">${model.kpis.map((x,i)=>`<article class="kpi"><div class="kpi-top"><span>${esc(x)}</span><i class="kpi-icon">${sectionIcon(model.nav[i+1]||model.nav[1]||'Dashboard')}</i></div><strong>${esc(model.values[i])}</strong><em>${i===0?'+12% rispetto a ieri':i===3?'+8,4% questo mese':'Aggiornato adesso'}</em></article>`).join('')}</section>
+      <section class="quick-grid">${quick.map((x,i)=>`<button class="quick-card" data-section-jump="${i+1}"><i class="quick-icon">${sectionIcon(x)}</i><span><strong>${esc(x)}</strong><small>Apri e lavora sui dati</small></span><svg viewBox="0 0 24 24" fill="none"><path d="m9 18 6-6-6-6"/></svg></button>`).join('')}</section>
+      <section class="dash-grid"><article class="card chart-card"><div class="card-head"><div><span>ANDAMENTO</span><h3>Attività degli ultimi 12 periodi</h3></div><b>+18,4%</b></div><div class="chart">${chartBars()}</div><div class="chart-axis"><span>inizio</span><span>oggi</span></div></article><article class="card"><div class="card-head"><div><span>ATTIVITÀ RECENTE</span><h3>Automazioni e aggiornamenti</h3></div><b class="live-dot">LIVE</b></div><div class="timeline">${model.activity.map((x,i)=>`<div><i></i><span><strong>${esc(x)}</strong><small>${['2 minuti fa','18 minuti fa','1 ora fa'][i]||'oggi'}</small></span></div>`).join('')}</div></article></section>
+      <section class="card table-card"><div class="card-head"><div><span>DA GESTIRE</span><h3>Elementi che richiedono attenzione</h3></div><button data-section-jump="1">Vedi tutto</button></div>${tableHtml(['Cliente / voce','Dettaglio','Info','Stato'],model.rows)}</section>`;
   }
 
   function tableHtml(headings,rows,interactive=false,sourceIndexes=[]){
-    return `<div class="table-wrap"><table><thead><tr>${headings.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((r,idx)=>`<tr ${interactive?`data-row-index="${sourceIndexes[idx]??idx}" class="demo-data-row ${(sourceIndexes[idx]??idx)===selectedRow?'selected':''}"`:''}>${r.map((c,i)=>`<td>${i===0?`<strong>${esc(c)}</strong>`:i===r.length-1?`<span class="status ${idx%3===2?'neutral':''}">${esc(c)}</span>`:esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    return `<div class="table-wrap"><table><thead><tr>${headings.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map((r,idx)=>`<tr ${interactive?`data-row-index="${sourceIndexes[idx]??idx}" class="demo-data-row ${(sourceIndexes[idx]??idx)===selectedRow?'selected':''}"`:''}>${r.map((c,i)=>`<td data-label="${esc(headings[i]||'Campo')}">${i===0?`<strong>${esc(c)}</strong>`:i===r.length-1?`<span class="status ${idx%3===2?'neutral':''}">${esc(c)}</span>`:esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   }
 
   function listPreset(label){
@@ -107,11 +113,11 @@
 
   function calendarView(label){
     const data=sectionData(label),p=data.preset,rows=data.rows;
-    return `${topbar(p.title,p.sub)}<section class="sandbox-note"><b>MODALITÀ PROVA</b><span>Puoi creare, modificare e cancellare elementi: restano solo su questo browser e non toccano dati reali.</span><button data-reset-demo>Ripristina</button></section><section class="calendar-layout"><article class="card calendar-card"><div class="calendar-head"><button>‹</button><div><span>AGOSTO 2026</span><h3>Settimana operativa</h3></div><button>›</button></div><div class="calendar-grid">${['Lun 17','Mar 18','Mer 19','Gio 20','Ven 21'].map((d,di)=>`<div class="day"><b>${d}</b>${Array.from({length:di%3+2},(_,i)=>`<span style="--shift:${15+(i*27)}%"><small>${9+i*2}:30</small>${esc(rows[(di+i)%Math.max(rows.length,1)]?.[0]||'Attività')}</span>`).join('')}</div>`).join('')}</div></article><article class="card side-summary"><span>OGGI</span><h3>${rows.length} attività nella demo</h3><div class="summary-list">${rows.slice(0,4).map((r,i)=>`<button class="summary-demo-row" data-row-index="${i}"><i></i><span><strong>${esc(r[0])}</strong><small>${esc(r[1]||'')} · ${esc(r[2]||'')}</small></span></button>`).join('')}</div><button data-new-row>+ Nuova attività</button></article></section>`;
+    return `${topbar(p.title,p.sub)}<section class="sandbox-note"><b>MODALITÀ PROVA</b><span>Crea e modifica le attività: restano solo su questo dispositivo e non toccano dati reali.</span><button data-reset-demo>Ripristina</button></section><section class="workspace-tools"><label class="demo-search">${sectionIcon('agenda')}<input value="" placeholder="Cerca nella giornata…" disabled></label><button data-calendar-nav="prev">← Settimana</button><button data-calendar-nav="next">Settimana →</button><b data-new-row>+ Nuova attività</b></section><section class="calendar-layout"><article class="card calendar-card"><div class="calendar-head"><button data-calendar-nav="prev">‹</button><div><span>AGOSTO 2026</span><h3>Settimana operativa</h3></div><button data-calendar-nav="next">›</button></div><div class="calendar-grid">${['Lun 17','Mar 18','Mer 19','Gio 20','Ven 21'].map((d,di)=>`<div class="day"><b>${d}</b>${Array.from({length:di%3+2},(_,i)=>`<span style="--shift:${15+(i*27)}%"><small>${9+i*2}:30</small>${esc(rows[(di+i)%Math.max(rows.length,1)]?.[0]||'Attività')}</span>`).join('')}</div>`).join('')}</div></article><article class="card side-summary"><span>OGGI</span><h3>${rows.length} attività nella demo</h3><div class="summary-list">${rows.slice(0,5).map((r,i)=>`<button class="summary-demo-row" data-row-index="${i}"><i></i><span><strong>${esc(r[0])}</strong><small>${esc(r[1]||'')} · ${esc(r[2]||'')}</small></span></button>`).join('')}</div><button data-new-row>+ Nuova attività</button></article></section><section class="agenda-mobile">${rows.slice(0,6).map((r,i)=>`<article class="agenda-row"><time>${esc(r[0]&&/^\d/.test(r[0])?r[0]:'09:30')}</time><span><strong>${esc(r[1]||r[0]||'Attività')}</strong><small>${esc(r[2]||'Attività demo')} · ${esc(r[3]||'Confermato')}</small></span><button data-row-index="${i}">Apri</button></article>`).join('')}<button data-new-row class="quick-card"><strong>+ Nuova attività</strong></button></section>`;
   }
 
   function reportView(label){
-    return `${topbar(label,'Indicatori sintetici e andamento operativo')}<section class="report-grid"><article class="card report-main"><div class="card-head"><div><span>PERFORMANCE</span><h3>Andamento mensile</h3></div><b>+21,8%</b></div><div class="big-chart">${[38,52,47,66,58,73,69,81,76,88,84,94].map((h,i)=>`<div><i style="height:${h}%"></i><small>${i+1}</small></div>`).join('')}</div></article><article class="card report-side"><span>RIEPILOGO</span><div><small>Valore mese</small><strong>${money(18640)}</strong></div><div><small>Operazioni concluse</small><strong>128</strong></div><div><small>Tempo risparmiato</small><strong>31 h</strong></div><div><small>Automazioni eseguite</small><strong>246</strong></div></article></section><section class="kpis compact">${payload.model.kpis.map((x,i)=>`<article class="kpi"><span>${esc(x)}</span><strong>${esc(payload.model.values[i])}</strong><em>dato demo</em></article>`).join('')}</section>`;
+    return `${topbar(label,'Indicatori sintetici e andamento operativo')}<section class="sandbox-note"><b>REPORT DEMO</b><span>I valori sono simulati, ma la struttura mostra come potresti leggere il business in tempo reale.</span><button data-reset-demo>Ripristina</button></section><section class="report-grid"><article class="card report-main"><div class="card-head"><div><span>PERFORMANCE</span><h3>Andamento mensile</h3></div><b>+21,8%</b></div><div class="big-chart">${[38,52,47,66,58,73,69,81,76,88,84,94].map((h,i)=>`<div><i style="height:${h}%"></i><small>${i+1}</small></div>`).join('')}</div></article><article class="card report-side"><span>RIEPILOGO</span><div><small>Valore mese</small><strong>${money(18640)}</strong></div><div><small>Operazioni concluse</small><strong>128</strong></div><div><small>Tempo risparmiato</small><strong>31 h</strong></div><div><small>Automazioni eseguite</small><strong>246</strong></div></article></section><section class="kpis compact">${payload.model.kpis.map((x,i)=>`<article class="kpi"><div class="kpi-top"><span>${esc(x)}</span><i class="kpi-icon">${sectionIcon('report')}</i></div><strong>${esc(payload.model.values[i])}</strong><em>dato demo</em></article>`).join('')}</section>`;
   }
 
   function modalForRow(label,index,isNew=false){
@@ -125,18 +131,19 @@
   function bindWorkspace(label){
     $$('[data-row-index]').forEach(r=>r.onclick=()=>{selectedRow=Number(r.dataset.rowIndex)||0;renderMain()});
     $('#demoSearch')?.addEventListener('input',e=>{workspaceQuery=e.target.value;renderMain();requestAnimationFrame(()=>{const i=$('#demoSearch');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}})});
-    $('[data-new-row]')?.addEventListener('click',()=>modalForRow(label,0,true));
+    $$('[data-new-row]').forEach(b=>b.addEventListener('click',()=>modalForRow(label,0,true)));
     $('[data-edit-row]')?.addEventListener('click',()=>modalForRow(label,selectedRow,false));
     $('[data-delete-row]')?.addEventListener('click',()=>deleteRow(label,selectedRow));
     $('[data-duplicate-row]')?.addEventListener('click',()=>duplicateRow(label,selectedRow));
     $('[data-export-demo]')?.addEventListener('click',()=>exportSection(label));
+    $$('[data-calendar-nav]').forEach(b=>b.addEventListener('click',()=>toastDemo(b.dataset.calendarNav==='prev'?'Settimana precedente caricata nella demo.':'Settimana successiva caricata nella demo.')));
   }
   function workspaceView(label){
     const s=String(label||'').toLowerCase();
     if(/agenda|appuntament|prenotaz|scadenz|turni|disponibil/.test(s))return calendarView(label);
     if(/report/.test(s))return reportView(label);
     const {preset:p,rows}=sectionData(label);const q=workspaceQuery.trim().toLowerCase();const indexed=rows.map((r,i)=>({r,i})).filter(x=>!q||x.r.some(c=>String(c).toLowerCase().includes(q)));const shown=indexed.map(x=>x.r),indexes=indexed.map(x=>x.i);if(selectedRow>=rows.length)selectedRow=Math.max(0,rows.length-1);const selected=rows[selectedRow]||[];
-    return `${topbar(p.title,p.sub)}<section class="sandbox-note"><b>GESTIONALE IN PROVA</b><span>Qui puoi lavorare davvero sui dati demo: crea, modifica, duplica, elimina, cerca ed esporta. Le modifiche restano solo sul tuo browser.</span><button data-reset-demo>Ripristina</button></section><section class="workspace-tools live-tools"><label class="demo-search">⌕ <input id="demoSearch" value="${esc(workspaceQuery)}" placeholder="Cerca in ${esc(p.title.toLowerCase())}…"></label><button data-export-demo>Esporta CSV</button><i>${shown.length} risultati</i><b data-new-row>+ Nuova voce</b></section><section class="work-grid"><article class="card table-card work-table">${tableHtml(p.heads,shown,true,indexes)}</article><aside class="card detail-card"><span>SCHEDA SELEZIONATA</span>${selected.length?`<h3>${esc(selected[0]||p.title)}</h3>${p.heads.slice(1).map((h,i)=>`<div><small>${esc(h)}</small><strong>${esc(selected[i+1]||'—')}</strong></div>`).join('')}<footer class="demo-detail-actions"><button data-edit-row>Modifica</button><button data-duplicate-row>Duplica</button><button class="danger" data-delete-row>Elimina</button></footer>`:`<h3>Nessun elemento</h3><p>Crea una nuova voce per provare questa sezione.</p><footer><button data-new-row>+ Nuova voce</button></footer>`}</aside></section>`;
+    return `${topbar(p.title,p.sub)}<section class="sandbox-note"><b>GESTIONALE IN PROVA</b><span>Questa sezione è operativa: crea, modifica, duplica, elimina, cerca ed esporta i dati demo.</span><button data-reset-demo>Ripristina</button></section><section class="workspace-tools live-tools"><label class="demo-search">${sectionIcon('search')}<input id="demoSearch" value="${esc(workspaceQuery)}" placeholder="Cerca in ${esc(p.title.toLowerCase())}…"></label><button data-export-demo>Esporta CSV</button><i>${shown.length} risultati</i><b data-new-row>+ Nuova voce</b></section><section class="work-grid"><article class="card table-card work-table">${tableHtml(p.heads,shown,true,indexes)}</article><aside class="card detail-card"><span>SCHEDA SELEZIONATA</span>${selected.length?`<h3>${esc(selected[0]||p.title)}</h3>${p.heads.slice(1).map((h,i)=>`<div><small>${esc(h)}</small><strong>${esc(selected[i+1]||'—')}</strong></div>`).join('')}<footer class="demo-detail-actions"><button data-edit-row>Modifica</button><button data-duplicate-row>Duplica</button><button class="danger" data-delete-row>Elimina</button></footer>`:`<h3>Nessun elemento</h3><p>Crea una nuova voce per provare questa sezione.</p><footer><button data-new-row>+ Nuova voce</button></footer>`}</aside></section>`;
   }
 
   function renderMain(){
@@ -144,15 +151,31 @@
     const label=model.nav[activeIndex]||model.nav[0]||'Dashboard';
     $('#view').innerHTML=activeIndex===0?dashboardView():workspaceView(label);
     $$('[data-section-jump]').forEach(b=>b.onclick=()=>activate(Number(b.dataset.sectionJump||0)));
+    $('[data-quick-new]')?.addEventListener('click',()=>{activate(Math.min(1,model.nav.length-1));requestAnimationFrame(()=>modalForRow(model.nav[1]||'Attività',0,true))});
     if(activeIndex>0)bindWorkspace(label);
     $('[data-reset-demo]')?.addEventListener('click',resetSandbox);
   }
 
   function activate(index){
     activeIndex=Math.max(0,Math.min(index,payload.model.nav.length-1));
-    $$('.nav button').forEach((b,i)=>b.classList.toggle('active',i===activeIndex));
+    $$('[data-index]').forEach(b=>b.classList.toggle('active',Number(b.dataset.index)===activeIndex));
+    const more=$('#mobileMore');if(more)more.classList.toggle('active',activeIndex>3);
+    closeMobileMenu();
     renderMain();
+    window.scrollTo({top:0,behavior:'smooth'});
     history.replaceState(null,'',`${location.pathname}?d=${encodeURIComponent(slug)}&section=${activeIndex}`);
+  }
+
+  
+  function openMobileMenu(){
+    $('#demoSide')?.classList.add('open');
+    $('#sideBackdrop')?.classList.add('show');
+    document.body.style.overflow='hidden';
+  }
+  function closeMobileMenu(){
+    $('#demoSide')?.classList.remove('open');
+    $('#sideBackdrop')?.classList.remove('show');
+    document.body.style.overflow='';
   }
 
   async function init(){
@@ -175,19 +198,16 @@
 
       $('#app').className='';
       const quotedPrice=Number(d.price||198);const startingPrice=Number(d.startingPrice||198);
-      $('#app').innerHTML=`<div class="demo-shell"><aside class="side"><div class="brand"><span class="brand-mark">EC</span><div><small>ANTEPRIMA CREATA PER</small><strong>${esc(place.name)}</strong></div></div><div class="demo-badge">DEMO OPERATIVA</div><div class="side-price"><small>QUESTA CONFIGURAZIONE</small><strong>${money(quotedPrice)}</strong><span>una tantum</span></div><nav class="nav">${model.nav.map((x,i)=>`<button class="${i===activeIndex?'active':''}" data-index="${i}"><span>${sectionIcon(x)}</span><b>${esc(x)}</b></button>`).join('')}</nav><div class="side-info"><span>Questa è una simulazione</span><p>I dati operativi sono inventati. Il nome e le informazioni pubbliche dell’attività servono solo a rendere l’anteprima concreta.</p></div><div class="side-footer"><b>Easy Come</b><small>Più ordine. Meno caos.</small></div></aside><main class="main"><div class="demo-topline"><div><span class="pulse"></span> ${esc(expiry)}</div><div class="demo-quote"><span>Gestionali da ${money(startingPrice)}</span><strong>Questa demo: ${money(quotedPrice)}</strong></div><div class="top-actions"><a href="${studio}" id="topCta">Personalizza il gestionale</a></div></div><div id="view"></div><section class="cta"><div><span>PREZZO INDICATIVO · ${money(quotedPrice)} UNA TANTUM</span><h2>Hai appena provato il gestionale. Ora adattalo al tuo lavoro.</h2><p>La proposta che hai provato è già caricata nel configuratore. Puoi aggiungere o togliere funzioni e vedere il prezzo aggiornarsi prima di acquistare. I gestionali Easy Come partono da ${money(startingPrice)}.</p></div><a id="cta" href="${studio}">Personalizza questa versione →</a></section><div class="meta"><span>Demo Easy Come · dati operativi dimostrativi · prezzo indicativo</span><span class="google" translate="no">Google Maps</span></div></main></div>`;
-      $$('.nav button').forEach(b=>b.onclick=()=>activate(Number(b.dataset.index)));
+      const navButtons=model.nav.map((x,i)=>`<button class="${i===activeIndex?'active':''}" data-index="${i}"><span class="nav-icon">${sectionIcon(x)}</span><b>${esc(x)}</b></button>`).join('');
+      const mobileTabs=model.nav.slice(0,4).map((x,i)=>`<button class="${i===activeIndex?'active':''}" data-index="${i}">${sectionIcon(x)}<span>${esc(x)}</span></button>`).join('');
+      $('#app').innerHTML=`<div class="demo-shell"><aside class="side" id="demoSide"><div class="brand"><span class="brand-mark">EC</span><div><small>GESTIONALE CREATO PER</small><strong>${esc(place.name)}</strong></div><button class="side-close" id="sideClose" aria-label="Chiudi menu">${sectionIcon('close')}</button></div><div class="side-head"><div class="demo-badge">DEMO OPERATIVA</div></div><div class="side-price"><small>QUESTA CONFIGURAZIONE</small><strong>${money(quotedPrice)}</strong><span>una tantum</span></div><div class="nav-label">AREA DI LAVORO</div><nav class="nav">${navButtons}</nav><div class="side-info"><span>Ambiente dimostrativo</span><p>I dati operativi sono inventati. Puoi modificarli liberamente: le prove restano solo sul tuo dispositivo.</p></div><div class="side-footer"><b>Easy Come</b><small>Più ordine. Meno caos.</small></div></aside><div class="side-backdrop" id="sideBackdrop"></div><header class="mobile-appbar"><button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Apri menu">${sectionIcon('menu')}</button><div class="mobile-brand"><strong>${esc(place.name)}</strong><small>${esc(payload.templateLabel||'Gestionale Easy Come')} · Demo operativa</small></div><span class="mobile-price">${money(quotedPrice)}</span><a href="${studio}" class="mobile-cta" id="mobileCta">Personalizza</a></header><main class="main"><div class="demo-topline"><div class="expiry"><span class="pulse"></span>${esc(expiry)}</div><div class="demo-quote"><span>Gestionali da ${money(startingPrice)}</span><strong>Questa demo: ${money(quotedPrice)}</strong></div><div class="top-actions"><a href="${studio}" id="topCta">Personalizza il gestionale</a></div></div><div id="view"></div><section class="cta"><div><span>PREZZO INDICATIVO · ${money(quotedPrice)} UNA TANTUM</span><h2>Questa base è già pronta. Adesso rendila tua.</h2><p>Nel configuratore ritrovi esattamente questa proposta: puoi aggiungere o togliere funzioni e vedere il prezzo aggiornarsi prima dell’acquisto.</p></div><a id="cta" href="${studio}">Personalizza questa versione →</a></section><div class="meta"><span>Demo Easy Come · dati operativi dimostrativi · prezzo indicativo</span><span class="google" translate="no">Google Maps</span></div></main><nav class="mobile-nav">${mobileTabs}<button id="mobileMore">${sectionIcon('menu')}<span>Altro</span></button></nav></div>`;
+      $$('[data-index]').forEach(b=>b.onclick=()=>activate(Number(b.dataset.index)));
+      $('#mobileMenuBtn')?.addEventListener('click',openMobileMenu);$('#mobileMore')?.addEventListener('click',openMobileMenu);$('#sideClose')?.addEventListener('click',closeMobileMenu);$('#sideBackdrop')?.addEventListener('click',closeMobileMenu);
       const saveStudioHandoff=()=>{
-        // Carry the exact proposal into Studio before navigation. Studio still
-        // validates/refetches the slug, but this snapshot prevents transient API
-        // timing/network issues from ever opening an unrelated or blank project.
-        try{
-          sessionStorage.setItem(`easycome:demo-handoff:${slug}`,JSON.stringify({project:d.project,price:quotedPrice,savedAt:Date.now()}));
-        }catch(_){ }
+        try{sessionStorage.setItem(`easycome:demo-handoff:${slug}`,JSON.stringify({project:d.project,price:quotedPrice,savedAt:Date.now()}));}catch(_){ }
         event('cta');
       };
-      $('#cta').onclick=saveStudioHandoff;
-      $('#topCta').onclick=saveStudioHandoff;
+      ['cta','topCta','mobileCta'].forEach(id=>{const el=$('#'+id);if(el)el.onclick=saveStudioHandoff});
       renderMain();
       event('view');
     }catch(e){fail(e.message)}
