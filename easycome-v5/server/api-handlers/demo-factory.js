@@ -110,7 +110,7 @@ export default async function handler(req,res){
         profile=buildWebsiteProfile(place,target.template_id,{});
       }
       const bytes=createWebsiteZip(profile,{siteUrl:`https://${profile.slug}.example.com`});
-      const filename=`${profile.slug}-easycome-site.zip`;
+      const filename=`${profile.slug}-easycome-web.zip`;
       res.setHeader('content-type','application/zip');
       res.setHeader('content-disposition',`attachment; filename="${filename}"`);
       res.setHeader('cache-control','private, no-store, max-age=0');

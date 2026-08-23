@@ -1,40 +1,29 @@
-# Easy Come — Automation Ecosystem
+# Easy Come V24 — Automation + Web Studio
 
-**La tua PMI. Ma automatizzata.**
+Easy Come è il brand dedicato all’automazione delle PMI. Il Gestionale resta il cuore operativo dell’ecosistema; Easy Come Audit è un modulo complementare del Gestionale. **Easy Come Web** è invece un prodotto autonomo del brand.
 
-Questa versione posiziona Easy Come come ecosistema per l’automazione delle PMI:
+## Cosa contiene
+- Sito pubblico Easy Come con posizionamento “La tua PMI. Ma automatizzata.”
+- Easy Come Studio per configurare i gestionali.
+- Hub, Audit e automazioni del Gestionale.
+- Control Room / Demo Factory.
+- **Easy Come Web Studio**: genera concept e progetti React/Vite premium per PMI prive di sito, senza richiedere il Gestionale.
 
-- **Gestionale Easy Come**: cuore operativo e fonte dati centrale.
-- **Automazioni**: regole e flussi costruiti sul lavoro reale dell’azienda.
-- **Easy Come Audit**: modulo complementare opzionale da **€100/mese**, utilizzabile solo insieme al Gestionale e collegato allo stesso database.
-- **Easy Come Hub**: accesso centrale a Gestionale, Audit, assistenza e nuove funzioni.
+## Easy Come Web
+La Factory propone 8 art direction (Editoriale, Cinematica, Studio, Organica, Coastal, Bold, Clinical, Gallery), copy specifico per settore, preview responsive e download di un progetto React strutturato. Nessuna palette Easy Come viene imposta al sito del cliente. Le immagini demo vanno sostituite con asset autorizzati prima della pubblicazione.
 
-- **Easy Come Web Factory**: individua le PMI senza sito dalla Demo Factory e genera un sito multipagina vero (Home, Servizi, Chi siamo, Contatti, Privacy, pagina richiesta/prenotazione quando serve), responsive, SEO-ready e predisposto per salvare le richieste nello stesso Gestionale Easy Come.
+## Avvio
+```bash
+npm install
+npm run dev
+```
 
-## Repository alleggerita per GitHub
-
-`dist-public/` non è incluso nello ZIP perché è un output generato automaticamente e duplicava i file sorgente. È già escluso da `.gitignore`. Per ricrearlo:
-
+## Build pubblica
 ```bash
 npm run build
 ```
+La cartella `dist-public/` viene generata dal build e non è inclusa nel pacchetto GitHub per evitare duplicati.
 
-## Pubblicazione
-
-La repository può essere caricata su GitHub. Per il prodotto completo (login, Supabase, Stripe, webhook e API) usa il repository collegato a Vercel o a un hosting Node/serverless compatibile. GitHub Pages da solo può mostrare la parte statica, ma non esegue le API in `api/` e `server/`.
-
-## Sicurezza
-
-Non caricare `.env` o chiavi reali nel repository. Usa `.env.example` come riferimento e configura le variabili sensibili sul provider di hosting.
-
-## Web Factory
-
-Nella Demo Factory, dopo la scansione dei contatti pubblici, le attività senza sito vengono marcate come opportunità Web Factory. Puoi:
-
-1. generare un sito singolo e rifinirne stile, headline, CTA e colore;
-2. generare in batch tutti i siti mancanti del prospect batch;
-3. aprire una preview desktop/mobile;
-4. scaricare un pacchetto ZIP multipagina pronto alla personalizzazione e pubblicazione;
-5. quando il sito viene generato dentro un Gestionale Easy Come, collegare il modulo contatti alla tabella `public_submissions` della stessa `organization_id`.
-
-Il generatore non usa un look “AI” o una singola landing universale: applica sistemi editoriali diversi per hospitality, appuntamenti, professionisti, retail, progetti e attività tecniche.
+## Documentazione
+- `AUDIT-ECOSYSTEM.md` — architettura Audit + Gestionale
+- `EASYCOME-WEB.md` — specifica Easy Come Web
