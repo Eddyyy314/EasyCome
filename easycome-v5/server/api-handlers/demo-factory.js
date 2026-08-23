@@ -5,6 +5,7 @@ import { discoverPublicBusinessContacts } from '../_email-discovery.js';
 import { seenPlaceIds, createCampaign, insertTargets, recentCampaigns, campaignTargets, markCampaign, targetBySlug, updateTarget } from '../_demo-store.js';
 import { buildQueryPlan, classifyPlace, buildDemoModel, demoSlug, demoPrice, outreachMessage, outreachSubject, outreachShortMessage, prospectScores } from '../_demo-factory-core.js';
 import { sendLiberoOutreach } from '../_libero-mail.js';
+import { buildWebsiteProfile, createWebsiteZip } from '../_website-factory.js';
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function baseUrl(req){return String(process.env.APP_URL||`${req.headers?.['x-forwarded-proto']||'https'}://${req.headers?.host||'easy-come.it'}`).replace(/\/$/,'')}
@@ -29,11 +30,13 @@ export default async function handler(req,res){
           const price=Number(cfg.quotedPrice||198);
           const emailed=Boolean(outreach.lastEmail);
           const contactStatus=outreach.contactStatus==='contacted'||emailed?'contacted':'not_contacted';
+          const websiteProfile=cfg.websiteProfile&&typeof cfg.websiteProfile==='object'?cfg.websiteProfile:null;
           return {
             id:row.place_id,demoSlug:row.demo_slug,demoUrl,templateId:row.template_id,
             templateLabel:cfg.label||row.template_id,name,address:snap.address||'',category:snap.category||'',
             price,subject:outreachSubject(place),message:outreachMessage(place,demoUrl,price),shortMessage:outreachShortMessage(place,demoUrl,price),
             emailDelivery:outreach.lastEmail||null,contactStatus,contactedAt:outreach.contactedAt||outreach.lastEmail?.sentAt||'',
+            websiteReady:Boolean(websiteProfile),websiteProfile,websiteDemoUrl:websiteProfile?`${origin}/web-demo.html?d=${encodeURIComponent(row.demo_slug)}`:'',
             contactability:0,potential:0,potentialReasons:[],mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=${encodeURIComponent(row.place_id||'')}`,
             createdAt:row.created_at||'',expiresAt:row.expires_at||''
           };
@@ -79,6 +82,39 @@ export default async function handler(req,res){
       const now=new Date().toISOString();
       await updateTarget(target.id,{demo_config:{...current,outreach:{...outreach,contactStatus:contacted?'contacted':'not_contacted',contactedAt:contacted?now:null,contactedVia:contacted?(String(req.body?.via||'manual')):null}}});
       return res.status(200).json({ok:true,contactStatus:contacted?'contacted':'not_contacted',contactedAt:contacted?now:null});
+    }
+    if(action==='website-config'){
+      const demoSlugValue=String(req.body?.demoSlug||'').trim();
+      if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
+      const target=await targetBySlug(demoSlugValue);
+      if(!target)return res.status(404).json({error:'Prospect non trovato.'});
+      const raw=await placeDetails(target.place_id);
+      const place=publicPlace(raw);
+      let discovered={email:'',website:'',contactPage:'',instagram:'',facebook:'',whatsapp:''};
+      if(place.website){try{discovered=await discoverPublicBusinessContacts(place.website)}catch{}}
+      const override=req.body?.config&&typeof req.body.config==='object'?req.body.config:{};
+      const profile=buildWebsiteProfile({...place,...discovered,phone:place.phone,website:place.website},target.template_id,override);
+      const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
+      await updateTarget(target.id,{demo_config:{...current,websiteProfile:profile}});
+      const origin=baseUrl(req);
+      return res.status(200).json({ok:true,profile,websiteDemoUrl:`${origin}/web-demo.html?d=${encodeURIComponent(demoSlugValue)}`});
+    }
+    if(action==='download-website'){
+      const demoSlugValue=String(req.body?.demoSlug||'').trim();
+      if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
+      const target=await targetBySlug(demoSlugValue);
+      if(!target)return res.status(404).json({error:'Prospect non trovato.'});
+      let profile=target.demo_config?.websiteProfile;
+      if(!profile){
+        const raw=await placeDetails(target.place_id); const place=publicPlace(raw);
+        profile=buildWebsiteProfile(place,target.template_id,{});
+      }
+      const bytes=createWebsiteZip(profile,{siteUrl:`https://${profile.slug}.example.com`});
+      const filename=`${profile.slug}-easycome-site.zip`;
+      res.setHeader('content-type','application/zip');
+      res.setHeader('content-disposition',`attachment; filename="${filename}"`);
+      res.setHeader('cache-control','private, no-store, max-age=0');
+      return res.status(200).end(Buffer.from(bytes));
     }
     if(action==='hydrate'){
       const ids=[...new Set((req.body?.placeIds||[]).map(String).filter(Boolean))].slice(0,5);

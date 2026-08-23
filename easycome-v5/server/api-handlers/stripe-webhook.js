@@ -51,7 +51,7 @@ export default async function handler(req,res){
               session?.metadata?.company_name?`Progetto: ${session.metadata.company_name}`:'',
               session?.amount_total?`Importo confermato ora: ${(session.amount_total/100).toFixed(2)} EUR`:'',
               session?.metadata?.implementation==='included'?'Implementazione assistita: inclusa.':'Implementazione assistita: non selezionata.',
-              session?.metadata?.managed_service==='selected'?`Easy Come Managed: selezionato, rinnovo mensile di ${(Number(process.env.EASYCOME_MANAGED_MONTHLY_CENTS||3000)/100).toFixed(2)} EUR fino a cancellazione.`:'Easy Come Managed: non selezionato.',
+              (session?.metadata?.audit_service==='selected'||session?.metadata?.managed_service==='selected')?`Easy Come Audit: attivo, rinnovo mensile di ${(Number(process.env.EASYCOME_AUDIT_MONTHLY_CENTS||10000)/100).toFixed(2)} EUR fino a cancellazione.`:'Easy Come Audit: non selezionato.',
               '',
               'Esecuzione e consegna: hai richiesto l’avvio immediato della fornitura digitale. Il pacchetto viene reso disponibile nell’area personale dopo la conferma del pagamento e la generazione tecnica.',
               'Recesso: per i consumatori valgono i diritti inderogabili previsti dalla legge e le eccezioni applicabili a contenuti digitali e servizi; durante il checkout hai richiesto espressamente l’avvio immediato. La funzione online resta disponibile al link sotto.',
@@ -71,20 +71,20 @@ export default async function handler(req,res){
       }
       if(subscriptionId&&session?.metadata?.user_id){
         let subscription={};try{subscription=await stripeGet(`subscriptions/${encodeURIComponent(subscriptionId)}`)}catch{}
-        await upsertSubscription({user_id:session.metadata.user_id,order_id:orderId||null,plan_code:'managed_tech_30',plan_name:'Gestione tecnica Easy Come',amount_cents:Number(process.env.EASYCOME_MANAGED_MONTHLY_CENTS||3000),currency:'eur',status:subscription.status||'active',stripe_customer_id:stripeId(session.customer),stripe_subscription_id:subscriptionId,current_period_end:isoFromUnix(subscription.current_period_end),cancel_at_period_end:Boolean(subscription.cancel_at_period_end),metadata:{checkout_session_id:session.id},updated_at:new Date().toISOString()});
+        await upsertSubscription({user_id:session.metadata.user_id,order_id:orderId||null,plan_code:'audit_100',plan_name:'Easy Come Audit',amount_cents:Number(process.env.EASYCOME_AUDIT_MONTHLY_CENTS||10000),currency:'eur',status:subscription.status||'active',stripe_customer_id:stripeId(session.customer),stripe_subscription_id:subscriptionId,current_period_end:isoFromUnix(subscription.current_period_end),cancel_at_period_end:Boolean(subscription.cancel_at_period_end),metadata:{checkout_session_id:session.id},updated_at:new Date().toISOString()});
       }
     }
 
     if(event.type.startsWith('customer.subscription.')){
       const subscription=object;const subscriptionId=subscription.id;const userId=subscription.metadata?.user_id;const orderId=subscription.metadata?.order_id||null;
-      const row={user_id:userId,order_id:orderId,plan_code:subscription.metadata?.plan_code||'managed_tech_30',plan_name:'Gestione tecnica Easy Come',amount_cents:Number(subscription.items?.data?.[0]?.price?.unit_amount||process.env.EASYCOME_MANAGED_MONTHLY_CENTS||3000),currency:subscription.currency||'eur',status:subscription.status||'unknown',stripe_customer_id:stripeId(subscription.customer),stripe_subscription_id:subscriptionId,current_period_end:isoFromUnix(subscription.current_period_end),cancel_at_period_end:Boolean(subscription.cancel_at_period_end),metadata:{event:event.type},updated_at:new Date().toISOString()};
+      const row={user_id:userId,order_id:orderId,plan_code:subscription.metadata?.plan_code||'audit_100',plan_name:'Easy Come Audit',amount_cents:Number(subscription.items?.data?.[0]?.price?.unit_amount||process.env.EASYCOME_AUDIT_MONTHLY_CENTS||10000),currency:subscription.currency||'eur',status:subscription.status||'unknown',stripe_customer_id:stripeId(subscription.customer),stripe_subscription_id:subscriptionId,current_period_end:isoFromUnix(subscription.current_period_end),cancel_at_period_end:Boolean(subscription.cancel_at_period_end),metadata:{event:event.type},updated_at:new Date().toISOString()};
       if(userId) await upsertSubscription(row); else await updateSubscriptionByStripeId(subscriptionId,{status:row.status,current_period_end:row.current_period_end,cancel_at_period_end:row.cancel_at_period_end,stripe_customer_id:row.stripe_customer_id,updated_at:row.updated_at});
       if(event.type==='customer.subscription.deleted'){
         await notifyAdmin({
           eventKey:`managed-ended:${subscriptionId}`,
-          eventType:'managed.ended',
+          eventType:'audit.ended',
           severity:'high',
-          title:'Easy Come Managed terminato',
+          title:'Easy Come Audit terminato',
           body:`Subscription ${subscriptionId} · utente ${userId||'non associato'}`,
           userId:userId||null,
           orderId,
@@ -99,9 +99,9 @@ export default async function handler(req,res){
       if(event.type==='invoice.payment_failed'){
         await notifyAdmin({
           eventKey:`invoice-failed:${object.id||event.id}`,
-          eventType:'managed.payment_failed',
+          eventType:'audit.payment_failed',
           severity:'urgent',
-          title:'Pagamento Managed fallito',
+          title:'Pagamento Audit fallito',
           body:`Fattura ${object.number||object.id||'—'} · cliente Stripe ${stripeId(object.customer)||'—'} · subscription ${subscriptionId||'—'}`,
           metadata:{stripe_event:event.id,invoice_id:object.id||null,stripe_subscription_id:subscriptionId||null},
         });

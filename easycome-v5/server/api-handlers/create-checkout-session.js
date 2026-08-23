@@ -43,18 +43,19 @@ export default async function handler(req, res) {
     const orderId = crypto.randomUUID();
     const origin = appOrigin(req);
 
-    const managedServiceSelected = Boolean(project.delivery?.managedServiceSelected);
+    const auditServiceSelected = Boolean(project.delivery?.auditServiceSelected ?? project.delivery?.managedServiceSelected);
+    const managedServiceSelected = auditServiceSelected; // legacy database compatibility
     if (managedServiceSelected) {
       const existing = await getSubscriptionByUser(user.id);
-      if (existing && !['canceled','incomplete_expired'].includes(existing.status)) throw new Error('La gestione tecnica è già collegata al tuo account. Deselezionala dall’ordine e gestiscila dal Profilo Easy Come.');
+      if (existing && !['canceled','incomplete_expired'].includes(existing.status)) throw new Error('Easy Come Audit è già collegato al tuo account. Gestiscilo dal Profilo Easy Come.');
     }
-    const managedMonthlyCents = Number(process.env.EASYCOME_MANAGED_MONTHLY_CENTS || 3000);
+    const managedMonthlyCents = Number(process.env.EASYCOME_AUDIT_MONTHLY_CENTS || 10000);
     await createOrder({
       id: orderId, user_id: user.id, status: 'checkout_created', customer_email: email, customer_name: customerName,
       customer_phone: phone || null, tax_id: taxId || null, company_name: companyName,
-      amount_cents: price.totalCents, currency: 'eur', price_breakdown: { ...price, managedMonthly: managedServiceSelected ? managedMonthlyCents / 100 : 0 }, project,
+      amount_cents: price.totalCents, currency: 'eur', price_breakdown: { ...price, auditMonthly: managedServiceSelected ? managedMonthlyCents / 100 : 0, managedMonthly: managedServiceSelected ? managedMonthlyCents / 100 : 0 }, project,
       source_url: clean(body.sourceUrl, 700) || null, prepared_filename: clean(body.preparedFilename, 250) || null, delivery_status: 'not_ready', download_count: 0,
-      purchase_type: managedServiceSelected ? 'software_plus_managed' : 'one_time', managed_service_selected: managedServiceSelected,
+      purchase_type: managedServiceSelected ? 'software_plus_audit' : 'one_time', managed_service_selected: managedServiceSelected,
       legal_acceptance: legalAcceptance,
     });
 
@@ -81,6 +82,7 @@ export default async function handler(req, res) {
     add('metadata[company_name]', companyName.slice(0, 480));
     add('metadata[price_version]', 'easycome-v8-2026-08');
     add('metadata[implementation]', project.delivery.implementationSelected ? 'included' : 'not_selected');
+    add('metadata[audit_service]', managedServiceSelected ? 'selected' : 'not_selected');
     add('metadata[managed_service]', managedServiceSelected ? 'selected' : 'not_selected');
     add('metadata[user_id]', user.id);
     add('metadata[terms_version]', legalAcceptance.terms_version);
@@ -91,11 +93,11 @@ export default async function handler(req, res) {
       add('line_items[1][price_data][unit_amount]', managedMonthlyCents);
       add('line_items[1][price_data][recurring][interval]', 'month');
       add('line_items[1][price_data][tax_behavior]', process.env.STRIPE_TAX_BEHAVIOR || 'inclusive');
-      add('line_items[1][price_data][product_data][name]', 'Gestione tecnica Easy Come');
-      add('line_items[1][price_data][product_data][description]', 'Gestione continuativa del software e del database, aggiornamenti minori e assistenza prioritaria.');
+      add('line_items[1][price_data][product_data][name]', 'Easy Come Audit');
+      add('line_items[1][price_data][product_data][description]', 'Modulo diagnostico integrato nel Gestionale Easy Come: controlli sul database reale, spiegazioni, evidenze, soluzioni e ricontrollo.');
       add('subscription_data[metadata][order_id]', orderId);
       add('subscription_data[metadata][user_id]', user.id);
-      add('subscription_data[metadata][plan_code]', 'managed_tech_30');
+      add('subscription_data[metadata][plan_code]', 'audit_100');
     } else {
       add('payment_intent_data[metadata][order_id]', orderId);
       add('payment_intent_data[metadata][company_name]', companyName.slice(0, 480));
@@ -109,7 +111,7 @@ export default async function handler(req, res) {
 
     const session = await stripePost('checkout/sessions', params);
     await updateOrderById(orderId, { stripe_session_id: session.id, checkout_url: session.url, updated_at: new Date().toISOString() });
-    return json(res, 200, { url: session.url, orderId, amount: price.total, currency: 'EUR', managedMonthly: managedServiceSelected ? managedMonthlyCents / 100 : 0 });
+    return json(res, 200, { url: session.url, orderId, amount: price.total, currency: 'EUR', auditMonthly: managedServiceSelected ? managedMonthlyCents / 100 : 0, managedMonthly: managedServiceSelected ? managedMonthlyCents / 100 : 0 });
   } catch (error) {
     console.error(error);
     return json(res, 400, { error: error.message || 'Errore durante la creazione del checkout.' });

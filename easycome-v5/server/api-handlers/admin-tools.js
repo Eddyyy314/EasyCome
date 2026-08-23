@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   if (action === 'managed-project') {
     try {
       const user = await authenticatedUser(req);
-      if (!(await isAdminUser(user.id))) return json(res, 403, { error: 'Solo gli amministratori Easy Come possono usare la Control Room Managed.' });
+      if (!(await isAdminUser(user.id))) return json(res, 403, { error: 'Solo gli amministratori Easy Come possono usare la Control Room Audit.' });
       const userId = String(req.query?.userId || url.searchParams.get('userId') || req.body?.userId || '').trim();
       if (!userId) return json(res, 400, { error: 'Cliente non valido.' });
       const row = await getProjectByUserId(userId);
@@ -36,10 +36,10 @@ export default async function handler(req, res) {
         const log = Array.isArray(current.accessLog) ? current.accessLog.slice(-49) : [];
         log.push({ at: now, adminUserId: user.id, adminEmail: user.email || '', action: 'open_support' });
         next = { ...next, accessLog: log, lastAccessAt: now };
-      } else return json(res, 400, { error: 'Operazione Managed non valida.' });
+      } else return json(res, 400, { error: 'Operazione Audit non valida.' });
       await updateProjectByUserId(userId, { project: { ...project, managed: next }, updated_at: new Date().toISOString() });
       return json(res, 200, { ok: true, managed: next });
-    } catch (error) { return json(res, 400, { error: error.message || 'Operazione Managed non riuscita.' }); }
+    } catch (error) { return json(res, 400, { error: error.message || 'Operazione Audit non riuscita.' }); }
   }
   return json(res, 404, { error: 'Azione amministrativa non riconosciuta.' });
 }

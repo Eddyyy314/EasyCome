@@ -164,8 +164,8 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: { prefer: 'return=minimal' },
       body: JSON.stringify([
-        { id: subA, user_id: a.id, order_id: orderA, plan_code: 'audit', plan_name: 'Audit Managed A', amount_cents: 3000, currency: 'eur', status: 'active', stripe_subscription_id: `audit_sub_a_${suffix}`, metadata: { audit_id: auditId } },
-        { id: subB, user_id: b.id, order_id: orderB, plan_code: 'audit', plan_name: 'Audit Managed B', amount_cents: 3000, currency: 'eur', status: 'active', stripe_subscription_id: `audit_sub_b_${suffix}`, metadata: { audit_id: auditId } },
+        { id: subA, user_id: a.id, order_id: orderA, plan_code: 'audit_100', plan_name: 'Easy Come Audit A', amount_cents: 10000, currency: 'eur', status: 'active', stripe_subscription_id: `audit_sub_a_${suffix}`, metadata: { audit_id: auditId } },
+        { id: subB, user_id: b.id, order_id: orderB, plan_code: 'audit_100', plan_name: 'Easy Come Audit B', amount_cents: 10000, currency: 'eur', status: 'active', stripe_subscription_id: `audit_sub_b_${suffix}`, metadata: { audit_id: auditId } },
       ]),
     });
 
@@ -198,7 +198,7 @@ export default async function handler(req, res) {
       ['Anon non legge ordini', 'easycome_orders?select=id&limit=1'],
       ['Anon non legge assistenza', 'easycome_support_requests?select=id&limit=1'],
       ['Anon non legge messaggi', 'easycome_support_messages?select=id&limit=1'],
-      ['Anon non legge Managed', 'easycome_subscriptions?select=id&limit=1'],
+      ['Anon non legge Audit', 'easycome_subscriptions?select=id&limit=1'],
     ];
     for (const [label, path] of anonCases) {
       const r = await restAnon(path);
@@ -212,7 +212,7 @@ export default async function handler(req, res) {
       ['Ordine A visibile ad A', `easycome_orders?id=eq.${enc(orderA)}&select=id`, orderA],
       ['Ticket A visibile ad A', `easycome_support_requests?id=eq.${enc(requestA)}&select=id`, requestA],
       ['Messaggio A visibile ad A', `easycome_support_messages?id=eq.${enc(messageA)}&select=id`, messageA],
-      ['Managed A visibile ad A', `easycome_subscriptions?id=eq.${enc(subA)}&select=id`, subA],
+      ['Audit A visibile ad A', `easycome_subscriptions?id=eq.${enc(subA)}&select=id`, subA],
     ];
     for (const [label, path, id] of ownCases) {
       const r = await restAs(tokenA, path);
@@ -225,7 +225,7 @@ export default async function handler(req, res) {
       ['A non vede ordine B', `easycome_orders?id=eq.${enc(orderB)}&select=id`],
       ['A non vede ticket B', `easycome_support_requests?id=eq.${enc(requestB)}&select=id`],
       ['A non vede messaggio B', `easycome_support_messages?id=eq.${enc(messageB)}&select=id`],
-      ['A non vede Managed B', `easycome_subscriptions?id=eq.${enc(subB)}&select=id`],
+      ['A non vede Audit B', `easycome_subscriptions?id=eq.${enc(subB)}&select=id`],
       ['A non vede CRM privato', `easycome_customer_admin?user_id=eq.${enc(b.id)}&select=user_id`],
       ['A non vede agenda privata', `easycome_admin_tasks?id=eq.${enc(taskId)}&select=id`],
       ['A non vede notifiche admin', `easycome_admin_notifications?id=eq.${enc(notifId)}&select=id`],
@@ -243,7 +243,7 @@ export default async function handler(req, res) {
       ['B non vede ordine A', `easycome_orders?id=eq.${enc(orderA)}&select=id`],
       ['B non vede ticket A', `easycome_support_requests?id=eq.${enc(requestA)}&select=id`],
       ['B non vede messaggio A', `easycome_support_messages?id=eq.${enc(messageA)}&select=id`],
-      ['B non vede Managed A', `easycome_subscriptions?id=eq.${enc(subA)}&select=id`],
+      ['B non vede Audit A', `easycome_subscriptions?id=eq.${enc(subA)}&select=id`],
       ['B non vede CRM privato', `easycome_customer_admin?user_id=eq.${enc(a.id)}&select=user_id`],
       ['B non vede agenda privata', `easycome_admin_tasks?id=eq.${enc(taskId)}&select=id`],
       ['B non vede notifiche admin', `easycome_admin_notifications?id=eq.${enc(notifId)}&select=id`],

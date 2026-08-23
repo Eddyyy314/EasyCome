@@ -78,8 +78,10 @@ export function compactProject(project = {}) {
     delivery: {
       previewApproved: Boolean(project.delivery?.previewApproved),
       implementationSelected: Boolean(project.delivery?.implementationSelected),
-      managedServiceSelected: Boolean(project.delivery?.managedServiceSelected),
-      managedServicePrice: 30,
+      auditServiceSelected: Boolean(project.delivery?.auditServiceSelected ?? project.delivery?.managedServiceSelected),
+      auditMonthlyPrice: 100,
+      managedServiceSelected: Boolean(project.delivery?.auditServiceSelected ?? project.delivery?.managedServiceSelected),
+      managedServicePrice: 100,
       notes: String(project.delivery?.notes || '').slice(0, 2500),
     },
   };

@@ -49,6 +49,10 @@
       "destination": "/api/router?route=create-managed-subscription"
     },
     {
+      "source": "/api/create-audit-subscription",
+      "destination": "/api/router?route=create-audit-subscription"
+    },
+    {
       "source": "/api/demo-event",
       "destination": "/api/router?route=demo-event"
     },
@@ -91,6 +95,10 @@
     {
       "source": "/demo",
       "destination": "/demo.html"
+    },
+    {
+      "source": "/web-demo",
+      "destination": "/web-demo.html"
     },
     {
       "source": "/factory",
