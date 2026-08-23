@@ -27,3 +27,10 @@ La cartella `dist-public/` viene generata dal build e non è inclusa nel pacchet
 ## Documentazione
 - `AUDIT-ECOSYSTEM.md` — architettura Audit + Gestionale
 - `EASYCOME-WEB.md` — specifica Easy Come Web
+
+
+## V26.1 — Web Studio scroll fix
+- Il Creative Director Engine usa ora uno scroll interno dedicato.
+- Header, step e footer restano sempre accessibili.
+- Scroll touch/mobile e tasto ESC corretti.
+- La pagina sottostante viene bloccata solo mentre il Web Studio è aperto.
