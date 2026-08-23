@@ -7,7 +7,7 @@ import { buildQueryPlan, classifyPlace, buildDemoModel, demoSlug, demoPrice, out
 import { sendLiberoOutreach } from '../_libero-mail.js';
 import { buildWebsiteProfile, createWebsiteZip } from '../_website-factory.js';
 import { classifyWebsitePresence, socialFieldsFromPresence } from '../_web-presence.js';
-import { buildLovableBrief } from '../_lovable-web.js';
+import { buildAiStudioBrief } from '../_aistudio-web.js';
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function baseUrl(req){return String(process.env.APP_URL||`${req.headers?.['x-forwarded-proto']||'https'}://${req.headers?.host||'easy-come.it'}`).replace(/\/$/,'')}
@@ -39,7 +39,7 @@ export default async function handler(req,res){
             price,subject:outreachSubject(place),message:outreachMessage(place,demoUrl,price),shortMessage:outreachShortMessage(place,demoUrl,price),
             emailDelivery:outreach.lastEmail||null,contactStatus,contactedAt:outreach.contactedAt||outreach.lastEmail?.sentAt||'',
             websiteReady:Boolean(websiteProfile),websiteProfile,websiteDemoUrl:websiteProfile?`${origin}/web-demo.html?d=${encodeURIComponent(row.demo_slug)}`:'',
-            websiteAiReady:Boolean(cfg.websiteAiBrief),websiteAiBrief:cfg.websiteAiBrief||null,websiteAiUrl:cfg.websiteAiBrief?.lovableUrl||'',
+            websiteAiReady:Boolean(cfg.websiteAiBrief),websiteAiBrief:cfg.websiteAiBrief||null,websiteAiUrl:cfg.websiteAiBrief?.aiStudioUrl||'https://aistudio.google.com/apps',
             contactability:0,potential:0,potentialReasons:[],mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=${encodeURIComponent(row.place_id||'')}`,
             createdAt:row.created_at||'',expiresAt:row.expires_at||''
           };
@@ -97,10 +97,10 @@ export default async function handler(req,res){
       if(place.website){try{discovered=await discoverPublicBusinessContacts(place.website)}catch{}}
       const merged={...place,...discovered,website:place.website,phone:place.phone,facebook:place.facebook||discovered.facebook||'',instagram:place.instagram||discovered.instagram||''};
       const override=req.body?.config&&typeof req.body.config==='object'?req.body.config:{};
-      const brief=buildLovableBrief(merged,target.template_id,override);
+      const brief=buildAiStudioBrief(merged,target.template_id,override);
       const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
       await updateTarget(target.id,{demo_config:{...current,websiteAiBrief:brief,websiteAiPreparedAt:new Date().toISOString()}});
-      return res.status(200).json({ok:true,brief,lovableUrl:brief.lovableUrl,webPresenceType:place.webPresenceType,webPresenceLabel:place.webPresenceLabel});
+      return res.status(200).json({ok:true,brief,aiStudioUrl:brief.aiStudioUrl,webPresenceType:place.webPresenceType,webPresenceLabel:place.webPresenceLabel});
     }
     if(action==='website-config'){
       const demoSlugValue=String(req.body?.demoSlug||'').trim();

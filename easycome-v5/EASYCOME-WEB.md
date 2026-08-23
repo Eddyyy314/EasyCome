@@ -1,23 +1,53 @@
-# Easy Come Web — V25
+# Easy Come Web — Creative Director Engine V26
 
-Easy Come Web è un prodotto autonomo del brand Easy Come. Non richiede il Gestionale.
+Easy Come Web è un prodotto autonomo del brand Easy Come. Non richiede il Gestionale, Audit o Hub cliente.
 
-## Principio
-Easy Come non genera più siti tramite template interni. La Factory crea un **creative brief ricco e controllato** e lo passa a un motore AI specializzato (Lovable Build with URL). Il ruolo di Easy Come è raccogliere dati reali, evitare allucinazioni, definire obiettivi e quality bar, e gestire il processo commerciale.
+## Cosa cambia in V26
 
-## Presenza web
-Un profilo Facebook, Instagram, TikTok, LinkedIn, Linktree, Google Maps, Booking, TripAdvisor, TheFork, PagineGialle o altra piattaforma esterna **non viene classificato come sito proprietario**. La Factory mostra “Solo social” o “Solo portale esterno” e considera l’azienda una reale opportunità Easy Come Web.
+Easy Come **non genera più internamente il sito con template** e non usa Lovable. La Factory agisce come una mini web agency automatizzata: identifica le PMI senza sito proprietario, raccoglie i dati reali, costruisce strategia e direzione creativa, quindi prepara un **Creative Build Pack** per Google AI Studio Build.
 
-## Flow
-1. Factory trova la PMI.
-2. Classifica la presenza digitale.
-3. Se non esiste un dominio proprietario, apre Web Studio.
-4. Easy Come prepara un brief con attività, settore, contatti, obiettivo, CTA, funzioni, note e riferimenti.
-5. `Crea con Lovable` apre Lovable Build with URL con prompt già compilato e autosubmit.
-6. L’operatore rifinisce visualmente il progetto in Lovable e può poi sincronizzarlo a GitHub/pubblicarlo.
+Il Build Pack contiene:
 
-## Quality bar
-Il prompt vieta esplicitamente estetiche AI generiche: gradienti SaaS, glassmorphism, card soup, bento casuali, template ripetuti, copy inventato e branding Easy Come. Richiede mobile realmente progettato, tipografia forte, gerarchia editoriale, accessibilità, motion con scopo e contenuti italiani credibili.
+- Master Build Prompt specifico per l'attività;
+- dati reali dell'impresa e vincoli contro le allucinazioni;
+- obiettivo, pubblico, differenziazione, offerta, personalità e territorio;
+- riferimenti e immagini opzionali;
+- regole anti-template / anti-look-AI;
+- Creative Director Quality Gate;
+- Mobile Quality Gate;
+- Production Quality Gate;
+- file Markdown scaricabile e riutilizzabile.
 
-## Dati
-Non inventare premi, recensioni, anni di esperienza, prezzi, certificazioni o fatti non forniti. Dove mancano informazioni, il design deve funzionare senza allucinazioni.
+## Regola presenza web
+
+Un URL viene considerato **sito proprietario** solo se è un vero sito dell'attività.
+
+Non contano come sito:
+
+- Facebook / Instagram / TikTok / altri social;
+- Linktree e link-in-bio;
+- Google Maps / pagine Google;
+- Booking / Airbnb / TripAdvisor / TheFork;
+- directory e marketplace terzi.
+
+Questi canali restano utili come fonti e contatti, ma la Factory mostra `SOLO SOCIAL` o `SOLO PORTALE ESTERNO` e continua a considerare l'azienda un'opportunità Easy Come Web.
+
+## Flow operativo
+
+1. Demo Factory trova l'attività.
+2. Web Intelligence classifica la presenza web.
+3. `Crea sito premium` apre il Creative Director Engine.
+4. L'operatore inserisce solo le informazioni che conosce; i campi mancanti non vengono inventati.
+5. `Crea Build Pack` salva il master prompt e tre passaggi di QA.
+6. `Copia + apri AI Studio` copia il Master Prompt e apre Google AI Studio Build.
+7. In AI Studio si incolla il prompt e si genera il sito.
+8. Si eseguono in sequenza Creative Review, Mobile Pass e Production Pass.
+9. Il progetto finale può essere esportato come ZIP o sincronizzato a GitHub dall'ambiente AI Studio.
+
+## Perché non c'è auto-submit
+
+La V26 non usa URL non documentati per precompilare Google AI Studio. Il passaggio è volutamente trasparente: la Factory copia il Master Prompt e apre Build; l'operatore lo incolla. Questo evita dipendenze fragili e mantiene il Build Pack riutilizzabile.
+
+## Principio qualità
+
+Se un sito potrebbe appartenere a cinque attività diverse cambiando soltanto logo e testo, non è abbastanza specifico. Il Quality Gate ordina al motore di ridisegnare le parti generiche, non semplicemente di descriverne i difetti.

@@ -1,9 +1,9 @@
 const SOCIAL_HOSTS = [
-  'facebook.com','fb.com','instagram.com','tiktok.com','linkedin.com','x.com','twitter.com','youtube.com','pinterest.com','threads.net'
+  'facebook.com','fb.com','instagram.com','tiktok.com','linkedin.com','x.com','twitter.com','youtube.com','pinterest.com','threads.net','wa.me','whatsapp.com','t.me','telegram.me'
 ];
 const PLATFORM_HOSTS = [
-  'linktr.ee','beacons.ai','bio.site','taplink.cc','msha.ke','campsite.bio',
-  'google.com','goo.gl','maps.app.goo.gl','tripadvisor.com','tripadvisor.it','booking.com','airbnb.com','airbnb.it',
+  'linktr.ee','beacons.ai','bio.site','taplink.cc','msha.ke','campsite.bio','linkin.bio','solo.to',
+  'google.com','goo.gl','g.page','maps.app.goo.gl','tripadvisor.com','tripadvisor.it','booking.com','airbnb.com','airbnb.it',
   'thefork.it','thefork.com','paginegialle.it','yelp.com','justeat.it','deliveroo.it','glovoapp.com'
 ];
 function hostMatches(host,list){
