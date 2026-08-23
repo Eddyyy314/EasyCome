@@ -1,4 +1,4 @@
-# Easy Come V24 — Automation + Web Studio
+# Easy Come V25 — Automation + AI Web Studio
 
 Easy Come è il brand dedicato all’automazione delle PMI. Il Gestionale resta il cuore operativo dell’ecosistema; Easy Come Audit è un modulo complementare del Gestionale. **Easy Come Web** è invece un prodotto autonomo del brand.
 
@@ -7,10 +7,10 @@ Easy Come è il brand dedicato all’automazione delle PMI. Il Gestionale resta 
 - Easy Come Studio per configurare i gestionali.
 - Hub, Audit e automazioni del Gestionale.
 - Control Room / Demo Factory.
-- **Easy Come Web Studio**: genera concept e progetti React/Vite premium per PMI prive di sito, senza richiedere il Gestionale.
+- **Easy Come Web Studio**: individua PMI senza un vero sito proprietario, costruisce un brief premium e avvia la generazione tramite Lovable Build with URL. Non richiede il Gestionale.
 
 ## Easy Come Web
-La Factory propone 8 art direction (Editoriale, Cinematica, Studio, Organica, Coastal, Bold, Clinical, Gallery), copy specifico per settore, preview responsive e download di un progetto React strutturato. Nessuna palette Easy Come viene imposta al sito del cliente. Le immagini demo vanno sostituite con asset autorizzati prima della pubblicazione.
+La V25 rimuove il generatore visuale interno come percorso principale. Facebook/Instagram/Linktree/Booking/TripAdvisor/Google Maps non vengono classificati come “sito”. Per le opportunità reali, la Factory prepara un brief dettagliato e apre Lovable con autosubmit. Vedi `EASYCOME-WEB.md`.
 
 ## Avvio
 ```bash

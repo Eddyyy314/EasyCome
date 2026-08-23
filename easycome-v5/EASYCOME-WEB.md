@@ -1,19 +1,23 @@
-# Easy Come Web — V24
+# Easy Come Web — V25
 
-## Posizionamento
-Easy Come Web è un prodotto autonomo del brand Easy Come. Può essere venduto anche a chi non possiede Gestionale, Audit o altri moduli.
+Easy Come Web è un prodotto autonomo del brand Easy Come. Non richiede il Gestionale.
 
-## Obiettivo
-Non generare landing generiche. La Factory deve produrre una vera direzione creativa per ogni attività: tipografia, palette, composizione, immagini, motion e UX coerenti con il settore e con il carattere del cliente.
+## Principio
+Easy Come non genera più siti tramite template interni. La Factory crea un **creative brief ricco e controllato** e lo passa a un motore AI specializzato (Lovable Build with URL). Il ruolo di Easy Come è raccogliere dati reali, evitare allucinazioni, definire obiettivi e quality bar, e gestire il processo commerciale.
 
-## Output Factory
-Il download è un progetto React + Vite strutturato, con React Router, componenti riutilizzabili, pagine reali, responsive, SEO di base, manifest, favicon, sitemap, privacy e form contatti.
+## Presenza web
+Un profilo Facebook, Instagram, TikTok, LinkedIn, Linktree, Google Maps, Booking, TripAdvisor, TheFork, PagineGialle o altra piattaforma esterna **non viene classificato come sito proprietario**. La Factory mostra “Solo social” o “Solo portale esterno” e considera l’azienda una reale opportunità Easy Come Web.
 
-## Art direction
-Sono disponibili otto sistemi visivi: Editoriale, Cinematico, Studio, Organico, Coastal, Bold, Clinical e Gallery. La categoria suggerisce il punto di partenza, ma la Factory può cambiarlo. Nessun colore Easy Come viene imposto al sito finale.
+## Flow
+1. Factory trova la PMI.
+2. Classifica la presenza digitale.
+3. Se non esiste un dominio proprietario, apre Web Studio.
+4. Easy Come prepara un brief con attività, settore, contatti, obiettivo, CTA, funzioni, note e riferimenti.
+5. `Crea con Lovable` apre Lovable Build with URL con prompt già compilato e autosubmit.
+6. L’operatore rifinisce visualmente il progetto in Lovable e può poi sincronizzarlo a GitHub/pubblicarlo.
 
-## Asset
-Le immagini demo servono esclusivamente alla preview. Prima della pubblicazione vanno sostituite con foto del cliente o immagini correttamente licenziate.
+## Quality bar
+Il prompt vieta esplicitamente estetiche AI generiche: gradienti SaaS, glassmorphism, card soup, bento casuali, template ripetuti, copy inventato e branding Easy Come. Richiede mobile realmente progettato, tipografia forte, gerarchia editoriale, accessibilità, motion con scopo e contenuti italiani credibili.
 
-## Relazione con l'ecosistema
-L'integrazione con Gestionale Easy Come è opzionale. Il sito deve funzionare bene anche completamente da solo.
+## Dati
+Non inventare premi, recensioni, anni di esperienza, prezzi, certificazioni o fatti non forniti. Dove mancano informazioni, il design deve funzionare senza allucinazioni.
