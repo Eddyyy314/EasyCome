@@ -97,10 +97,10 @@ export default async function handler(req,res){
     if(action==='publish-web-proposal'){
       const demoSlugValue=String(req.body?.demoSlug||'').trim();if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
       const target=await targetBySlug(demoSlugValue);if(!target)return res.status(404).json({error:'Prospect non trovato.'});
-      const previewUrl=String(req.body?.previewUrl||'').trim();let parsed;try{parsed=new URL(previewUrl);if(!['http:','https:'].includes(parsed.protocol))throw new Error('protocol')}catch{throw new Error('Inserisci un URL pubblico valido della preview.');}
+      const previewUrl=String(req.body?.previewUrl||'').trim();let parsedHref='';if(previewUrl){try{const parsed=new URL(previewUrl);if(!['http:','https:'].includes(parsed.protocol))throw new Error('protocol');parsedHref=parsed.href}catch{throw new Error('URL preview non valido.');}}
       const price=Math.round(Number(req.body?.price||0));if(price<50||price>20000)throw new Error('Inserisci un prezzo tra 50 € e 20.000 €.');
       const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const existing=current.webProposal&&typeof current.webProposal==='object'?current.webProposal:{};const token=existing.token||crypto.randomBytes(18).toString('hex');const now=new Date();const expires=new Date(now.getTime()+30*86400000);
-      const proposal={...existing,token,previewUrl:parsed.href,price,status:existing.status==='paid'?'paid':'draft',createdAt:existing.createdAt||now.toISOString(),updatedAt:now.toISOString(),expiresAt:expires.toISOString()};
+      const proposal={...existing,token,previewUrl:parsedHref||existing.previewUrl||'',price,status:existing.status==='paid'?'paid':'draft',createdAt:existing.createdAt||now.toISOString(),updatedAt:now.toISOString(),expiresAt:expires.toISOString()};
       await updateTarget(target.id,{demo_config:{...current,webProposal:proposal}});const origin=baseUrl(req);return res.status(200).json({ok:true,proposal,proposalUrl:`${origin}/web-proposal.html?d=${encodeURIComponent(demoSlugValue)}&t=${encodeURIComponent(token)}`});
     }
     if(action==='prepare-website-ai'){
@@ -114,8 +114,10 @@ export default async function handler(req,res){
       if(place.website){try{discovered=await discoverPublicBusinessContacts(place.website)}catch{}}
       const merged={...place,...discovered,website:place.website,phone:place.phone,facebook:place.facebook||discovered.facebook||'',instagram:place.instagram||discovered.instagram||''};
       const incoming=req.body?.config&&typeof req.body.config==='object'?req.body.config:{};
-      const currentBrand=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const autoPhotos=[...storedAssetCards(req,currentBrand.websiteBrandAssets||[]),...photoCards(req,place.id,place.photos||[])].slice(0,6).map(p=>p.url);
-      const override={...incoming,images:(Array.isArray(incoming.images)?incoming.images.filter(Boolean):String(incoming.images||'').trim()?incoming.images:autoPhotos)};
+      const currentBrand=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
+      // Asset lock: public Google/Social photos are NEVER auto-selected. Only images explicitly approved in Web Studio enter the build pack.
+      const explicitImages=Array.isArray(incoming.images)?incoming.images.filter(Boolean):String(incoming.images||'').trim()?incoming.images:[];
+      const override={...incoming,images:explicitImages,imageManifest:Array.isArray(incoming.imageManifest)?incoming.imageManifest:[]};
       const brief=buildAiStudioBrief(merged,target.template_id,override);
       const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
       await updateTarget(target.id,{demo_config:{...current,websiteAiBrief:brief,websiteAiPreparedAt:new Date().toISOString()}});

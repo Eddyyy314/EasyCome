@@ -1,6 +1,6 @@
 {
   "name": "easycome-automation-ecosystem",
-  "version": "27.0.0",
+  "version": "28.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "nodemailer": "^9.0.3",
-    "imapflow": "^1.6.5"
+    "imapflow": "^1.6.5",
+    "@supabase/supabase-js": "2.109.0",
+    "fflate": "0.8.3"
   }
 }

@@ -1,46 +1,45 @@
-# Easy Come Web — V27 Brand DNA + Proposal Commerce
+# Easy Come Web — V28 Asset Lock + Project Portal
 
-Easy Come Web è un prodotto indipendente del brand Easy Come.
+Easy Come Web è un prodotto autonomo del brand Easy Come. La Factory individua PMI senza sito proprietario, prepara il Brand/Creative Build Pack e trasforma il progetto finito in una proposta commerciale ospitata direttamente da Easy Come.
 
-## Flow definitivo
+## Regola immagini: Asset Lock
 
-1. La Factory trova una PMI e distingue sito proprietario, social e portali esterni.
-2. `Crea sito premium` apre il Creative Director Engine.
-3. **Brand Intelligence** recupera le foto disponibili da Google Places e le mostra come riferimenti reali. Facebook/Instagram/Google Maps non vengono mai classificati come sito proprietario.
-4. Il browser analizza le immagini selezionate e ricava una palette reale. Logo/foto originali caricati dall’admin vengono salvati in Easy Come, diventano URL di riferimento temporanei accessibili al motore creativo e hanno priorità nel Brand DNA.
-5. Il Build Pack V3 passa ad AI Studio: dati reali, immagini reali/reference, colori reali, strategia, Design DNA e tre Quality Gate anti-AI.
-6. AI Studio genera il progetto. Le immagini reference vengono mantenute centralizzate per essere sostituite velocemente con asset autorizzati prima della pubblicazione definitiva.
-7. Quando il sito è finito, in Factory premi **Importa sito finito**.
-8. Inserisci URL preview, prezzo e ZIP finale. Easy Come carica il pacchetto in Supabase Storage e crea una proposta privata.
-9. Easy Come copia un link del tipo `/web-proposal.html?d=...&t=...`.
-10. Il prospect apre il link: vede il suo sito dentro una pagina Easy Come, il prezzo e il checkout Stripe.
-11. Dopo il pagamento il webhook marca la proposta come acquistata e invia la notifica Easy Come.
+Le foto pubbliche recuperate da Google/social NON vengono più selezionate automaticamente. L'admin deve riconoscere ogni asset e indicarne il ruolo (prodotto, locale, logo, team, lavoro, territorio o altra foto originale). Solo gli asset approvati entrano nel manifest passato al generatore.
 
-## Regole Brand DNA
+Il Master Prompt e tutti i Quality Gate vietano di generare, cercare o sostituire immagini non presenti nell'Approved Visual Asset Manifest. Se non esiste una foto approvata adatta a una sezione, il sito deve essere progettato senza fotografia in quella sezione.
 
-- I colori non vengono scelti dalla palette Easy Come.
-- Se esistono logo/foto/asset reali, sono la fonte principale dell'art direction.
-- Le foto pubbliche da Google Places sono mostrate con le attribution restituite da Google e vanno considerate riferimento/private proposal finché i diritti di pubblicazione non sono confermati.
-- Il prompt vieta i pattern tipici da landing AI e obbliga il modello a costruire la composizione attorno al materiale reale.
-- L'identità deve sembrare dell'attività, non del generatore.
+## Flow di vendita
 
-## Storage proposte
+1. Factory → prospect senza sito proprietario.
+2. Web Studio → approvazione asset + Brand DNA + Creative Build Pack.
+3. Google AI Studio → generazione e Quality Gate.
+4. Production Pass → build portabile con `dist/index.html` (Vite `base: './'` e routing compatibile con path annidati).
+5. Download ZIP.
+6. Factory → **Importa in Easy Come**.
+7. Easy Come carica il ZIP direttamente su Supabase Storage tramite signed upload, senza far transitare il file nella Function Vercel.
+8. Easy Come verifica il pacchetto, trova la cartella pubblicabile e ospita i file sotto `/web-sites/<prospect>/<token>/`.
+9. Easy Come genera il portale/proposta privata con preview + checkout Stripe.
+10. Il cliente riceve solo il link Easy Come. Lo ZIP non viene allegato al messaggio.
+11. Dopo il pagamento il portale sblocca anche il download del pacchetto completo.
 
-Il pacchetto ZIP viene salvato in un bucket Supabase privato. Default: `easycome-web-proposals`. La Factory prova a crearlo automaticamente con service role se non esiste.
+## Formati ZIP accettati
 
-Variabili:
+L'importer cerca, in ordine di preferenza:
 
-```env
-EASYCOME_WEB_ASSET_SECRET=una-stringa-lunga-casuale
-SUPABASE_WEB_BUCKET=easycome-web-proposals
-```
+- `dist/index.html`
+- `build/index.html`
+- `out/index.html`
+- `index.html` di un sito statico completo
 
-Il pacchetto massimo accettato dalla Factory è 15 MB.
+Se il pacchetto contiene soltanto i sorgenti React/Vite e l'`index.html` punta ancora a `/src/main.*`, Easy Come blocca l'import e chiede di eseguire il Production Pass prima di riprovare.
 
-## Checkout proposta
+## Storage
 
-Il checkout Easy Come Web è one-time e non richiede un account Easy Come preventivo. Il prezzo è deciso dall'admin quando pubblica la proposta. Stripe riceve metadata `purchase_type=web_proposal`, `demo_slug` e `proposal_token`.
+Variabili richieste:
 
-## Note operative
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_WEB_BUCKET=easycome-web-projects`
+- `EASYCOME_WEB_ASSET_SECRET`
 
-Le reference Google Places vengono risolte al momento della richiesta tramite Place ID + indice, senza persistere il photo resource name nel Build Pack. Le foto pubbliche servono soprattutto per costruire rapidamente la proposta privata; prima del go-live va comunque confermato il diritto di utilizzo degli asset definitivi del cliente.
+Il bucket rimane privato. Le preview vengono servite da Easy Come; gli asset binari grandi vengono forniti con signed URL temporanee.

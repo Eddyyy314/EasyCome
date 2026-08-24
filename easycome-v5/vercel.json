@@ -6,7 +6,7 @@
       "maxDuration": 30
     },
     "api/web-package-upload.js": {
-      "maxDuration": 30
+      "maxDuration": 60
     },
     "api/web-photo.js": {
       "maxDuration": 20
@@ -37,6 +37,18 @@
   "buildCommand": "node scripts/build-public.mjs",
   "outputDirectory": "dist-public",
   "rewrites": [
+    {
+      "source": "/web-sites/:slug/:token",
+      "destination": "/api/web-package-upload?mode=file&d=:slug&t=:token&p=index.html"
+    },
+    {
+      "source": "/web-sites/:slug/:token/",
+      "destination": "/api/web-package-upload?mode=file&d=:slug&t=:token&p=index.html"
+    },
+    {
+      "source": "/web-sites/:slug/:token/:path*",
+      "destination": "/api/web-package-upload?mode=file&d=:slug&t=:token&p=:path*"
+    },
     {
       "source": "/api/web-proposal-public",
       "destination": "/api/router?route=web-proposal-public"

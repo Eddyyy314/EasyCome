@@ -117,10 +117,22 @@ function designDNA(name='',templateId='',category=''){
 function joinList(value,fallback='Not provided'){
   const s=clean(value,3500);return s||fallback;
 }
-function buildReviewPrompts(name,dna){
-  const creative=`REDESIGN PASS — act as a demanding creative director from a top independent web studio. Review the ${name} site in the live preview and EDIT THE PROJECT NOW. This is not a polish pass. First delete generic AI patterns before adding anything. Fail the design if you see: a centered eyebrow/gradient headline, hero-left/image-right by default, two pill CTAs, 3–4 equal feature cards, generic icon grids, bento-for-no-reason, rounded containers around every section, fake dashboard visuals, gradient blobs, repetitive white/grey section bands, generic testimonial carousels or a giant rounded navbar. Also fail it if every section could be rearranged without changing the identity. Rebuild weak sections using this Design DNA: ${dna.composition} ${dna.image} ${dna.navigation} ${dna.signature} Use fewer components, stronger hierarchy, real negative space, editorial cropping and typography with personality. Avoid overused AI font choices (Inter, Poppins, Montserrat, Roboto, generic Space Grotesk/Playfair pairings) unless there is a specific reason. Keep factual accuracy. The finished first 2–3 viewports must look screenshot-worthy and clearly commissioned for ${name}.`;
-  const mobile=`MOBILE ART-DIRECTION PASS — redesign ${name} at 390px and 360px as its own composition, not a stacked desktop page. Preserve the Design DNA but change crops, headline breaks, navigation, section order where useful, whitespace, CTA placement and image ratios for thumbs and a narrow viewport. Remove horizontal overflow, tiny type, giant dead gaps and desktop leftovers. Do not turn every element into a full-width rounded card. Test sticky/fixed elements, 44px touch targets, forms and footer. Apply changes directly and keep reduced-motion support.`;
-  const production=`DELIVERY PASS — harden the ${name} site without flattening its art direction. Fix build/console errors, broken routes/assets, keyboard/focus behavior, contrast, semantic HTML, reduced-motion, metadata, canonical/Open Graph basics, LocalBusiness structured data only from supplied facts, image loading/layout stability and obvious Core Web Vitals risks. Verify every phone/email/social/CTA against supplied data. Delete unsupported testimonials, awards, statistics, prices, years, team members or claims. Check 1440×900, 1280×800, 390×844 and 360×800. Keep the distinctive composition intact; production quality must not mean making the design generic.`;
+function normalizeImageManifest(raw=[]){
+  const items=Array.isArray(raw)?raw:[];
+  const out=[];const seen=new Set();
+  for(const item of items){
+    const url=safeUrl(item?.url||item);if(!url||seen.has(url))continue;seen.add(url);
+    out.push({url,role:clean(item?.role||'approved business image',80),source:clean(item?.source||'approved',80),name:clean(item?.name||'',120)});
+    if(out.length>=12)break;
+  }
+  return out;
+}
+function buildReviewPrompts(name,dna,assets=[]){
+  const approved=assets.map(a=>a.url);
+  const assetLock=approved.length?`APPROVED ASSET LOCK: the only business photography/logo URLs allowed in this project are: ${approved.join(' | ')}. Inspect the code and remove every business image/background URL that is not on this list. Never generate, search for, or substitute stock/AI imagery. If a section has no suitable approved image, redesign it without an image.`:`ASSET LOCK: no approved business photography exists. Remove stock/AI imagery and design with typography, color, rules and spacing instead.`;
+  const creative=`REDESIGN PASS — act as a demanding creative director from a top independent web studio. Review the ${name} site in the live preview and EDIT THE PROJECT NOW. This is not a polish pass. First delete generic AI patterns before adding anything. Fail the design if you see: a centered eyebrow/gradient headline, hero-left/image-right by default, two pill CTAs, 3–4 equal feature cards, generic icon grids, bento-for-no-reason, rounded containers around every section, fake dashboard visuals, gradient blobs, repetitive white/grey section bands, generic testimonial carousels or a giant rounded navbar. Also fail it if every section could be rearranged without changing the identity. Rebuild weak sections using this Design DNA: ${dna.composition} ${dna.image} ${dna.navigation} ${dna.signature} Use fewer components, stronger hierarchy, real negative space, editorial cropping and typography with personality. Avoid overused AI font choices (Inter, Poppins, Montserrat, Roboto, generic Space Grotesk/Playfair pairings) unless there is a specific reason. Keep factual accuracy. ${assetLock} The finished first 2–3 viewports must look screenshot-worthy and clearly commissioned for ${name}.`;
+  const mobile=`MOBILE ART-DIRECTION PASS — redesign ${name} at 390px and 360px as its own composition, not a stacked desktop page. Preserve the Design DNA but change crops, headline breaks, navigation, section order where useful, whitespace, CTA placement and image ratios for thumbs and a narrow viewport. Remove horizontal overflow, tiny type, giant dead gaps and desktop leftovers. Do not turn every element into a full-width rounded card. ${assetLock} Test sticky/fixed elements, 44px touch targets, forms and footer. Apply changes directly and keep reduced-motion support.`;
+  const production=`DELIVERY PASS — harden the ${name} site without flattening its art direction. Fix build/console errors, broken routes/assets, keyboard/focus behavior, contrast, semantic HTML, reduced-motion, metadata, canonical/Open Graph basics, LocalBusiness structured data only from supplied facts, image loading/layout stability and obvious Core Web Vitals risks. Verify every phone/email/social/CTA against supplied data. Delete unsupported testimonials, awards, statistics, prices, years, team members or claims. ${assetLock} IMPORTANT DELIVERY FORMAT FOR EASY COME: produce a portable static build. For Vite set base:'./' (or equivalent relative asset paths), avoid hard-coded root /assets URLs, and prefer HashRouter or a static routing strategy that works under a nested preview path. Run the production build and make sure the downloadable project contains dist/index.html plus all dist assets. Check 1440×900, 1280×800, 390×844 and 360×800. Keep the distinctive composition intact; production quality must not mean making the design generic.`;
   return {creative,mobile,production};
 }
 export function buildAiStudioBrief(place={},templateId='custom',override={}){
@@ -144,14 +156,16 @@ export function buildAiStudioBrief(place={},templateId='custom',override={}){
   const features=clean(override.features||'Contatto reale, SEO locale, responsive impeccabile, performance, accessibilità e privacy placeholder da completare.',1800);
   const anti=clean(override.anti||'Evita qualsiasi soluzione che sembri un sito AI generico o un tema marketplace.',1500);
   const refs=listUrls(override.references);
-  const images=listUrls(override.images);
+  const imageManifest=normalizeImageManifest(override.imageManifest);
+  const images=listUrls(imageManifest.length?imageManifest.map(x=>x.url):override.images);
   const brandColors=[...new Set((Array.isArray(override.brandColors)?override.brandColors:String(override.brandColors||'').split(/[\s,;]+/)).map(v=>String(v||'').trim()).filter(v=>/^#[0-9a-f]{6}$/i.test(v)))].slice(0,6);
   const uploadedAssets=clean(override.uploadedAssets,1200);
   const lens=sectorLens(templateId,category);
   const dna=designDNA(name,templateId,category);
-  const reviewPrompts=buildReviewPrompts(name,dna);
+  const reviewPrompts=buildReviewPrompts(name,dna,imageManifest);
   const referenceBlock=refs.length?refs.map((u,i)=>`${i+1}. ${u}`).join('\n'):'None supplied. Do not imitate a random trend site.';
-  const imageBlock=images.length?images.map((u,i)=>`${i+1}. ${u}`).join('\n'):'No approved/reference business imagery supplied yet. Do NOT invent a visual identity around generic stock: design intentional slots and keep the composition ready for real assets.';
+  const imageBlock=images.length?images.map((u,i)=>`${i+1}. ${u}`).join('\n'):'No approved business imagery supplied. Do NOT invent or fetch replacement stock/AI imagery.';
+  const assetManifestBlock=imageManifest.length?imageManifest.map((a,i)=>`${i+1}. [${String(a.role||'approved').toUpperCase()}] ${a.url}${a.name?` — ${a.name}`:''} (${a.source||'approved'})`).join('\n'):'NONE. No business image is approved for use.';
   const colorBlock=brandColors.length?brandColors.join(' · '):'No reliable palette extracted. Derive color choices from the supplied logo/reference photos if available; otherwise keep the palette restrained and easy to retune.';
   const prompt=`You are not a generic website generator. You are the creative director, conversion strategist, UX lead and senior frontend engineer of an excellent independent digital studio.
 
@@ -192,6 +206,16 @@ Category clichés to avoid: ${lens.avoid}
 
 DESIGN DNA — THIS IS A COMPOSITION BRIEF, NOT A TEMPLATE
 Composition: ${dna.composition}
+APPROVED VISUAL ASSET MANIFEST — HARD LOCK
+${assetManifestBlock}
+
+NON-NEGOTIABLE IMAGE RULES
+- Every business photo, logo image and CSS background-image in the site MUST come from the approved manifest above.
+- Never generate, search, scrape or substitute a different person/product/location image.
+- Asset roles are binding: a TEAM/PERSON image must never stand in for a PRODUCT, food or location; a PRODUCT image must not be presented as a person/team image; an ALTRA FOTO ORIGINALE is general brand material only unless the role is clarified. Never infer a more specific role than the manifest says.
+- If a section needs a photo but there is no approved asset with the correct role, redesign that section without a photo. Empty space, typography or color is always better than a wrong image.
+- This rule is stricter than aesthetics. A beautiful but wrong image is a failed build.
+
 Image behavior: ${dna.image}
 Navigation: ${dna.navigation}
 Motion: ${dna.motion}
@@ -210,7 +234,7 @@ ${uploadedAssets?`\nLOCAL ASSETS THE OPERATOR WILL ALSO UPLOAD TO AI STUDIO\n${u
 BRAND FIDELITY RULES
 - Treat the supplied business photos/logo as the primary creative source, not decoration added after layout. Study their dominant colors, contrast, materials, light, crop opportunities and visual mood BEFORE choosing typography or page composition.
 - When real brand colors are supplied, build the palette from them. You may create darker/lighter neutrals for readability, but do not replace the identity with a fashionable unrelated palette.
-- Use the supplied/reference business imagery prominently where appropriate. Do not substitute generic AI-looking stock when a relevant real image exists.
+- Use only the APPROVED VISUAL ASSET MANIFEST. Do not add any unapproved stock, generated, scraped or substitute image even if it looks better.
 - For the PRIVATE PROPOSAL build, when the supplied image URLs are reachable, use those actual URLs in the site so the prospect immediately recognizes their own place/work/products. Keep all image URLs centralized in one data/config file so they can be replaced in minutes after purchase.
 - Do not recolor the business into an Easy Come identity. This site must visually belong to the client.
 - If the photos are visually inconsistent, curate them: choose a dominant photographic language, crop them consistently and let the strongest 3–5 images lead.
@@ -275,7 +299,8 @@ Deliver the website itself, not a mockup or a prose proposal. It should look lik
     aiStudioUrl:'https://aistudio.google.com/apps',
     references:refs,
     images,
+    imageManifest,
     reviewPrompts,
-    meta:{name,category,goal,audience,differentiator,offer,personality,territory,tone,cta,features,anti,notes,brandColors,uploadedAssets,designDNA:dna,createdAt:new Date().toISOString(),engine:'google-ai-studio-build-v3-brand-dna'}
+    meta:{name,category,goal,audience,differentiator,offer,personality,territory,tone,cta,features,anti,notes,brandColors,uploadedAssets,designDNA:dna,createdAt:new Date().toISOString(),engine:'google-ai-studio-build-v4-asset-lock'}
   };
 }
