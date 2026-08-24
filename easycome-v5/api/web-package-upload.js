@@ -8,7 +8,7 @@ import { createSignedUpload, downloadObject, signedObjectUrl, uploadObject } fro
 import { readJson, json, appOrigin } from '../server/_responses.js';
 export const config={api:{bodyParser:false}};
 
-const BUILDER_VERSION='39.0-static-handoff';
+const BUILDER_VERSION='37.0-legacy-importer';
 const MAX_ZIP_BYTES=50*1024*1024;
 const MAX_FILES=700;
 const MAX_UNPACKED_BYTES=80*1024*1024;
@@ -21,28 +21,6 @@ function safePath(v){let p=decodeURIComponent(String(v||'')).replace(/\\/g,'/').
 function mime(file=''){const ext=(String(file).toLowerCase().match(/\.([a-z0-9]+)$/)||[])[1]||'';return({html:'text/html; charset=utf-8',htm:'text/html; charset=utf-8',css:'text/css; charset=utf-8',js:'text/javascript; charset=utf-8',mjs:'text/javascript; charset=utf-8',json:'application/json; charset=utf-8',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',avif:'image/avif',ico:'image/x-icon',woff:'font/woff',woff2:'font/woff2',ttf:'font/ttf',otf:'font/otf',pdf:'application/pdf',txt:'text/plain; charset=utf-8',xml:'application/xml; charset=utf-8',webmanifest:'application/manifest+json',mp4:'video/mp4',webm:'video/webm',mp3:'audio/mpeg',wav:'audio/wav'})[ext]||'application/octet-stream'}
 function isText(file=''){return /\.(?:html?|css|js|mjs|json|svg|txt|xml|webmanifest)$/i.test(file)}
 function zipEntries(raw){let unpacked;try{unpacked=unzipSync(new Uint8Array(raw))}catch{throw new Error('ZIP non leggibile. Scaricalo di nuovo dalla fonte originale.')}const entries=[];let total=0;for(const [name,data] of Object.entries(unpacked)){const normalized=String(name||'').replace(/\\/g,'/').replace(/^\/+/, '');if(!normalized||normalized.endsWith('/')||normalized.startsWith('__MACOSX/')||normalized.includes('/.git/')||normalized.includes('/node_modules/'))continue;if(normalized.split('/').some(x=>x==='..'))throw new Error('ZIP non sicuro: contiene percorsi non validi.');total+=data.length;if(total>MAX_UNPACKED_BYTES)throw new Error('Pacchetto troppo grande dopo l’estrazione.');entries.push({name:normalized,data});if(entries.length>MAX_FILES)throw new Error(`Pacchetto troppo complesso: massimo ${MAX_FILES} file importabili.`)}if(!entries.length)throw new Error('ZIP vuoto.');return entries}
-function businessUxGate(entries,approvedManifest=[]){
-  const problems=[];
-  for(const e of entries){
-    if(!/\.(?:html?|tsx?|jsx?|mjs|cjs)$/i.test(e.name))continue;
-    const t=textOf(e);
-    if(/\bcopia\s+(?:il\s+)?(?:messaggio|ordine|prenotazione|richiesta)\b/i.test(t)||/\bcopy\s+(?:message|order|booking|request)\b/i.test(t))problems.push(`${e.name}: flusso “copia messaggio/ordine”`);
-    if(/navigator\.clipboard\.writeText/i.test(t)&&/(?:carrello|cart|ordine|order|prenot|booking|messaggio|message)/i.test(t))problems.push(`${e.name}: clipboard usata come completamento di un flusso commerciale`);
-    if(/(?:fatto|creato|generato|costruito)\s+(?:con|da)\s+(?:l[’']?\s*)?(?:AI|intelligenza artificiale)/i.test(t)||/non\s+per\s+sembrare[^\n]{0,80}(?:AI|intelligenza artificiale)/i.test(t))problems.push(`${e.name}: copy cliente che cita il processo di produzione`);
-    if(/prenotazione\s+(?:è\s+)?confermata|booking\s+confirmed/i.test(t)&&!/(?:fetch\s*\(|axios|wa\.me|api\.whatsapp|mailto:)/i.test(t))problems.push(`${e.name}: conferma prenotazione senza destinazione/backend reale`);
-  }
-  const approved=new Set((Array.isArray(approvedManifest)?approvedManifest:[]).map(x=>String(x?.url||x||'').trim()).filter(Boolean));
-  const suspiciousHosts=/(?:images\.unsplash\.com|source\.unsplash\.com|images\.pexels\.com|pixabay\.com|cdn\.pixabay\.com)/i;
-  const remoteImage=/https?:\/\/[^\s\"'`)]+(?:\.(?:png|jpe?g|webp|gif|avif)(?:\?[^\s\"'`)]*)?|(?:googleusercontent|ggpht|googleusercontent\.com)[^\s\"'`)]*)/gi;
-  for(const e of entries){
-    if(!/\.(?:html?|css|tsx?|jsx?|mjs|cjs|json)$/i.test(e.name))continue;const t=textOf(e);let m;while((m=remoteImage.exec(t))){const url=m[0].replace(/[),.;]+$/,'');if(approved.has(url))continue;if(suspiciousHosts.test(url)||!approved.size)problems.push(`${e.name}: immagine esterna non approvata (${url.slice(0,120)})`);}
-  }
-  const visualText=entries.filter(e=>/\.(?:html?|css|tsx?|jsx?|mjs|cjs)$/i.test(e.name)).map(textOf).join('\n');
-  const customType=/(?:fonts\.googleapis\.com|@font-face|Newsreader|Fraunces|Bodoni\s+Moda|Cormorant\s+Garamond|DM\s+Serif\s+Display|Source\s+Serif\s+4|Libre\s+Baskerville|Syne|Bricolage\s+Grotesque|Archivo(?:\s+Black)?|Barlow\s+Condensed|Atkinson\s+Hyperlegible|IBM\s+Plex\s+Sans|Libre\s+Franklin|Work\s+Sans|Manrope|Public\s+Sans|Source\s+Sans\s+3|Lora)/i.test(visualText);
-  const genericPrimary=/(?:font-family\s*:\s*[^;}{]{0,100}(?:Inter|Poppins|Montserrat|Roboto|Arial|Helvetica|system-ui)|fontFamily\s*[:=][^,}\n]{0,100}(?:Inter|Poppins|Montserrat|Roboto|Arial|Helvetica|system-ui))/i.test(visualText);
-  if(genericPrimary&&!customType)problems.push('Tipografia generica rilevata: manca una vera coppia display/body art-directed. Scegli esplicitamente una tipografia display/body coerente con il brand.');
-  if(problems.length)throw new Error(`QUALITY GATE EASY COME: il sito contiene una funzione, un testo o un'immagine che non possiamo pubblicare. ${[...new Set(problems)].slice(0,5).join(' · ')}. Correggi il progetto: CTA reali, fotografie esclusivamente approvate e coerenti con il contenuto, e una tipografia realmente art-directed.`);
-}
 function parentOf(file){const i=String(file).lastIndexOf('/');return i<0?'':file.slice(0,i)}
 function textOf(entry){return Buffer.from(entry?.data||[]).toString('utf8')}
 function projectInfo(entries){
@@ -175,7 +153,7 @@ export default async function handler(req,res){
     if(mode==='finalize'){
       const objectPath=String(body.path||proposal.packagePath||'').trim();if(!objectPath.startsWith(`projects/${slug}/${token}/source/`))throw new Error('Pacchetto Easy Come non valido.');
       const source=await downloadObject(objectPath);if(source.bytes.length>MAX_ZIP_BYTES)throw new Error('Pacchetto troppo grande.');
-      const entries=zipEntries(source.bytes);businessUxGate(entries,current.websiteHandoff?.config?.imageManifest||current.websiteCreative?.config?.imageManifest||current.websiteAiBrief?.imageManifest||[]);const portalBase=`/web-sites/${encodeURIComponent(slug)}/${encodeURIComponent(token)}/`,site=await resolveSite(entries,portalBase),siteBasePath=`projects/${slug}/${token}/site-v${Date.now()}`;
+      const entries=zipEntries(source.bytes);const portalBase=`/web-sites/${encodeURIComponent(slug)}/${encodeURIComponent(token)}/`,site=await resolveSite(entries,portalBase),siteBasePath=`projects/${slug}/${token}/site-v${Date.now()}`;
       await uploadMany(siteBasePath,site.files);
       const origin=appOrigin(req),hostedPreviewUrl=`${origin}${portalBase}`,next={...proposal,packagePath:objectPath,packageName:proposal.packageName||clean(objectPath.split('/').pop()),packageBytes:source.bytes.length,packageUploadedAt:new Date().toISOString(),uploadPending:false,status:proposal.status==='paid'?'paid':'ready',buildState:'ready',builderVersion:BUILDER_VERSION,previewMode:'easycome-hosted',previewUrl:hostedPreviewUrl,hostedPreviewUrl,siteBasePath,siteRoot:site.root,siteFileCount:site.files.length,siteBuildMode:site.buildMode,sitePublishedAt:new Date().toISOString(),buildDiagnostics:site.diagnostics||null,updatedAt:new Date().toISOString()};
       await updateTarget(target.id,{demo_config:{...current,webProposal:next}});return json(res,200,{ok:true,proposal:next,hostedPreviewUrl,buildMode:site.buildMode,diagnostics:site.diagnostics||null,builder:BUILDER_VERSION});

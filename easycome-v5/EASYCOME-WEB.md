@@ -1,4 +1,4 @@
-# Easy Come Web — V39 Free Chat Handoff
+# Easy Come Web — V39 Free Chat Handoff · Direct Import
 
 ## Principio
 Easy Come prepara il contesto; la chat scelta dall’utente crea il sito; Easy Come ospita, vende e consegna. Non esiste una chiamata API generativa nel flusso Web V39.
@@ -19,7 +19,7 @@ Il prompt contiene business, dati pubblici, obiettivo, audience, differenziante,
 - ogni azione commerciale deve portare a WhatsApp, telefono, email o richiesta reale.
 
 ## Import
-Lo ZIP finale viene caricato con signed upload in Supabase Storage e passa attraverso `api/web-package-upload.js`. Il portale resta sotto `/web-sites/:slug/:token/`.
+Lo ZIP finale viene caricato con signed upload in Supabase Storage e importato da `api/web-package-upload.js`. L’importatore esegue solo controlli tecnici indispensabili (ZIP leggibile, percorsi sicuri, presenza di un sito servibile): non blocca il progetto per stile, font, immagini, CTA o scelte creative. Il portale resta sotto `/web-sites/:slug/:token/`.
 
 ## Commerciale
 Prezzo sito configurabile + implementazione fissa €50. Il cliente riceve soltanto il link Easy Come; il pacchetto si sblocca dopo il pagamento.

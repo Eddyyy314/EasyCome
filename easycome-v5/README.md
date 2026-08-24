@@ -1,4 +1,4 @@
-# Easy Come V39 — Free Chat Handoff
+# Easy Come V39 — Free Chat Handoff · Direct Import
 
 Easy Come Web non usa più API generative a pagamento.
 
@@ -12,7 +12,7 @@ Easy Come Web non usa più API generative a pagamento.
 6. **Apri ChatGPT** (o un’altra chat), allega il Creative Pack e incolla il prompt.
 7. La chat deve consegnare uno ZIP statico: `index.html`, `styles.css`, `app.js`, `assets/`.
 8. Torni in Easy Come e premi **Importa e crea portale**.
-9. Easy Come applica il Quality Gate, ospita la preview e crea il link cliente + checkout.
+9. Easy Come importa tecnicamente il pacchetto, ospita la preview e crea il link cliente + checkout.
 
 ## Costi AI
 
@@ -20,7 +20,7 @@ Nessuna `OPENAI_API_KEY` e nessuna API di chat sono richieste da Easy Come Web V
 
 ## Asset Lock
 
-Il Master Prompt vieta stock e immagini esterne. Se il materiale fotografico non copre uniformemente una sezione ripetuta, il designer deve cambiare la composizione invece di lasciare elementi monchi. L’importatore Easy Come mantiene inoltre i controlli su funzioni finte, immagini esterne e flussi commerciali inutili.
+Il Master Prompt vieta stock e immagini esterne. Se il materiale fotografico non copre uniformemente una sezione ripetuta, il designer deve cambiare la composizione invece di lasciare elementi monchi. L’importatore Easy Come non giudica più le scelte creative: verifica soltanto che il pacchetto sia tecnicamente leggibile e pubblicabile.
 
 ## Prezzo
 
