@@ -1,19 +1,25 @@
-# Easy Come Web — V36 Typography Director
+# Easy Come Web — V38 Free Chat Handoff
 
-Easy Come Web crea proposte web su misura per PMI. La V36 aggiunge un Context Engine che costruisce il sito a partire da attività reale, obiettivo commerciale, visitatore, informazioni disponibili, Brand DNA e asset approvati.
+## Principio
+Easy Come prepara il contesto; la chat scelta dall’utente crea il sito; Easy Come ospita, vende e consegna. Non esiste una chiamata API generativa nel flusso Web V38.
 
-## Regole chiave
-- Nessun template universale.
-- Nessuna fotografia sostitutiva o stock non approvata.
-- Le immagini hanno ruoli semantici vincolanti.
-- Se un gruppo ripetuto non ha copertura fotografica completa e coerente, l'intero gruppo viene ridisegnato con una grammatica uniforme.
-- Meglio una composizione tipografica completa che una griglia con una foto mancante.
-- CTA solo reali: WhatsApp, chiamata, richiesta/prenotazione reale.
-- Il portale Easy Come blocca in importazione flussi finti e immagini esterne non approvate.
+## Master Prompt
+Il prompt contiene business, dati pubblici, obiettivo, audience, differenziante, offerta, territorio, CTA, funzioni, vincoli visivi, palette e manifest degli asset. Obbliga il designer a creare un sito specifico per l’attività, statico e importabile.
 
-## Prezzo Web
-Il prezzo del progetto è deciso nella Factory. Al checkout viene sempre aggiunta **Implementazione Easy Come Web: €50**, mostrata come voce separata.
+## Creative Pack
+`/api/web-handoff` crea un ZIP amministrativo con Master Prompt, manifest e copie delle immagini approvate. Gli URL accettati dal pack sono esclusivamente gli endpoint firmati Easy Come per Google Places e asset caricati in Easy Come.
 
+## Design rules
+- nessun template universale;
+- niente stock o immagini non approvate;
+- niente sezioni ripetute con copertura fotografica incoerente;
+- tipografia scelta per il brand, non default generici;
+- niente marquee/ticker decorativi, card soup, glassmorphism o CTA finte;
+- nessun riferimento a ChatGPT, prompt o processo produttivo nel sito cliente;
+- ogni azione commerciale deve portare a WhatsApp, telefono, email o richiesta reale.
 
-## Typography Director V36
-Ogni Build Pack riceve una coppia tipografica display/body selezionata in base a settore e personalità. Le scelte generiche di sistema vengono rifiutate come identità visiva e il Creative Review tratta tipografia, line-break, scala e rapporto con le immagini come parte dell'art direction.
+## Import
+Lo ZIP finale viene caricato con signed upload in Supabase Storage e passa attraverso `api/web-package-upload.js`. Il portale resta sotto `/web-sites/:slug/:token/`.
+
+## Commerciale
+Prezzo sito configurabile + implementazione fissa €50. Il cliente riceve soltanto il link Easy Come; il pacchetto si sblocca dopo il pagamento.

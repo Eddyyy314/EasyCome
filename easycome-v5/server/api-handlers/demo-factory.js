@@ -7,7 +7,6 @@ import { buildQueryPlan, classifyPlace, buildDemoModel, demoSlug, demoPrice, out
 import { sendLiberoOutreach } from '../_libero-mail.js';
 import { buildWebsiteProfile, createWebsiteZip } from '../_website-factory.js';
 import { classifyWebsitePresence, socialFieldsFromPresence } from '../_web-presence.js';
-import { buildAiStudioBrief } from '../_aistudio-web.js';
 import { photoCards, storedAssetCards } from '../_web-brand.js';
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -40,7 +39,7 @@ export default async function handler(req,res){
             price,subject:outreachSubject(place),message:outreachMessage(place,demoUrl,price),shortMessage:outreachShortMessage(place,demoUrl,price),
             emailDelivery:outreach.lastEmail||null,contactStatus,contactedAt:outreach.contactedAt||outreach.lastEmail?.sentAt||'',
             websiteReady:Boolean(websiteProfile),websiteProfile,websiteDemoUrl:websiteProfile?`${origin}/web-demo.html?d=${encodeURIComponent(row.demo_slug)}`:'',
-            websiteAiReady:Boolean(cfg.websiteAiBrief),websiteAiBrief:cfg.websiteAiBrief||null,websiteAiUrl:cfg.websiteAiBrief?.aiStudioUrl||'https://aistudio.google.com/apps',webProposal:cfg.webProposal||null,
+            websiteCreative:cfg.websiteCreative||null,websiteHandoff:cfg.websiteHandoff||null,websiteAiReady:false,websiteAiBrief:null,websiteAiUrl:'',webProposal:cfg.webProposal||null,
             contactability:0,potential:0,potentialReasons:[],mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=${encodeURIComponent(row.place_id||'')}`,
             createdAt:row.created_at||'',expiresAt:row.expires_at||''
           };
@@ -101,27 +100,8 @@ export default async function handler(req,res){
       const price=Math.round(Number(req.body?.price||0));if(price<50||price>20000)throw new Error('Inserisci un prezzo tra 50 € e 20.000 €.');
       const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const existing=current.webProposal&&typeof current.webProposal==='object'?current.webProposal:{};const token=existing.token||crypto.randomBytes(18).toString('hex');const now=new Date();const expires=new Date(now.getTime()+30*86400000);
       const implementationFee=50;const proposal={...existing,token,previewUrl:parsedHref||existing.previewUrl||'',price,implementationFee,totalPrice:price+implementationFee,status:existing.status==='paid'?'paid':'draft',createdAt:existing.createdAt||now.toISOString(),updatedAt:now.toISOString(),expiresAt:expires.toISOString()};
-      await updateTarget(target.id,{demo_config:{...current,webProposal:proposal}});const origin=baseUrl(req);return res.status(200).json({ok:true,proposal,proposalUrl:`${origin}/web-proposal.html?d=${encodeURIComponent(demoSlugValue)}&t=${encodeURIComponent(token)}`});
-    }
-    if(action==='prepare-website-ai'){
-      const demoSlugValue=String(req.body?.demoSlug||'').trim();
-      if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
-      const target=await targetBySlug(demoSlugValue);
-      if(!target)return res.status(404).json({error:'Prospect non trovato.'});
-      const raw=await placeDetails(target.place_id);
-      const place=publicPlace(raw);
-      let discovered={email:'',website:'',contactPage:'',instagram:'',facebook:'',whatsapp:''};
-      if(place.website){try{discovered=await discoverPublicBusinessContacts(place.website)}catch{}}
-      const merged={...place,...discovered,website:place.website,phone:place.phone,facebook:place.facebook||discovered.facebook||'',instagram:place.instagram||discovered.instagram||''};
-      const incoming=req.body?.config&&typeof req.body.config==='object'?req.body.config:{};
-      const currentBrand=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
-      // Asset lock: public Google/Social photos are NEVER auto-selected. Only images explicitly approved in Web Studio enter the build pack.
-      const explicitImages=Array.isArray(incoming.images)?incoming.images.filter(Boolean):String(incoming.images||'').trim()?incoming.images:[];
-      const override={...incoming,images:explicitImages,imageManifest:Array.isArray(incoming.imageManifest)?incoming.imageManifest:[]};
-      const brief=buildAiStudioBrief(merged,target.template_id,override);
-      const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
-      await updateTarget(target.id,{demo_config:{...current,websiteAiBrief:brief,websiteAiPreparedAt:new Date().toISOString()}});
-      return res.status(200).json({ok:true,brief,aiStudioUrl:brief.aiStudioUrl,webPresenceType:place.webPresenceType,webPresenceLabel:place.webPresenceLabel});
+      const rawHandoff=req.body?.handoffConfig&&typeof req.body.handoffConfig==='object'?req.body.handoffConfig:null;const handoff=rawHandoff?{version:String(req.body?.handoffVersion||'V38').slice(0,20),preparedAt:now.toISOString(),config:rawHandoff,prompt:String(req.body?.handoffPrompt||'').slice(0,60000)}:(current.websiteHandoff||null);
+      await updateTarget(target.id,{demo_config:{...current,webProposal:proposal,...(handoff?{websiteHandoff:handoff}:{})}});const origin=baseUrl(req);return res.status(200).json({ok:true,proposal,handoff,proposalUrl:`${origin}/web-proposal.html?d=${encodeURIComponent(demoSlugValue)}&t=${encodeURIComponent(token)}`});
     }
     if(action==='website-config'){
       const demoSlugValue=String(req.body?.demoSlug||'').trim();

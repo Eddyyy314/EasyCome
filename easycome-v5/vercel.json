@@ -13,6 +13,9 @@
     },
     "api/web-brand-asset.js": {
       "maxDuration": 30
+    },
+    "api/web-handoff.js": {
+      "maxDuration": 60
     }
   },
   "headers": [

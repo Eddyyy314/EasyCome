@@ -1,14 +1,31 @@
-# Easy Come V36 — Context Engine
+# Easy Come V38 — Free Chat Handoff
 
-Ecosistema Easy Come con Web Factory V36. Il Web Context Engine interpreta la PMI prima di progettare: business, visitor intent, conversione, contenuto, brand e copertura fotografica.
+Easy Come Web non usa più API generative a pagamento.
 
-### Web checkout
-- Prezzo sito: configurabile per proposta.
-- Implementazione: €50 fissi per ogni sito.
-- Stripe mostra le due voci separatamente.
+## Flow
 
-### Visual QA
-Il Build Pack applica un piano fotografico coerente; l'importatore blocca immagini stock/esterne non approvate e CTA finte.
+1. La Factory trova l’attività e distingue sito proprietario, social e portali.
+2. Approvi logo/foto reali con Asset Lock.
+3. Compili business, obiettivo, conversione e direzione desiderata.
+4. **Prepara Master Prompt**: Easy Come salva il brief e crea la proposta (prezzo sito + €50 implementazione).
+5. **Scarica Creative Pack**: contiene `MASTER-PROMPT.md`, `ASSET-MANIFEST.json` e le immagini approvate.
+6. **Apri ChatGPT** (o un’altra chat), allega il Creative Pack e incolla il prompt.
+7. La chat deve consegnare uno ZIP statico: `index.html`, `styles.css`, `app.js`, `assets/`.
+8. Torni in Easy Come e premi **Importa e crea portale**.
+9. Easy Come applica il Quality Gate, ospita la preview e crea il link cliente + checkout.
 
-### Build
-`npm run build`
+## Costi AI
+
+Nessuna `OPENAI_API_KEY` e nessuna API di chat sono richieste da Easy Come Web V38. L’handoff usa la normale interfaccia della chat scelta dall’utente.
+
+## Asset Lock
+
+Il Master Prompt vieta stock e immagini esterne. Se il materiale fotografico non copre uniformemente una sezione ripetuta, il designer deve cambiare la composizione invece di lasciare elementi monchi. L’importatore Easy Come mantiene inoltre i controlli su funzioni finte, immagini esterne e flussi commerciali inutili.
+
+## Prezzo
+
+Il checkout mostra due righe: prezzo del progetto + **€50 implementazione Easy Come Web**.
+
+## Deploy
+
+GitHub + Vercel come prima. Servono le normali variabili Easy Come/Supabase/Stripe già in uso; non serve alcuna chiave API generativa.
