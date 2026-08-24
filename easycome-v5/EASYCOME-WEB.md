@@ -1,3 +1,5 @@
+> **V33 Clean Checkout:** checkout delle proposte Easy Come Web limitato alla carta, senza Link come metodo di pagamento; copy cliente privo di riferimenti al processo di produzione.
+
 > **V32 Browser Compiler:** import AI Studio senza Vite/Rollup runtime; TSX/JSX viene trasformato con un compilatore JavaScript puro e le dipendenze browser arrivano via ESM CDN.
 
 # Easy Come Web — V30 Zero‑Touch Builder

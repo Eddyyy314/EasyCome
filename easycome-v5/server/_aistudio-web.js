@@ -129,8 +129,8 @@ function normalizeImageManifest(raw=[]){
 }
 function buildReviewPrompts(name,dna,assets=[]){
   const approved=assets.map(a=>a.url);
-  const assetLock=approved.length?`APPROVED ASSET LOCK: the only business photography/logo URLs allowed in this project are: ${approved.join(' | ')}. Inspect the code and remove every business image/background URL that is not on this list. Never generate, search for, or substitute stock/AI imagery. If a section has no suitable approved image, redesign it without an image.`:`ASSET LOCK: no approved business photography exists. Remove stock/AI imagery and design with typography, color, rules and spacing instead.`;
-  const creative=`REDESIGN PASS — act as a demanding creative director from a top independent web studio. Review the ${name} site in the live preview and EDIT THE PROJECT NOW. This is not a polish pass. First delete generic AI patterns before adding anything. Fail the design if you see: a centered eyebrow/gradient headline, hero-left/image-right by default, two pill CTAs, 3–4 equal feature cards, generic icon grids, bento-for-no-reason, rounded containers around every section, fake dashboard visuals, gradient blobs, repetitive white/grey section bands, generic testimonial carousels or a giant rounded navbar. Also fail it if every section could be rearranged without changing the identity. Rebuild weak sections using this Design DNA: ${dna.composition} ${dna.image} ${dna.navigation} ${dna.signature} Use fewer components, stronger hierarchy, real negative space, editorial cropping and typography with personality. Avoid overused AI font choices (Inter, Poppins, Montserrat, Roboto, generic Space Grotesk/Playfair pairings) unless there is a specific reason. Keep factual accuracy. ${assetLock} The finished first 2–3 viewports must look screenshot-worthy and clearly commissioned for ${name}.`;
+  const assetLock=approved.length?`APPROVED ASSET LOCK: the only business photography/logo URLs allowed in this project are: ${approved.join(' | ')}. Inspect the code and remove every business image/background URL that is not on this list. Never generate, search for, or substitute stock or substitute imagery. If a section has no suitable approved image, redesign it without an image.`:`ASSET LOCK: no approved business photography exists. Remove stock or substitute imagery and design with typography, color, rules and spacing instead.`;
+  const creative=`REDESIGN PASS — act as a demanding creative director from a top independent web studio. Review the ${name} site in the live preview and EDIT THE PROJECT NOW. This is not a polish pass. First delete generic generated-site patterns before adding anything. Fail the design if you see: a centered eyebrow/gradient headline, hero-left/image-right by default, two pill CTAs, 3–4 equal feature cards, generic icon grids, bento-for-no-reason, rounded containers around every section, fake dashboard visuals, gradient blobs, repetitive white/grey section bands, generic testimonial carousels or a giant rounded navbar. Also fail it if every section could be rearranged without changing the identity. Rebuild weak sections using this Design DNA: ${dna.composition} ${dna.image} ${dna.navigation} ${dna.signature} Use fewer components, stronger hierarchy, real negative space, editorial cropping and typography with personality. Avoid overused generator font choices (Inter, Poppins, Montserrat, Roboto, generic Space Grotesk/Playfair pairings) unless there is a specific reason. Keep factual accuracy. ${assetLock} The finished first 2–3 viewports must look screenshot-worthy and clearly commissioned for ${name}.`;
   const mobile=`MOBILE ART-DIRECTION PASS — redesign ${name} at 390px and 360px as its own composition, not a stacked desktop page. Preserve the Design DNA but change crops, headline breaks, navigation, section order where useful, whitespace, CTA placement and image ratios for thumbs and a narrow viewport. Remove horizontal overflow, tiny type, giant dead gaps and desktop leftovers. Do not turn every element into a full-width rounded card. ${assetLock} Test sticky/fixed elements, 44px touch targets, forms and footer. Apply changes directly and keep reduced-motion support.`;
   const production=`DELIVERY PASS — harden the ${name} site without flattening its art direction. Fix build/console errors, broken routes/assets, keyboard/focus behavior, contrast, semantic HTML, reduced-motion, metadata, canonical/Open Graph basics, LocalBusiness structured data only from supplied facts, image loading/layout stability and obvious Core Web Vitals risks. Verify every phone/email/social/CTA against supplied data. Delete unsupported testimonials, awards, statistics, prices, years, team members or claims. ${assetLock} IMPORTANT DELIVERY FORMAT FOR EASY COME: produce a portable static build. For Vite set base:'./' (or equivalent relative asset paths), avoid hard-coded root /assets URLs, and prefer HashRouter or a static routing strategy that works under a nested preview path. Run the production build and make sure the downloadable project contains dist/index.html plus all dist assets. Check 1440×900, 1280×800, 390×844 and 360×800. Keep the distinctive composition intact; production quality must not mean making the design generic.`;
   return {creative,mobile,production};
@@ -154,7 +154,7 @@ export function buildAiStudioBrief(place={},templateId='custom',override={}){
   const tone=clean(override.tone||'Trova una direzione creativa unica e specifica; non scegliere un template o una palette preconfezionata.',600);
   const cta=clean(override.cta||'Scegli la CTA reale più adatta al business usando telefono, email, WhatsApp o richiesta informazioni solo se disponibili.',500);
   const features=clean(override.features||'Contatto reale, SEO locale, responsive impeccabile, performance, accessibilità e privacy placeholder da completare.',1800);
-  const anti=clean(override.anti||'Evita qualsiasi soluzione che sembri un sito AI generico o un tema marketplace.',1500);
+  const anti=clean(override.anti||'Evita qualsiasi soluzione che sembri un template generico o un tema marketplace.',1500);
   const refs=listUrls(override.references);
   const imageManifest=normalizeImageManifest(override.imageManifest);
   const images=listUrls(imageManifest.length?imageManifest.map(x=>x.url):override.images);
@@ -164,7 +164,7 @@ export function buildAiStudioBrief(place={},templateId='custom',override={}){
   const dna=designDNA(name,templateId,category);
   const reviewPrompts=buildReviewPrompts(name,dna,imageManifest);
   const referenceBlock=refs.length?refs.map((u,i)=>`${i+1}. ${u}`).join('\n'):'None supplied. Do not imitate a random trend site.';
-  const imageBlock=images.length?images.map((u,i)=>`${i+1}. ${u}`).join('\n'):'No approved business imagery supplied. Do NOT invent or fetch replacement stock/AI imagery.';
+  const imageBlock=images.length?images.map((u,i)=>`${i+1}. ${u}`).join('\n'):'No approved business imagery supplied. Do NOT invent or fetch replacement stock or substitute imagery.';
   const assetManifestBlock=imageManifest.length?imageManifest.map((a,i)=>`${i+1}. [${String(a.role||'approved').toUpperCase()}] ${a.url}${a.name?` — ${a.name}`:''} (${a.source||'approved'})`).join('\n'):'NONE. No business image is approved for use.';
   const colorBlock=brandColors.length?brandColors.join(' · '):'No reliable palette extracted. Derive color choices from the supplied logo/reference photos if available; otherwise keep the palette restrained and easy to retune.';
   const prompt=`You are not a generic website generator. You are the creative director, conversion strategist, UX lead and senior frontend engineer of an excellent independent digital studio.
@@ -240,14 +240,18 @@ BRAND FIDELITY RULES
 - If the photos are visually inconsistent, curate them: choose a dominant photographic language, crop them consistently and let the strongest 3–5 images lead.
 - Public listing/social images are reference material for a private proposal unless usage rights are confirmed; keep the project easy to swap to approved originals before public launch.
 
+CUSTOMER-FACING LANGUAGE LOCK
+- Never mention artificial intelligence, AI, Google AI Studio, prompts, models, generators, builders, automation tools or Easy Come's production workflow anywhere in visible website copy, metadata, alt text, structured data or customer-facing UI.
+- The finished website must speak only as the client's brand. The visitor should see the business, its identity, products, services and contact paths—never how the website was produced.
+
 NON-NEGOTIABLE CREATIVE RULES
-- This is a business website, NOT a SaaS dashboard and NOT an AI demo.
+- This is a business website, NOT a SaaS dashboard and NOT a software-demo landing page.
 - Do not use Easy Come branding, colors, typography or visual language. The client must have an independent identity.
 - Do not start from a visible template. Derive layout, proportions, palette and section order from this business.
-- No purple/blue AI gradients, glassmorphism, random blobs, floating pills, excessive rounded rectangles, card soup, default bento grids, generic icon feature rows, fake dashboards or repetitive alternating sections.
-- Hard ban on the common AI landing formula: eyebrow + centered giant headline + two pill buttons + 3 equal cards + icon grid + testimonial strip + rounded final CTA. If your first attempt drifts there, throw it away and recompose.
+- No fashion-driven purple/blue gradients, glassmorphism, random blobs, floating pills, excessive rounded rectangles, card soup, default bento grids, generic icon feature rows, fake dashboards or repetitive alternating sections.
+- Hard ban on the common generic landing formula: eyebrow + centered giant headline + two pill buttons + 3 equal cards + icon grid + testimonial strip + rounded final CTA. If your first attempt drifts there, throw it away and recompose.
 - Do not make every section a component-shaped rectangle. Prefer open composition, edges, rules, image fields, type, whitespace and changes of scale.
-- Avoid overused generator typography by default: Inter, Poppins, Montserrat, Roboto and fashionable-but-generic Space Grotesk + Playfair pairings. Choose fonts for this identity, not because they are common in AI output.
+- Avoid overused generator typography by default: Inter, Poppins, Montserrat, Roboto and fashionable-but-generic Space Grotesk + Playfair pairings. Choose fonts for this identity, not because they are common in generated templates.
 - Use at most one visual gimmick. Craft comes from proportion, type, crop, spacing and rhythm—not from effects.
 - Avoid the universal headline-left/image-right hero unless it is genuinely the strongest concept. The first viewport needs a clear visual idea.
 - Use typography as a design material: considered scale, line length, hierarchy, spacing and contrast. Do not overuse uppercase micro-labels.
@@ -276,7 +280,7 @@ BUILD REQUIREMENTS
 
 SELF-REVIEW GATE — DO THIS BEFORE YOU STOP
 Inspect the finished site at desktop and mobile. Ask yourself:
-1. Could this be identified as an AI-generated landing page in five seconds?
+1. Could this be identified as a generic template-generated landing page in five seconds?
 2. Could the same design belong to an unrelated business if only the logo changed?
 3. Is the first viewport memorable without being confusing?
 4. Does the typography feel intentionally art-directed?
@@ -286,7 +290,7 @@ Inspect the finished site at desktop and mobile. Ask yourself:
 8. Are the primary CTA and contact path obvious?
 9. Does the first 900px of desktop look like a real art-directed brand page rather than a UI kit?
 10. Did you repeat the same rounded container/card treatment more than twice?
-11. Would a design-aware human call any section ‘AI-looking’? If yes, rebuild it rather than polish it.
+11. Would a design-aware human call any section generic or template-looking? If yes, rebuild it rather than polish it.
 If the answer is wrong on any point, redesign and fix it before considering the project complete.
 
 FINAL EXPECTATION

@@ -62,6 +62,7 @@ export default async function handler(req, res) {
     const params = new URLSearchParams();
     const add = (key, value) => { if (value !== undefined && value !== null && value !== '') params.append(key, String(value)); };
     add('mode', managedServiceSelected ? 'subscription' : 'payment');
+    add('payment_method_types[0]', 'card');
     add('customer_email', email);
     if (!managedServiceSelected) add('customer_creation', 'always');
     add('client_reference_id', orderId);

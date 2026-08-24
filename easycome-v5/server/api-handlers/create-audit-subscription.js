@@ -28,7 +28,7 @@ export default async function handler(req,res){
       purchase_type:'audit_service',managed_service_selected:true,
     });
     const origin=appOrigin(req);const p=new URLSearchParams();const add=(k,v)=>{if(v!==undefined&&v!==null&&v!=='')p.append(k,String(v))};
-    add('mode','subscription');add('customer_email',email);add('client_reference_id',orderId);add('billing_address_collection','required');
+    add('mode','subscription');add('payment_method_types[0]','card');add('customer_email',email);add('client_reference_id',orderId);add('billing_address_collection','required');
     add('line_items[0][quantity]','1');add('line_items[0][price_data][currency]','eur');add('line_items[0][price_data][unit_amount]',amountCents);
     add('line_items[0][price_data][recurring][interval]','month');add('line_items[0][price_data][product_data][name]','Easy Come Audit');
     add('line_items[0][price_data][product_data][description]','Modulo complementare del Gestionale Easy Come: diagnostica sul database reale, evidenze, soluzioni operative e ricontrollo.');
