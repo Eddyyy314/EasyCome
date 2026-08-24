@@ -1,6 +1,6 @@
-# Easy Come V35 — Context Engine
+# Easy Come V36 — Context Engine
 
-Ecosistema Easy Come con Web Factory V35. Il Web Context Engine interpreta la PMI prima di progettare: business, visitor intent, conversione, contenuto, brand e copertura fotografica.
+Ecosistema Easy Come con Web Factory V36. Il Web Context Engine interpreta la PMI prima di progettare: business, visitor intent, conversione, contenuto, brand e copertura fotografica.
 
 ### Web checkout
 - Prezzo sito: configurabile per proposta.

@@ -60,7 +60,50 @@ function hashString(value=''){
   let h=2166136261;for(const ch of String(value)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0;
 }
 function pick(list,seed,offset=0){return list[(seed+offset)%list.length]}
-function designDNA(name='',templateId='',category=''){
+function typographyDNA(name='',templateId='',category='',personality=''){
+  const seed=hashString(`type|${name}|${templateId}|${category}|${personality}`);
+  const t=`${category} ${templateId} ${personality}`.toLowerCase();
+  const isFood=/ristor|food|bar|cafe|caff|pizz|trattor|oster|forna|forno|panif|bakery|pastic|focacc|gelat|aliment/.test(t)||templateId==='restaurant';
+  const isTravel=/hotel|camp|resort|bed|tour|travel|vacan|b&b|affitt|ospital/.test(t)||templateId==='booking';
+  const isPro=/consult|avvocat|commercial|studio|account|legal|notaio|architett|ingegner/.test(t)||templateId==='professional';
+  const isHealth=/medic|clinic|dent|health|physio|psicolog|terap|farmac/.test(t)||templateId==='health';
+  const isRetail=/shop|store|boutique|retail|fashion|negozio|gioiell|arredo/.test(t)||templateId==='retail';
+  const isCraft=/officin|repair|auto|mechanic|carrozzer|elettric|idraulic|falegn|artigian|laborator/.test(t)||templateId==='workshop';
+  const pools=isFood?[
+    {display:'Newsreader',body:'Libre Franklin',treatment:'Warm editorial food identity: expressive but not precious. Use Newsreader for short display statements and Libre Franklin for practical information. No scripted accents, no italic word inserted just for decoration.'},
+    {display:'Fraunces',body:'Work Sans',treatment:'Tactile contemporary craft: use Fraunces selectively at strong optical sizes, paired with calm Work Sans. Avoid the cliché of making every second word italic.'},
+    {display:'Bricolage Grotesque',body:'Source Serif 4',treatment:'Contemporary artisan identity with an unexpected reversal: characterful grotesque display type and warm editorial reading text. Let real product imagery, not a giant serif headline, own the first impression.'},
+    {display:'DM Serif Display',body:'IBM Plex Sans',treatment:'Confident local editorial voice. Use the display face in a few memorable moments, not as a wall of giant serif text. IBM Plex Sans keeps details direct and useful.'}
+  ]:(isTravel?[
+    {display:'Cormorant Garamond',body:'Manrope',treatment:'Destination-led, elegant and atmospheric without looking like a booking template. Use the serif for place-led storytelling; keep logistics crisp in Manrope.'},
+    {display:'Newsreader',body:'Source Sans 3',treatment:'Editorial travel journal rather than travel portal. Moderate contrast, generous reading rhythm, strong captions and practical labels.'},
+    {display:'Fraunces',body:'Libre Franklin',treatment:'Characterful hospitality with a tactile human feel. Use variable weight/optical size intentionally and avoid decorative italics as a recurring motif.'}
+  ]:(isPro?[
+    {display:'Source Serif 4',body:'IBM Plex Sans',treatment:'Serious contemporary practice: sober authority, excellent readability and typographic discipline. Use thin rules and measured hierarchy instead of decorative cards.'},
+    {display:'Libre Baskerville',body:'Source Sans 3',treatment:'Established editorial authority with a modern operational layer. Keep headings concise and body copy calm; avoid corporate-blue visual conventions.'},
+    {display:'Newsreader',body:'IBM Plex Sans',treatment:'High-trust editorial system. Use Newsreader for statements and section titles, IBM Plex Sans for details, forms and navigation. No oversized quote-like hero by default.'}
+  ]:(isHealth?[
+    {display:'Source Serif 4',body:'Atkinson Hyperlegible',treatment:'Human, precise and highly readable. The serif adds warmth without wellness clichés; Atkinson Hyperlegible prioritizes clarity in practical information.'},
+    {display:'Lora',body:'Source Sans 3',treatment:'Reassuring editorial tone with approachable detail. Keep typography calm, never ornamental or luxury-coded.'},
+    {display:'Newsreader',body:'Public Sans',treatment:'Contemporary care identity: soft editorial headings with exceptionally clear utility typography.'}
+  ]:(isRetail?[
+    {display:'Bodoni Moda',body:'Work Sans',treatment:'Fashion/flagship contrast: campaign-like display type with clean retail utility. Let product imagery dominate and keep UI chrome minimal.'},
+    {display:'Syne',body:'Libre Franklin',treatment:'Graphic contemporary brand voice. Use Syne as a deliberate display system, not everywhere; use Libre Franklin for product and practical copy.'},
+    {display:'Cormorant Garamond',body:'Manrope',treatment:'Curated boutique/editorial character. Strong typography, quiet interface, selective large-scale moments.'}
+  ]:(isCraft?[
+    {display:'Archivo Black',body:'Archivo',treatment:'Direct, crafted and confident. Use condensed/strong display hierarchy sparingly, with practical body copy and strong alignment to real work imagery.'},
+    {display:'Barlow Condensed',body:'IBM Plex Sans',treatment:'Technical but designed: compact display type, crisp information hierarchy and zero fake-industrial decoration.'},
+    {display:'Bricolage Grotesque',body:'Source Sans 3',treatment:'Contemporary maker identity with character in headlines and neutral clarity everywhere else. No tech-startup styling.'}
+  ]:[
+    {display:'Bricolage Grotesque',body:'Source Sans 3',treatment:'Distinctive contemporary voice without a SaaS look. Use the display family for rhythm and shape, with Source Sans 3 for clarity.'},
+    {display:'Newsreader',body:'Libre Franklin',treatment:'Editorial local identity: expressive display moments, restrained body type and strong reading rhythm.'},
+    {display:'Syne',body:'Manrope',treatment:'Graphic, confident and modern. Use asymmetry and scale carefully; never turn it into a tech landing page.'},
+    {display:'Fraunces',body:'IBM Plex Sans',treatment:'Human, tactile and specific. Use variable features deliberately and keep the body typography practical.'}
+  ])))));
+  const chosen=pick(pools,seed,13);
+  return {...chosen,source:'Google Fonts',rule:`Load ${chosen.display} and ${chosen.body} explicitly. Use no more than these two families unless a supplied brand font is genuinely present. System fonts are fallbacks only, never the visual identity.`};
+}
+function designDNA(name='',templateId='',category='',personality=''){
   const seed=hashString(`${name}|${templateId}|${category}`);
   const c=String(category||'').toLowerCase();
   const isFood=/ristor|food|bar|cafe|caff|pizzeria|trattoria|osteria|forna|forno|panif|bakery|pastic|focacc|gelat|aliment/.test(c)||templateId==='restaurant';
@@ -109,8 +152,9 @@ function designDNA(name='',templateId='',category=''){
     'Signature moment: a section transition where typography and imagery interact in a way unique to this business, without becoming a gimmick.',
     'Signature moment: one memorable full-width typographic or photographic pause that breaks the normal web rhythm and anchors the identity.'
   ];
+  const typography=typographyDNA(name,templateId,category,personality);
   return {
-    composition:pick(composition,seed,1),image:pick(image,seed,3),navigation:pick(navigation,seed,5),motion:pick(motion,seed,7),signature:pick(signature,seed,11),
+    composition:pick(composition,seed,1),image:pick(image,seed,3),navigation:pick(navigation,seed,5),motion:pick(motion,seed,7),signature:pick(signature,seed,11),typography,
     antiPattern:'Never use the default AI-site sequence: centered eyebrow + huge gradient headline + two rounded CTA buttons + three feature cards + icon grid + testimonials + final CTA panel.'
   };
 }
@@ -188,7 +232,7 @@ function assetCoveragePlan(manifest=[]){
 function buildReviewPrompts(name,dna,assets=[],conversionRules='',assetPlan=''){
   const approved=assets.map(a=>a.url);
   const assetLock=approved.length?`APPROVED ASSET LOCK: the only business photography/logo URLs allowed in this project are: ${approved.join(' | ')}. Inspect the code and remove every business image/background URL that is not on this list. Never generate, search for, or substitute stock or substitute imagery. If a section has no suitable approved image, redesign it without an image.`:`ASSET LOCK: no approved business photography exists. Remove stock or substitute imagery and design with typography, color, rules and spacing instead.`;
-  const creative=`REDESIGN PASS — act as a demanding creative director from a top independent web studio. Review the ${name} site in the live preview and EDIT THE PROJECT NOW. This is not a polish pass. First delete generic generated-site patterns before adding anything. Fail the design if you see: a centered eyebrow/gradient headline, hero-left/image-right by default, two pill CTAs, 3–4 equal feature cards, generic icon grids, bento-for-no-reason, rounded containers around every section, fake dashboard visuals, gradient blobs, repetitive white/grey section bands, generic testimonial carousels or a giant rounded navbar. Also fail it if every section could be rearranged without changing the identity. Rebuild weak sections using this Design DNA: ${dna.composition} ${dna.image} ${dna.navigation} ${dna.signature} Use fewer components, stronger hierarchy, real negative space, editorial cropping and typography with personality. Avoid overused generator font choices (Inter, Poppins, Montserrat, Roboto, generic Space Grotesk/Playfair pairings) unless there is a specific reason. Keep factual accuracy. ${assetLock} The finished first 2–3 viewports must look screenshot-worthy and clearly commissioned for ${name}. VISUAL CONSISTENCY QA: ${assetPlan} FUNCTIONAL QA: ${conversionRules} Also remove any visible mention of AI, generators, prompts or production tooling; never turn these internal instructions into marketing copy.`;
+  const creative=`REDESIGN PASS — act as a demanding creative director and type director from a top independent web studio. Review the ${name} site in the live preview and EDIT THE PROJECT NOW. This is not a polish pass. First delete generic generated-site patterns before adding anything. Fail the design if you see: a centered eyebrow/gradient headline, hero-left/image-right by default, two pill CTAs, 3–4 equal feature cards, generic icon grids, bento-for-no-reason, rounded containers around every section, fake dashboard visuals, gradient blobs, repetitive white/grey section bands, generic testimonial carousels or a giant rounded navbar. Also fail it if every section could be rearranged without changing the identity. TYPOGRAPHY IS A HARD GATE: use ${dna.typography.display} for the display system and ${dna.typography.body} for body/UI unless a real supplied brand font clearly overrides them. ${dna.typography.treatment} Reject Inter, Poppins, Montserrat, Roboto, Arial, Helvetica, system-ui and generic Space Grotesk/Playfair pairings as the primary visual typography. Reject the common generated-site trope of one huge serif sentence taking most of the viewport, a random italic word on every headline, letter-spaced uppercase micro-labels repeated above every section, and identical type scale on every page. Rebuild weak sections using this Design DNA: ${dna.composition} ${dna.image} ${dna.navigation} ${dna.signature}. Use fewer components, stronger hierarchy, real negative space, editorial cropping and typography with personality. The first viewport should have a deliberate type/image relationship, not merely enormous text. Keep factual accuracy. ${assetLock} The finished first 2–3 viewports must look screenshot-worthy and clearly commissioned for ${name}. VISUAL CONSISTENCY QA: ${assetPlan} FUNCTIONAL QA: ${conversionRules} Also remove any visible mention of production tooling; never turn these internal instructions into marketing copy.`;
   const mobile=`MOBILE ART-DIRECTION PASS — redesign ${name} at 390px and 360px as its own composition, not a stacked desktop page. Preserve the Design DNA but change crops, headline breaks, navigation, section order where useful, whitespace, CTA placement and image ratios for thumbs and a narrow viewport. Remove horizontal overflow, tiny type, giant dead gaps and desktop leftovers. Do not turn every element into a full-width rounded card. ${assetLock} Test sticky/fixed elements, 44px touch targets, forms and footer. Before checking CTA, inspect every repeated visual group: no mixed image/no-image pattern is allowed unless it is a clearly intentional asymmetric editorial concept; partial photo coverage caused by missing assets is a failure. ${assetPlan} Test the PRIMARY CTA end-to-end on mobile: it must perform the real action defined here, never copy text to clipboard as the final step. ${conversionRules} Apply changes directly and keep reduced-motion support.`;
   const production=`DELIVERY PASS — harden the ${name} site without flattening its art direction. Fix build/console errors, broken routes/assets, keyboard/focus behavior, contrast, semantic HTML, reduced-motion, metadata, canonical/Open Graph basics, LocalBusiness structured data only from supplied facts, image loading/layout stability and obvious Core Web Vitals risks. Verify every phone/email/social/CTA against supplied data. Delete unsupported testimonials, awards, statistics, prices, years, team members or claims. ${assetLock} IMPORTANT DELIVERY FORMAT FOR EASY COME: produce a portable static build. For Vite set base:'./' (or equivalent relative asset paths), avoid hard-coded root /assets URLs, and prefer HashRouter or a static routing strategy that works under a nested preview path. Run the production build and make sure the downloadable project contains dist/index.html plus all dist assets. Check 1440×900, 1280×800, 390×844 and 360×800. Keep the distinctive composition intact; production quality must not mean making the design generic. VISUAL ASSET COVERAGE TEST: ${assetPlan} CONVERSION TEST: ${conversionRules} Click every primary CTA and verify it reaches the real phone/email/WhatsApp destination. Delete fake carts, clipboard-only flows, fake booking confirmations and dead forms. CLIENT COPY TEST: visible copy must not mention AI, prompts, generators, models or how the site was produced.`;
   return {creative,mobile,production};
@@ -221,7 +265,7 @@ export function buildAiStudioBrief(place={},templateId='custom',override={}){
   const brandColors=[...new Set((Array.isArray(override.brandColors)?override.brandColors:String(override.brandColors||'').split(/[\s,;]+/)).map(v=>String(v||'').trim()).filter(v=>/^#[0-9a-f]{6}$/i.test(v)))].slice(0,6);
   const uploadedAssets=clean(override.uploadedAssets,1200);
   const lens=sectorLens(templateId,category);
-  const dna=designDNA(name,templateId,category);
+  const dna=designDNA(name,templateId,category,personality);
   const conversionRules=conversionContract({category,templateId,phone,email,whatsapp,features,cta,actionMode});
   const intelligence=activityBlueprint({name,category,templateId,goal,offer,notes,phone,email,whatsapp});
   const assetPlan=assetCoveragePlan(imageManifest);
@@ -281,6 +325,21 @@ Category clichés to avoid: ${lens.avoid}
 
 DESIGN DNA — THIS IS A COMPOSITION BRIEF, NOT A TEMPLATE
 Composition: ${dna.composition}
+
+TYPOGRAPHY DIRECTOR — HARD ART-DIRECTION SYSTEM
+Display family: ${dna.typography.display}
+Body / UI family: ${dna.typography.body}
+Treatment: ${dna.typography.treatment}
+Font source: ${dna.typography.source}
+Rule: ${dna.typography.rule}
+- Load the selected families explicitly and actually use them in the rendered project. Do not leave the browser/system font as the visual result.
+- If a supplied logo contains a wordmark, show the real logo asset; do not recreate the logo by typing the business name in the display font.
+- Do not make a giant serif headline the whole concept. Typography must work together with imagery, brand colors, whitespace and content.
+- Avoid the recurring generated-site styling of a single italic accent word inside every large headline. Italics are allowed only when the type concept genuinely calls for them.
+- Avoid tiny uppercase letter-spaced labels above every section. Use them rarely, if at all.
+- Keep body copy highly readable (roughly 16–20px desktop depending on face, comfortable line height and sensible line length).
+- Create a real scale hierarchy: display, section title, body, utility. Do not simply use one huge heading size and one tiny body size.
+- On mobile, recompose line breaks and scale. Never let a headline become a 5–7 line wall of text.
 APPROVED VISUAL ASSET MANIFEST — HARD LOCK
 ${assetManifestBlock}
 
@@ -333,7 +392,7 @@ NON-NEGOTIABLE CREATIVE RULES
 - No fashion-driven purple/blue gradients, glassmorphism, random blobs, floating pills, excessive rounded rectangles, card soup, default bento grids, generic icon feature rows, fake dashboards or repetitive alternating sections.
 - Hard ban on the common generic landing formula: eyebrow + centered giant headline + two pill buttons + 3 equal cards + icon grid + testimonial strip + rounded final CTA. If your first attempt drifts there, throw it away and recompose.
 - Do not make every section a component-shaped rectangle. Prefer open composition, edges, rules, image fields, type, whitespace and changes of scale.
-- Avoid overused generator typography by default: Inter, Poppins, Montserrat, Roboto and fashionable-but-generic Space Grotesk + Playfair pairings. Choose fonts for this identity, not because they are common in generated templates.
+- Typography is not decoration. Use the TYPOGRAPHY DIRECTOR pair above unless a real supplied brand font overrides it. Inter, Poppins, Montserrat, Roboto, Arial, Helvetica and system-ui are fallbacks only, not the visual identity. Avoid generic Space Grotesk + Playfair pairings.
 - Use at most one visual gimmick. Craft comes from proportion, type, crop, spacing and rhythm—not from effects.
 - Avoid the universal headline-left/image-right hero unless it is genuinely the strongest concept. The first viewport needs a clear visual idea.
 - Use typography as a design material: considered scale, line length, hierarchy, spacing and contrast. Do not overuse uppercase micro-labels.
@@ -382,6 +441,9 @@ Inspect the finished site at desktop and mobile. Ask yourself:
 16. Does every image depict exactly what its surrounding copy claims it depicts? If uncertain, remove or relocate it.
 17. If all photos disappeared, would the remaining information architecture still make sense for this specific business? If not, the design is leaning on decoration instead of understanding.
 18. Does the site answer the visitor questions defined in EASY COME ACTIVITY UNDERSTANDING before asking for conversion? If not, restructure it.
+19. Is the selected display/body font pair visibly loaded and used, or did the project fall back to a generic system font? If generic, fix it.
+20. Does the hero rely on the cliché of gigantic serif text, repeated italic accent words or micro-uppercase labels instead of real art direction? If yes, redesign it.
+21. Could you recognize this business from the type, imagery and palette even with the logo hidden? If no, strengthen the identity.
 If the answer is wrong on any point, redesign and fix it before considering the project complete.
 
 FINAL EXPECTATION
@@ -396,6 +458,6 @@ Deliver the website itself, not a mockup or a prose proposal. It should look lik
     images,
     imageManifest,
     reviewPrompts,
-    meta:{name,category,goal,audience,differentiator,offer,personality,territory,tone,cta,features,anti,notes,actionMode,conversionRules,brandColors,uploadedAssets,designDNA:dna,intelligence,assetPlan,createdAt:new Date().toISOString(),engine:'easycome-web-v35-context-engine'}
+    meta:{name,category,goal,audience,differentiator,offer,personality,territory,tone,cta,features,anti,notes,actionMode,conversionRules,brandColors,uploadedAssets,designDNA:dna,intelligence,assetPlan,createdAt:new Date().toISOString(),engine:'easycome-web-v36-typography-director'}
   };
 }

@@ -8,7 +8,7 @@ import { createSignedUpload, downloadObject, signedObjectUrl, uploadObject } fro
 import { readJson, json, appOrigin } from '../server/_responses.js';
 export const config={api:{bodyParser:false}};
 
-const BUILDER_VERSION='35.0-context-engine';
+const BUILDER_VERSION='36.0-typography-director';
 const MAX_ZIP_BYTES=50*1024*1024;
 const MAX_FILES=700;
 const MAX_UNPACKED_BYTES=80*1024*1024;
@@ -37,7 +37,11 @@ function businessUxGate(entries,approvedManifest=[]){
   for(const e of entries){
     if(!/\.(?:html?|css|tsx?|jsx?|mjs|cjs|json)$/i.test(e.name))continue;const t=textOf(e);let m;while((m=remoteImage.exec(t))){const url=m[0].replace(/[),.;]+$/,'');if(approved.has(url))continue;if(suspiciousHosts.test(url)||!approved.size)problems.push(`${e.name}: immagine esterna non approvata (${url.slice(0,120)})`);}
   }
-  if(problems.length)throw new Error(`QUALITY GATE EASY COME: il sito contiene una funzione, un testo o un'immagine che non possiamo pubblicare. ${[...new Set(problems)].slice(0,5).join(' · ')}. Correggi il progetto: CTA reali e fotografie esclusivamente approvate e coerenti con il contenuto.`);
+  const visualText=entries.filter(e=>/\.(?:html?|css|tsx?|jsx?|mjs|cjs)$/i.test(e.name)).map(textOf).join('\n');
+  const customType=/(?:fonts\.googleapis\.com|@font-face|Newsreader|Fraunces|Bodoni\s+Moda|Cormorant\s+Garamond|DM\s+Serif\s+Display|Source\s+Serif\s+4|Libre\s+Baskerville|Syne|Bricolage\s+Grotesque|Archivo(?:\s+Black)?|Barlow\s+Condensed|Atkinson\s+Hyperlegible|IBM\s+Plex\s+Sans|Libre\s+Franklin|Work\s+Sans|Manrope|Public\s+Sans|Source\s+Sans\s+3|Lora)/i.test(visualText);
+  const genericPrimary=/(?:font-family\s*:\s*[^;}{]{0,100}(?:Inter|Poppins|Montserrat|Roboto|Arial|Helvetica|system-ui)|fontFamily\s*[:=][^,}\n]{0,100}(?:Inter|Poppins|Montserrat|Roboto|Arial|Helvetica|system-ui))/i.test(visualText);
+  if(genericPrimary&&!customType)problems.push('Tipografia generica rilevata: manca una vera coppia display/body art-directed. Usa il Typography Director del Build Pack e carica esplicitamente i font scelti.');
+  if(problems.length)throw new Error(`QUALITY GATE EASY COME: il sito contiene una funzione, un testo o un'immagine che non possiamo pubblicare. ${[...new Set(problems)].slice(0,5).join(' · ')}. Correggi il progetto: CTA reali, fotografie esclusivamente approvate e coerenti con il contenuto, e una tipografia realmente art-directed.`);
 }
 function parentOf(file){const i=String(file).lastIndexOf('/');return i<0?'':file.slice(0,i)}
 function textOf(entry){return Buffer.from(entry?.data||[]).toString('utf8')}
