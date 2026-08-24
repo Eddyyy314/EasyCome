@@ -1,3 +1,5 @@
+> **V31 Instant Portal Builder:** import AI Studio senza runtime `npm install`; dipendenze browser via ESM CDN, build più stabile su Vercel.
+
 # Easy Come V30 — Zero‑Touch Web Builder
 
 V30 rende Easy Come Web realmente one-click: lo ZIP sorgente scaricato da Google AI Studio viene riconosciuto e compilato automaticamente anche quando App.tsx/index.tsx sono nella root e non esiste `src/`. Il builder usa le dipendenze già presenti in Easy Come e, quando necessario, installa in una directory temporanea soltanto le dipendenze effettivamente importate con `npm --ignore-scripts`, poi esegue Vite con configurazione controllata Easy Come.

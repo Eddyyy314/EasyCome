@@ -1,3 +1,5 @@
+> **V31 Instant Portal Builder:** import AI Studio senza runtime `npm install`; dipendenze browser via ESM CDN, build più stabile su Vercel.
+
 # Easy Come Web — V30 Zero‑Touch Builder
 
 Easy Come Web è un prodotto autonomo del brand Easy Come. La Factory individua PMI senza sito proprietario, prepara il Brand/Creative Build Pack e trasforma il progetto finito in una proposta commerciale ospitata direttamente da Easy Come.
