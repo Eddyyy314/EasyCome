@@ -1,4 +1,4 @@
-# Easy Come V38 — Free Chat Handoff
+# Easy Come V39 — Free Chat Handoff
 
 Easy Come Web non usa più API generative a pagamento.
 
@@ -16,7 +16,7 @@ Easy Come Web non usa più API generative a pagamento.
 
 ## Costi AI
 
-Nessuna `OPENAI_API_KEY` e nessuna API di chat sono richieste da Easy Come Web V38. L’handoff usa la normale interfaccia della chat scelta dall’utente.
+Nessuna `OPENAI_API_KEY` e nessuna API di chat sono richieste da Easy Come Web V39. L’handoff usa la normale interfaccia della chat scelta dall’utente.
 
 ## Asset Lock
 

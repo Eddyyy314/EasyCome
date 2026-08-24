@@ -8,7 +8,7 @@ import { createSignedUpload, downloadObject, signedObjectUrl, uploadObject } fro
 import { readJson, json, appOrigin } from '../server/_responses.js';
 export const config={api:{bodyParser:false}};
 
-const BUILDER_VERSION='37.0-legacy-importer';
+const BUILDER_VERSION='39.0-static-handoff';
 const MAX_ZIP_BYTES=50*1024*1024;
 const MAX_FILES=700;
 const MAX_UNPACKED_BYTES=80*1024*1024;

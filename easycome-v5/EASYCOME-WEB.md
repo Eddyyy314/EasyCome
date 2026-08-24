@@ -1,7 +1,7 @@
-# Easy Come Web — V38 Free Chat Handoff
+# Easy Come Web — V39 Free Chat Handoff
 
 ## Principio
-Easy Come prepara il contesto; la chat scelta dall’utente crea il sito; Easy Come ospita, vende e consegna. Non esiste una chiamata API generativa nel flusso Web V38.
+Easy Come prepara il contesto; la chat scelta dall’utente crea il sito; Easy Come ospita, vende e consegna. Non esiste una chiamata API generativa nel flusso Web V39.
 
 ## Master Prompt
 Il prompt contiene business, dati pubblici, obiettivo, audience, differenziante, offerta, territorio, CTA, funzioni, vincoli visivi, palette e manifest degli asset. Obbliga il designer a creare un sito specifico per l’attività, statico e importabile.
