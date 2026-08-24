@@ -4,6 +4,15 @@
   "functions": {
     "api/router.js": {
       "maxDuration": 30
+    },
+    "api/web-package-upload.js": {
+      "maxDuration": 30
+    },
+    "api/web-photo.js": {
+      "maxDuration": 20
+    },
+    "api/web-brand-asset.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
@@ -28,6 +37,18 @@
   "buildCommand": "node scripts/build-public.mjs",
   "outputDirectory": "dist-public",
   "rewrites": [
+    {
+      "source": "/api/web-proposal-public",
+      "destination": "/api/router?route=web-proposal-public"
+    },
+    {
+      "source": "/api/web-proposal-checkout",
+      "destination": "/api/router?route=web-proposal-checkout"
+    },
+    {
+      "source": "/web-proposal",
+      "destination": "/web-proposal.html"
+    },
     {
       "source": "/api/admin-tools",
       "destination": "/api/router?route=admin-tools"

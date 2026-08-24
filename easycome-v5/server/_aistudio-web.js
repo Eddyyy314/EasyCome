@@ -56,13 +56,71 @@ function sectorLens(templateId='',category=''){
     avoid:'No generic local-business template, stock icon wall, card soup, fake social proof or default SaaS aesthetics.'
   };
 }
+function hashString(value=''){
+  let h=2166136261;for(const ch of String(value)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0;
+}
+function pick(list,seed,offset=0){return list[(seed+offset)%list.length]}
+function designDNA(name='',templateId='',category=''){
+  const seed=hashString(`${name}|${templateId}|${category}`);
+  const c=String(category||'').toLowerCase();
+  const isFood=/ristor|food|bar|cafe|caff|pizzeria|trattoria|osteria/.test(c)||templateId==='restaurant';
+  const isTravel=/hotel|camp|resort|bed|tour|travel|vacan|b&b|affitt|ospital/.test(c)||templateId==='booking';
+  const isPro=/consult|avvocat|commercial|studio|account|legal|notaio|architett|ingegner/.test(c)||templateId==='professional';
+  const isHealth=/medic|clinic|dent|health|physio|psicolog|terap|farmac/.test(c)||templateId==='health';
+  const isRetail=/shop|store|boutique|retail|fashion|negozio|gioiell|arredo/.test(c)||templateId==='retail';
+  const composition=(isFood||isTravel)?[
+    'Cinematic editorial opening: image and type overlap across a non-symmetrical grid; the first fold feels like a magazine cover, not a landing-page component.',
+    'Chapter-based scroll: a strong full-bleed opening followed by alternating quiet and immersive chapters; no repeated section shell.',
+    'Photographic contact sheet: one dominant image, cropped detail fragments and oversized type create a tactile story rather than a card grid.'
+  ]:isPro||isHealth?[
+    'Editorial document system: oversized type, disciplined margins, thin rules and asymmetric columns; authority comes from composition rather than decoration.',
+    'Typographic architecture: a restrained but unusual grid with one dominant statement, side annotations and occasional full-width evidence/content moments.',
+    'Spatial minimalism: generous negative space, deliberate off-grid moments and a small number of strong blocks; almost no containers.'
+  ]:isRetail?[
+    'Digital flagship composition: campaign-scale imagery, editorial product/story moments and varied pacing; avoid ecommerce catalogue sameness.',
+    'Gallery wall rhythm: asymmetric image sizes, captions and typographic interventions arranged like a curated exhibition.',
+    'Poster-to-gallery journey: graphic first viewport, then large visual stories with minimal UI chrome and strong merchandising hierarchy.'
+  ]:[
+    'Editorial asymmetry: a strong type-led first viewport, off-grid image placement and section rhythm that changes as the story progresses.',
+    'Poster system: the site behaves like a series of art-directed posters connected by a simple navigation and one clear conversion path.',
+    'Tactile local story: large real-world details, texture, generous type and documentary pacing; almost no conventional UI cards.'
+  ];
+  const image=(isFood||isTravel||isRetail)?[
+    'Photography is the primary medium. Prefer large crops, details, atmosphere and imperfect human-scale moments. Never use a stock-photo mosaic.',
+    'Use images as editorial objects: full bleed, unexpected crops, edge-to-edge transitions and occasional small captioned details.',
+    'Build visual tension with one hero image and a few carefully sized supporting images; fewer, better images beat a gallery of equal cards.'
+  ]:[
+    'Use imagery sparingly and intentionally. One excellent contextual image or material detail is better than decorative stock photography.',
+    'Let typography lead; images appear as evidence, context or texture, never as generic smiling-people filler.',
+    'If imagery is weak or unavailable, lean into typography, rules, spacing and graphic composition rather than inventing stock-photo sections.'
+  ];
+  const navigation=[
+    'Navigation is quiet and almost invisible until needed; avoid a giant rounded navbar capsule.',
+    'Use a precise editorial header with plain text links and one unobtrusive action; no floating app-style navigation.',
+    'Keep navigation minimal and architectural, with strong alignment to the page grid and no decorative pills.'
+  ];
+  const motion=[
+    'Motion language: restrained cinematic reveals, image masks and subtle type/line transitions. No floating blobs, bouncing cards or perpetual movement.',
+    'Motion language: mostly still. Use one or two purposeful transitions to make the page feel crafted, then get out of the way.',
+    'Motion language: scroll-linked only where it clarifies hierarchy; otherwise crisp fades/transforms under 500ms with reduced-motion support.'
+  ];
+  const signature=[
+    'Signature moment: one unexpected but usable composition in the first two viewports that could become a screenshot-worthy brand moment.',
+    'Signature moment: a section transition where typography and imagery interact in a way unique to this business, without becoming a gimmick.',
+    'Signature moment: one memorable full-width typographic or photographic pause that breaks the normal web rhythm and anchors the identity.'
+  ];
+  return {
+    composition:pick(composition,seed,1),image:pick(image,seed,3),navigation:pick(navigation,seed,5),motion:pick(motion,seed,7),signature:pick(signature,seed,11),
+    antiPattern:'Never use the default AI-site sequence: centered eyebrow + huge gradient headline + two rounded CTA buttons + three feature cards + icon grid + testimonials + final CTA panel.'
+  };
+}
 function joinList(value,fallback='Not provided'){
   const s=clean(value,3500);return s||fallback;
 }
-function buildReviewPrompts(name){
-  const creative=`Act as a ruthless senior creative director reviewing the website you just built for ${name}. Do NOT merely describe problems: edit the project now. Check the first viewport, composition, typography, image treatment, section rhythm, navigation, CTA hierarchy, originality and brand specificity. Remove any visible AI/template tells: card soup, excessive rounded boxes, generic gradients, floating pills, generic icon rows, meaningless bento layouts, stock SaaS patterns, repetitive section shells and safe-but-forgettable composition. If the site could plausibly belong to five unrelated businesses by changing the logo, it has failed: redesign the weak parts. Preserve factual accuracy and do not invent business claims.`;
-  const mobile=`Now perform a dedicated mobile design pass for ${name} at 390px and 360px. Do not simply stack the desktop layout. Recompose the hero, type scale, image crops, navigation, whitespace, CTA placement, galleries, forms and footer for touch. Remove overflow, cramped text, tiny controls and dead space. Make the mobile version feel intentionally art-directed. Apply the changes directly.`;
-  const production=`Now harden the ${name} website for delivery. Fix all console/build issues, broken routes, missing assets, accessibility problems, focus states, reduced-motion behavior, metadata, semantic structure, Core Web Vitals risks and obvious SEO/local-business issues. Verify every phone/email/CTA uses only supplied real data. Do not add invented testimonials, prices, awards, team members, statistics or legal claims. Keep the visual concept intact while making the code clean and export-ready.`;
+function buildReviewPrompts(name,dna){
+  const creative=`REDESIGN PASS — act as a demanding creative director from a top independent web studio. Review the ${name} site in the live preview and EDIT THE PROJECT NOW. This is not a polish pass. First delete generic AI patterns before adding anything. Fail the design if you see: a centered eyebrow/gradient headline, hero-left/image-right by default, two pill CTAs, 3–4 equal feature cards, generic icon grids, bento-for-no-reason, rounded containers around every section, fake dashboard visuals, gradient blobs, repetitive white/grey section bands, generic testimonial carousels or a giant rounded navbar. Also fail it if every section could be rearranged without changing the identity. Rebuild weak sections using this Design DNA: ${dna.composition} ${dna.image} ${dna.navigation} ${dna.signature} Use fewer components, stronger hierarchy, real negative space, editorial cropping and typography with personality. Avoid overused AI font choices (Inter, Poppins, Montserrat, Roboto, generic Space Grotesk/Playfair pairings) unless there is a specific reason. Keep factual accuracy. The finished first 2–3 viewports must look screenshot-worthy and clearly commissioned for ${name}.`;
+  const mobile=`MOBILE ART-DIRECTION PASS — redesign ${name} at 390px and 360px as its own composition, not a stacked desktop page. Preserve the Design DNA but change crops, headline breaks, navigation, section order where useful, whitespace, CTA placement and image ratios for thumbs and a narrow viewport. Remove horizontal overflow, tiny type, giant dead gaps and desktop leftovers. Do not turn every element into a full-width rounded card. Test sticky/fixed elements, 44px touch targets, forms and footer. Apply changes directly and keep reduced-motion support.`;
+  const production=`DELIVERY PASS — harden the ${name} site without flattening its art direction. Fix build/console errors, broken routes/assets, keyboard/focus behavior, contrast, semantic HTML, reduced-motion, metadata, canonical/Open Graph basics, LocalBusiness structured data only from supplied facts, image loading/layout stability and obvious Core Web Vitals risks. Verify every phone/email/social/CTA against supplied data. Delete unsupported testimonials, awards, statistics, prices, years, team members or claims. Check 1440×900, 1280×800, 390×844 and 360×800. Keep the distinctive composition intact; production quality must not mean making the design generic.`;
   return {creative,mobile,production};
 }
 export function buildAiStudioBrief(place={},templateId='custom',override={}){
@@ -87,17 +145,21 @@ export function buildAiStudioBrief(place={},templateId='custom',override={}){
   const anti=clean(override.anti||'Evita qualsiasi soluzione che sembri un sito AI generico o un tema marketplace.',1500);
   const refs=listUrls(override.references);
   const images=listUrls(override.images);
+  const brandColors=[...new Set((Array.isArray(override.brandColors)?override.brandColors:String(override.brandColors||'').split(/[\s,;]+/)).map(v=>String(v||'').trim()).filter(v=>/^#[0-9a-f]{6}$/i.test(v)))].slice(0,6);
+  const uploadedAssets=clean(override.uploadedAssets,1200);
   const lens=sectorLens(templateId,category);
-  const reviewPrompts=buildReviewPrompts(name);
+  const dna=designDNA(name,templateId,category);
+  const reviewPrompts=buildReviewPrompts(name,dna);
   const referenceBlock=refs.length?refs.map((u,i)=>`${i+1}. ${u}`).join('\n'):'None supplied. Do not imitate a random trend site.';
-  const imageBlock=images.length?images.map((u,i)=>`${i+1}. ${u}`).join('\n'):'No approved client imagery supplied. Design image slots intentionally and use tasteful replaceable imagery only if the environment can source it legally/reliably.';
+  const imageBlock=images.length?images.map((u,i)=>`${i+1}. ${u}`).join('\n'):'No approved/reference business imagery supplied yet. Do NOT invent a visual identity around generic stock: design intentional slots and keep the composition ready for real assets.';
+  const colorBlock=brandColors.length?brandColors.join(' · '):'No reliable palette extracted. Derive color choices from the supplied logo/reference photos if available; otherwise keep the palette restrained and easy to retune.';
   const prompt=`You are not a generic website generator. You are the creative director, conversion strategist, UX lead and senior frontend engineer of an excellent independent digital studio.
 
 MISSION
 Design and build an exceptional, production-quality website for a real Italian SME. It must feel commissioned, art-directed and specific to this business. The output should be impressive enough to present to a paying client, while remaining truthful, usable and easy to maintain.
 
 IMPORTANT WORKING METHOD
-Before writing UI code, silently establish: (1) the conversion goal, (2) the content hierarchy, (3) one strong visual concept, (4) a type system, (5) an image strategy, (6) 2–3 signature visual moments, and (7) the mobile composition. Then build. Do not dump a design rationale page into the website.
+Before writing UI code, silently establish: (1) the conversion goal, (2) the content hierarchy, (3) three genuinely different visual concepts, (4) reject the two that feel most like familiar web templates, (5) commit to one strong concept, (6) a type system, (7) an image strategy, (8) 2–3 signature visual moments, and (9) the mobile composition. Then build. Do not show the rejected concepts or dump a design-rationale page into the website.
 
 REAL BUSINESS DATA — NEVER CONTRADICT OR EMBELLISH
 Name: ${name}
@@ -128,28 +190,53 @@ Conversion lens: ${lens.conversion}
 Experience lens: ${lens.experience}
 Category clichés to avoid: ${lens.avoid}
 
+DESIGN DNA — THIS IS A COMPOSITION BRIEF, NOT A TEMPLATE
+Composition: ${dna.composition}
+Image behavior: ${dna.image}
+Navigation: ${dna.navigation}
+Motion: ${dna.motion}
+Signature moment: ${dna.signature}
+Hard anti-pattern: ${dna.antiPattern}
+
 VISUAL REFERENCES — INSPIRATION ONLY, NEVER COPY
 ${referenceBlock}
 
-APPROVED / REFERENCE IMAGES
+APPROVED / REFERENCE IMAGES — THESE SHOULD DRIVE THE ART DIRECTION
 ${imageBlock}
+
+REAL BRAND COLOR DNA
+${colorBlock}
+${uploadedAssets?`\nLOCAL ASSETS THE OPERATOR WILL ALSO UPLOAD TO AI STUDIO\n${uploadedAssets}\n`:''}
+BRAND FIDELITY RULES
+- Treat the supplied business photos/logo as the primary creative source, not decoration added after layout. Study their dominant colors, contrast, materials, light, crop opportunities and visual mood BEFORE choosing typography or page composition.
+- When real brand colors are supplied, build the palette from them. You may create darker/lighter neutrals for readability, but do not replace the identity with a fashionable unrelated palette.
+- Use the supplied/reference business imagery prominently where appropriate. Do not substitute generic AI-looking stock when a relevant real image exists.
+- For the PRIVATE PROPOSAL build, when the supplied image URLs are reachable, use those actual URLs in the site so the prospect immediately recognizes their own place/work/products. Keep all image URLs centralized in one data/config file so they can be replaced in minutes after purchase.
+- Do not recolor the business into an Easy Come identity. This site must visually belong to the client.
+- If the photos are visually inconsistent, curate them: choose a dominant photographic language, crop them consistently and let the strongest 3–5 images lead.
+- Public listing/social images are reference material for a private proposal unless usage rights are confirmed; keep the project easy to swap to approved originals before public launch.
 
 NON-NEGOTIABLE CREATIVE RULES
 - This is a business website, NOT a SaaS dashboard and NOT an AI demo.
 - Do not use Easy Come branding, colors, typography or visual language. The client must have an independent identity.
 - Do not start from a visible template. Derive layout, proportions, palette and section order from this business.
 - No purple/blue AI gradients, glassmorphism, random blobs, floating pills, excessive rounded rectangles, card soup, default bento grids, generic icon feature rows, fake dashboards or repetitive alternating sections.
+- Hard ban on the common AI landing formula: eyebrow + centered giant headline + two pill buttons + 3 equal cards + icon grid + testimonial strip + rounded final CTA. If your first attempt drifts there, throw it away and recompose.
+- Do not make every section a component-shaped rectangle. Prefer open composition, edges, rules, image fields, type, whitespace and changes of scale.
+- Avoid overused generator typography by default: Inter, Poppins, Montserrat, Roboto and fashionable-but-generic Space Grotesk + Playfair pairings. Choose fonts for this identity, not because they are common in AI output.
+- Use at most one visual gimmick. Craft comes from proportion, type, crop, spacing and rhythm—not from effects.
 - Avoid the universal headline-left/image-right hero unless it is genuinely the strongest concept. The first viewport needs a clear visual idea.
 - Use typography as a design material: considered scale, line length, hierarchy, spacing and contrast. Do not overuse uppercase micro-labels.
 - Use asymmetry, editorial pacing, full-bleed imagery, negative space, typographic moments or other composition techniques only when they support the concept—not as decoration.
-- Create 2–3 memorable signature moments, but keep interaction understandable and fast.
+- Create 2–3 memorable signature moments, but keep interaction understandable and fast. At least one should be visible in the first 2–3 viewports and should still look strong as a static screenshot.
 - Mobile is a separate composition problem. Design at 390px/360px, do not merely stack desktop sections.
 - Motion must have a reason. Keep it subtle, performant and compatible with prefers-reduced-motion.
 - Use a restrained radius system. Not every section, image and button needs rounded corners.
 - Use icons only where they add information. Never decorate every paragraph with an icon.
 - Never invent awards, years in business, reviews, ratings, customer counts, team names, certifications, prices, statistics, menu items, room types, medical claims or testimonials.
 - If important information is unknown, make the design work without it. Do not hallucinate copy to fill space.
-- Write believable, polished Italian copy. Short, specific and human beats generic marketing language.
+- Write believable, polished Italian copy. Short, specific and human beats generic marketing language. Ban filler like ‘esperienza unica’, ‘passione e qualità’, ‘soluzioni su misura’, ‘innovazione al tuo servizio’ unless the supplied facts genuinely justify the phrase.
+- Section count is not a goal. Use only the sections needed to tell a coherent story and convert. Different sections should have different visual roles; never repeat the same shell three times.
 
 BUILD REQUIREMENTS
 - Build a complete web project in Google AI Studio Build mode, using React as appropriate and clean maintainable components.
@@ -173,6 +260,9 @@ Inspect the finished site at desktop and mobile. Ask yourself:
 6. Is the mobile experience genuinely composed?
 7. Did you invent a single unsupported business fact?
 8. Are the primary CTA and contact path obvious?
+9. Does the first 900px of desktop look like a real art-directed brand page rather than a UI kit?
+10. Did you repeat the same rounded container/card treatment more than twice?
+11. Would a design-aware human call any section ‘AI-looking’? If yes, rebuild it rather than polish it.
 If the answer is wrong on any point, redesign and fix it before considering the project complete.
 
 FINAL EXPECTATION
@@ -186,6 +276,6 @@ Deliver the website itself, not a mockup or a prose proposal. It should look lik
     references:refs,
     images,
     reviewPrompts,
-    meta:{name,category,goal,audience,differentiator,offer,personality,territory,tone,cta,features,anti,notes,createdAt:new Date().toISOString(),engine:'google-ai-studio-build'}
+    meta:{name,category,goal,audience,differentiator,offer,personality,territory,tone,cta,features,anti,notes,brandColors,uploadedAssets,designDNA:dna,createdAt:new Date().toISOString(),engine:'google-ai-studio-build-v3-brand-dna'}
   };
 }

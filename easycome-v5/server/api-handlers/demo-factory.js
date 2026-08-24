@@ -8,11 +8,12 @@ import { sendLiberoOutreach } from '../_libero-mail.js';
 import { buildWebsiteProfile, createWebsiteZip } from '../_website-factory.js';
 import { classifyWebsitePresence, socialFieldsFromPresence } from '../_web-presence.js';
 import { buildAiStudioBrief } from '../_aistudio-web.js';
+import { photoCards, storedAssetCards } from '../_web-brand.js';
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function baseUrl(req){return String(process.env.APP_URL||`${req.headers?.['x-forwarded-proto']||'https'}://${req.headers?.host||'easy-come.it'}`).replace(/\/$/,'')}
 function queryValue(req,name){try{return String(req.query?.[name]||new URL(req.url||'','http://localhost').searchParams.get(name)||'').trim()}catch{return String(req.query?.[name]||'').trim()}}
-function publicPlace(place){const presence=classifyWebsitePresence(place.websiteUri||'');const social=socialFieldsFromPresence(presence);return {id:place.id||'',name:place.displayName?.text||'Azienda',address:place.formattedAddress||'',website:presence.owned?presence.url:'',listedUrl:presence.url||'',webPresenceType:presence.type,webPresenceLabel:presence.label,platformUrl:presence.type==='platform'?presence.url:'',...social,phone:place.nationalPhoneNumber||'',email:'',category:place.primaryTypeDisplayName?.text||place.primaryType||'Attività',primaryType:place.primaryType||'',types:place.types||[]}}
+function publicPlace(place){const presence=classifyWebsitePresence(place.websiteUri||'');const social=socialFieldsFromPresence(presence);return {id:place.id||'',name:place.displayName?.text||'Azienda',address:place.formattedAddress||'',website:presence.owned?presence.url:'',listedUrl:presence.url||'',webPresenceType:presence.type,webPresenceLabel:presence.label,platformUrl:presence.type==='platform'?presence.url:'',...social,phone:place.nationalPhoneNumber||'',email:'',category:place.primaryTypeDisplayName?.text||place.primaryType||'Attività',primaryType:place.primaryType||'',types:place.types||[],photos:Array.isArray(place.photos)?place.photos.slice(0,8):[]}}
 
 export default async function handler(req,res){
   try{
@@ -39,7 +40,7 @@ export default async function handler(req,res){
             price,subject:outreachSubject(place),message:outreachMessage(place,demoUrl,price),shortMessage:outreachShortMessage(place,demoUrl,price),
             emailDelivery:outreach.lastEmail||null,contactStatus,contactedAt:outreach.contactedAt||outreach.lastEmail?.sentAt||'',
             websiteReady:Boolean(websiteProfile),websiteProfile,websiteDemoUrl:websiteProfile?`${origin}/web-demo.html?d=${encodeURIComponent(row.demo_slug)}`:'',
-            websiteAiReady:Boolean(cfg.websiteAiBrief),websiteAiBrief:cfg.websiteAiBrief||null,websiteAiUrl:cfg.websiteAiBrief?.aiStudioUrl||'https://aistudio.google.com/apps',
+            websiteAiReady:Boolean(cfg.websiteAiBrief),websiteAiBrief:cfg.websiteAiBrief||null,websiteAiUrl:cfg.websiteAiBrief?.aiStudioUrl||'https://aistudio.google.com/apps',webProposal:cfg.webProposal||null,
             contactability:0,potential:0,potentialReasons:[],mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=${encodeURIComponent(row.place_id||'')}`,
             createdAt:row.created_at||'',expiresAt:row.expires_at||''
           };
@@ -86,6 +87,22 @@ export default async function handler(req,res){
       await updateTarget(target.id,{demo_config:{...current,outreach:{...outreach,contactStatus:contacted?'contacted':'not_contacted',contactedAt:contacted?now:null,contactedVia:contacted?(String(req.body?.via||'manual')):null}}});
       return res.status(200).json({ok:true,contactStatus:contacted?'contacted':'not_contacted',contactedAt:contacted?now:null});
     }
+    if(action==='website-brand-scan'){
+      const demoSlugValue=String(req.body?.demoSlug||'').trim();if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
+      const target=await targetBySlug(demoSlugValue);if(!target)return res.status(404).json({error:'Prospect non trovato.'});
+      const raw=await placeDetails(target.place_id);const place=publicPlace(raw);const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const uploaded=storedAssetCards(req,current.websiteBrandAssets||[]);const photos=[...uploaded,...photoCards(req,place.id,place.photos||[])].slice(0,12);
+      let discovered={email:'',website:'',contactPage:'',instagram:'',facebook:'',whatsapp:''};if(place.website){try{discovered=await discoverPublicBusinessContacts(place.website)}catch{}}
+      return res.status(200).json({ok:true,photos,sources:{facebook:place.facebook||discovered.facebook||'',instagram:place.instagram||discovered.instagram||'',listedUrl:place.listedUrl||'',mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${encodeURIComponent(place.id)}`},webPresenceType:place.webPresenceType,webPresenceLabel:place.webPresenceLabel});
+    }
+    if(action==='publish-web-proposal'){
+      const demoSlugValue=String(req.body?.demoSlug||'').trim();if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
+      const target=await targetBySlug(demoSlugValue);if(!target)return res.status(404).json({error:'Prospect non trovato.'});
+      const previewUrl=String(req.body?.previewUrl||'').trim();let parsed;try{parsed=new URL(previewUrl);if(!['http:','https:'].includes(parsed.protocol))throw new Error('protocol')}catch{throw new Error('Inserisci un URL pubblico valido della preview.');}
+      const price=Math.round(Number(req.body?.price||0));if(price<50||price>20000)throw new Error('Inserisci un prezzo tra 50 € e 20.000 €.');
+      const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const existing=current.webProposal&&typeof current.webProposal==='object'?current.webProposal:{};const token=existing.token||crypto.randomBytes(18).toString('hex');const now=new Date();const expires=new Date(now.getTime()+30*86400000);
+      const proposal={...existing,token,previewUrl:parsed.href,price,status:existing.status==='paid'?'paid':'draft',createdAt:existing.createdAt||now.toISOString(),updatedAt:now.toISOString(),expiresAt:expires.toISOString()};
+      await updateTarget(target.id,{demo_config:{...current,webProposal:proposal}});const origin=baseUrl(req);return res.status(200).json({ok:true,proposal,proposalUrl:`${origin}/web-proposal.html?d=${encodeURIComponent(demoSlugValue)}&t=${encodeURIComponent(token)}`});
+    }
     if(action==='prepare-website-ai'){
       const demoSlugValue=String(req.body?.demoSlug||'').trim();
       if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
@@ -96,7 +113,9 @@ export default async function handler(req,res){
       let discovered={email:'',website:'',contactPage:'',instagram:'',facebook:'',whatsapp:''};
       if(place.website){try{discovered=await discoverPublicBusinessContacts(place.website)}catch{}}
       const merged={...place,...discovered,website:place.website,phone:place.phone,facebook:place.facebook||discovered.facebook||'',instagram:place.instagram||discovered.instagram||''};
-      const override=req.body?.config&&typeof req.body.config==='object'?req.body.config:{};
+      const incoming=req.body?.config&&typeof req.body.config==='object'?req.body.config:{};
+      const currentBrand=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const autoPhotos=[...storedAssetCards(req,currentBrand.websiteBrandAssets||[]),...photoCards(req,place.id,place.photos||[])].slice(0,6).map(p=>p.url);
+      const override={...incoming,images:(Array.isArray(incoming.images)?incoming.images.filter(Boolean):String(incoming.images||'').trim()?incoming.images:autoPhotos)};
       const brief=buildAiStudioBrief(merged,target.template_id,override);
       const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
       await updateTarget(target.id,{demo_config:{...current,websiteAiBrief:brief,websiteAiPreparedAt:new Date().toISOString()}});

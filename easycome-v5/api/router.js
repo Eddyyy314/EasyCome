@@ -14,6 +14,8 @@ import stripeWebhook from '../server/api-handlers/stripe-webhook.js';
 import supportMessage from '../server/api-handlers/support-message.js';
 import supportRequest from '../server/api-handlers/support-request.js';
 import withdrawalRequest from '../server/api-handlers/withdrawal-request.js';
+import webProposalPublic from '../server/api-handlers/web-proposal-public.js';
+import webProposalCheckout from '../server/api-handlers/web-proposal-checkout.js';
 import { json } from '../server/_responses.js';
 
 const handlers = {
@@ -33,6 +35,8 @@ const handlers = {
   'support-message': supportMessage,
   'support-request': supportRequest,
   'withdrawal-request': withdrawalRequest,
+  'web-proposal-public': webProposalPublic,
+  'web-proposal-checkout': webProposalCheckout,
 };
 
 export default async function handler(req, res) {

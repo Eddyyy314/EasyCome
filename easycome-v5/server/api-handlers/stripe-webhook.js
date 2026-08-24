@@ -2,6 +2,7 @@ import { readRaw, json } from '../_responses.js';
 import { updateOrderById, updateOrderBySession, upsertSubscription, updateSubscriptionByStripeId } from '../_supabase.js';
 import { verifyStripeSignature, stripeGet } from '../_stripe.js';
 import { notifyAdmin, sendEmail } from '../_notify.js';
+import { targetBySlug, updateTarget } from '../_demo-store.js';
 
 export const config = { api: { bodyParser: false } };
 const isoFromUnix=(value)=>Number(value)?new Date(Number(value)*1000).toISOString():null;
@@ -15,7 +16,18 @@ export default async function handler(req,res){
     const event=JSON.parse(raw.toString('utf8'));const object=event.data?.object||{};
 
     if(event.type.startsWith('checkout.session.')){
-      const session=object;const orderId=session?.metadata?.order_id||session?.client_reference_id;const subscriptionId=stripeId(session?.subscription);
+      const session=object;
+      if(session?.metadata?.purchase_type==='web_proposal'){
+        const slug=String(session.metadata.demo_slug||'');const token=String(session.metadata.proposal_token||'');const paid=((event.type==='checkout.session.completed'&&session.payment_status==='paid')||event.type==='checkout.session.async_payment_succeeded');
+        if(slug&&token){
+          const target=await targetBySlug(slug).catch(()=>null);if(target){const cfg=target.demo_config||{};const p=cfg.webProposal||{};if(p.token===token){const next={...p,status:paid?'paid':(event.type==='checkout.session.expired'?'expired':p.status),stripeSessionId:session.id,paymentStatus:session.payment_status||null,buyer:{...(p.buyer||{}),name:session.metadata.buyer_name||p.buyer?.name||'',email:session.customer_details?.email||session.customer_email||session.metadata.buyer_email||p.buyer?.email||'',phone:session.customer_details?.phone||session.metadata.buyer_phone||p.buyer?.phone||''},paidAt:paid?new Date().toISOString():p.paidAt||null,updatedAt:new Date().toISOString()};await updateTarget(target.id,{demo_config:{...cfg,webProposal:next}});}}
+        }
+        if(paid){
+          await notifyAdmin({eventKey:`web-proposal-paid:${session.id}`,eventType:'web.proposal.paid',severity:'high',title:'Easy Come Web acquistato',body:`${session.metadata.company_name||'Cliente'} · ${session.customer_details?.email||session.customer_email||''} · ${session.amount_total?(session.amount_total/100).toFixed(2)+' EUR':''}`,metadata:{stripe_event:event.id,session_id:session.id,demo_slug:slug}});
+          const customerEmail=session.customer_details?.email||session.customer_email||session.metadata.buyer_email||'';if(customerEmail){await sendEmail({to:customerEmail,subject:`Easy Come Web — pagamento confermato`,text:[`Ciao ${session.metadata.buyer_name||''},`,'','abbiamo ricevuto il pagamento per il progetto Easy Come Web mostrato nella tua proposta privata.','Easy Come ti contatterà per gli ultimi dettagli e la consegna definitiva.','',`Progetto: ${session.metadata.company_name||'Easy Come Web'}`,session.amount_total?`Importo: ${(session.amount_total/100).toFixed(2)} EUR`:'','',`Contatto: infoeasycome@libero.it`].filter(Boolean).join('\n')});}
+        }
+        return json(res,200,{received:true,webProposal:true});
+      }const orderId=session?.metadata?.order_id||session?.client_reference_id;const subscriptionId=stripeId(session?.subscription);
       const common={stripe_session_id:session?.id||null,payment_status:session?.payment_status||null,stripe_customer_id:stripeId(session?.customer),stripe_payment_intent_id:stripeId(session?.payment_intent),stripe_subscription_id:subscriptionId,updated_at:new Date().toISOString()};
       let patch=null;
       if(event.type==='checkout.session.completed') patch={...common,status:session.payment_status==='paid'?'paid':'processing',delivery_status:session.payment_status==='paid'?'ready_to_generate':'not_ready',paid_at:session.payment_status==='paid'?new Date().toISOString():null};
