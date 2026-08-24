@@ -6,7 +6,7 @@
       "maxDuration": 30
     },
     "api/web-package-upload.js": {
-      "maxDuration": 60
+      "maxDuration": 300
     },
     "api/web-photo.js": {
       "maxDuration": 20

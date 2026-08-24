@@ -1,4 +1,4 @@
-# Easy Come Web — V28 Asset Lock + Project Portal
+# Easy Come Web — V30 Zero‑Touch Builder
 
 Easy Come Web è un prodotto autonomo del brand Easy Come. La Factory individua PMI senza sito proprietario, prepara il Brand/Creative Build Pack e trasforma il progetto finito in una proposta commerciale ospitata direttamente da Easy Come.
 
@@ -13,8 +13,8 @@ Il Master Prompt e tutti i Quality Gate vietano di generare, cercare o sostituir
 1. Factory → prospect senza sito proprietario.
 2. Web Studio → approvazione asset + Brand DNA + Creative Build Pack.
 3. Google AI Studio → generazione e Quality Gate.
-4. Production Pass → build portabile con `dist/index.html` (Vite `base: './'` e routing compatibile con path annidati).
-5. Download ZIP.
+4. Production Pass → controllo visuale/funzionale del progetto. Non serve creare manualmente `dist/`.
+5. Download dello ZIP sorgente direttamente da Google AI Studio.
 6. Factory → **Importa in Easy Come**.
 7. Easy Come carica il ZIP direttamente su Supabase Storage tramite signed upload, senza far transitare il file nella Function Vercel.
 8. Easy Come verifica il pacchetto, trova la cartella pubblicabile e ospita i file sotto `/web-sites/<prospect>/<token>/`.
@@ -24,14 +24,14 @@ Il Master Prompt e tutti i Quality Gate vietano di generare, cercare o sostituir
 
 ## Formati ZIP accettati
 
-L'importer cerca, in ordine di preferenza:
+L’importer accetta direttamente:
 
-- `dist/index.html`
-- `build/index.html`
-- `out/index.html`
-- `index.html` di un sito statico completo
+- `dist/index.html`, `build/index.html`, `out/index.html`;
+- siti statici completi;
+- progetti React/Vite classici con `src/`;
+- export recenti di Google AI Studio con `App.tsx`, `index.tsx`, componenti e `package.json` direttamente nella root.
 
-Se il pacchetto contiene soltanto i sorgenti React/Vite e l'`index.html` punta ancora a `/src/main.*`, Easy Come blocca l'import e chiede di eseguire il Production Pass prima di riprovare.
+Quando riceve sorgenti, Easy Come rileva l’entrypoint dal vero `index.html`, usa una configurazione Vite controllata, risolve le librerie già comprese nel runtime Easy Come e installa in una directory temporanea soltanto le ulteriori dipendenze effettivamente importate, con lifecycle script disabilitati.
 
 ## Storage
 
@@ -56,3 +56,7 @@ L'importer accetta:
 Quando riceve un progetto React/Vite sorgente, Easy Come esegue una build server-side con base path del portale, pubblica gli asset nello Storage privato e crea automaticamente la preview Easy Come. Non serve `npm run build` manuale.
 
 Il browser forza una nuova versione di `factory.js` a ogni release importante per evitare che una Factory vecchia rimanga in cache.
+
+## V30 — Zero‑Touch Build
+
+Il flusso definitivo è: **AI Studio → Download ZIP → Easy Come → Importa e crea portale**. Non servono Publish in AI Studio, terminale, GitHub, Vercel manuale o `npm run build` per il singolo prospect. Il risultato compilato viene pubblicato nel portale Easy Come; il sorgente originale resta privato e può essere sbloccato al cliente dopo il checkout.

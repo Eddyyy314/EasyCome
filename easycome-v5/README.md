@@ -1,3 +1,9 @@
+# Easy Come V30 — Zero‑Touch Web Builder
+
+V30 rende Easy Come Web realmente one-click: lo ZIP sorgente scaricato da Google AI Studio viene riconosciuto e compilato automaticamente anche quando App.tsx/index.tsx sono nella root e non esiste `src/`. Il builder usa le dipendenze già presenti in Easy Come e, quando necessario, installa in una directory temporanea soltanto le dipendenze effettivamente importate con `npm --ignore-scripts`, poi esegue Vite con configurazione controllata Easy Come.
+
+Flow: AI Studio → Download ZIP → Factory → Importa e crea portale → link cliente → checkout. Non serve Publish, `npm install`, `npm run build`, GitHub o Vercel manuale per ogni sito.
+
 # Easy Come V28 — Automation Ecosystem
 
 Questa versione mantiene il posizionamento Easy Come come ecosistema per automatizzare le PMI e introduce **Easy Come Web V28: Asset Lock + Project Portal**.
