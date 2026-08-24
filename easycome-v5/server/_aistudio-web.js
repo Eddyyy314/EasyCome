@@ -7,7 +7,7 @@ function listUrls(raw){
 function sectorLens(templateId='',category=''){
   const k=String(templateId||'').toLowerCase();
   const c=String(category||'').toLowerCase();
-  if(k==='restaurant'||/ristor|food|bar|cafe|caff|pizzeria|trattoria|osteria/.test(c))return {
+  if(k==='restaurant'||/ristor|food|bar|cafe|caff|pizzeria|trattoria|osteria|forna|forno|panif|bakery|pastic|focacc|gelat|aliment/.test(c))return {
     business:'Food / hospitality',
     conversion:'Turn discovery into a reservation, call, directions request or menu exploration with very little friction.',
     experience:'The site should feel sensorial and specific to the place: food, materiality, atmosphere, neighbourhood, table culture and rhythm. Photography should carry emotion; typography should carry personality.',
@@ -63,7 +63,7 @@ function pick(list,seed,offset=0){return list[(seed+offset)%list.length]}
 function designDNA(name='',templateId='',category=''){
   const seed=hashString(`${name}|${templateId}|${category}`);
   const c=String(category||'').toLowerCase();
-  const isFood=/ristor|food|bar|cafe|caff|pizzeria|trattoria|osteria/.test(c)||templateId==='restaurant';
+  const isFood=/ristor|food|bar|cafe|caff|pizzeria|trattoria|osteria|forna|forno|panif|bakery|pastic|focacc|gelat|aliment/.test(c)||templateId==='restaurant';
   const isTravel=/hotel|camp|resort|bed|tour|travel|vacan|b&b|affitt|ospital/.test(c)||templateId==='booking';
   const isPro=/consult|avvocat|commercial|studio|account|legal|notaio|architett|ingegner/.test(c)||templateId==='professional';
   const isHealth=/medic|clinic|dent|health|physio|psicolog|terap|farmac/.test(c)||templateId==='health';
@@ -127,12 +127,70 @@ function normalizeImageManifest(raw=[]){
   }
   return out;
 }
-function buildReviewPrompts(name,dna,assets=[]){
+function conversionContract({category='',templateId='',phone='',email='',whatsapp='',features='',cta='',actionMode='auto'}={}){
+  const text=`${category} ${templateId} ${features} ${cta}`.toLowerCase();
+  const requested=String(actionMode||'auto').toLowerCase();
+  const bookingLike=/prenot|booking|appuntament|reservation|tavol|soggiorn|camera|hotel|camp|b&b|salon|parruc|estetic|barber|visita|consulenza/.test(text);
+  const orderLike=/ordin|carrello|cart|menu|catalog|focacc|pizza|ristor|food|bakery|pan|pastic|take.?away|asporto/.test(text);
+  const quoteLike=/preventiv|richiest|contatt|servizio|officin|ripar|impiant|consul|studio|profession/.test(text);
+  const digits=String(phone||'').replace(/\D/g,'');
+  const waUrl=safeUrl(whatsapp)|| (digits?`https://wa.me/${digits}`:'');
+  let mode=requested;
+  if(!['auto','whatsapp','booking','request','call','none'].includes(mode))mode='auto';
+  if(mode==='auto')mode=bookingLike?'booking':orderLike&&waUrl?'whatsapp':quoteLike?'request':waUrl?'whatsapp':phone?'call':email?'request':'none';
+  const destinations=`Verified phone: ${phone||'NONE'}\nVerified email: ${email||'NONE'}\nWhatsApp destination: ${waUrl||'NONE'}`;
+  const universal=`REAL ACTION CONTRACT — HARD FUNCTIONAL RULE\n- Never build a fake cart, fake checkout, fake booking engine, clipboard-only order flow, dead form or decorative interaction.\n- NEVER make the visitor press a button whose main result is “copy message”, “copy order”, “copy booking” or similar. Clipboard may be a secondary convenience only, never the conversion path.\n- Every primary CTA must complete a real action with the verified contact data below. If the required destination is missing, remove the function instead of faking it.\n- Do not claim a reservation/order is confirmed unless a real confirmation backend exists. Use “richiesta di prenotazione” / “richiesta ordine” when confirmation is manual.\n${destinations}`;
+  if(mode==='whatsapp')return `${universal}\nPRIMARY ACTION MODE: WHATSAPP.\n- Use a direct WhatsApp action. Final CTA must open the verified WhatsApp destination with encodeURIComponent() of a useful pre-filled Italian message.\n- If the UI lets users select products, quantities or options, keep that state only to build the WhatsApp message. The final CTA must be “Invia ordine su WhatsApp” / “Invia richiesta su WhatsApp”, NOT “Copia messaggio”.\n- Include the selected items/options, quantities and any notes in the WhatsApp text.\n- If WhatsApp destination is NONE, do not simulate WhatsApp: fall back to ${phone?'a direct phone call':email?'a real email action':'no transactional UI'}.`;
+  if(mode==='booking')return `${universal}\nPRIMARY ACTION MODE: BOOKING REQUEST.\n- Build a proper, mobile-first booking/request form only with fields that make sense (e.g. name, phone/email, date, time/arrival-departure, party size/service, notes). Validate required fields and show clear errors.\n- Submission must actually leave the page toward a verified destination: ${waUrl?'open WhatsApp with the complete structured booking request':email?'open a pre-filled email with the complete structured booking request':phone?'offer the verified call action after validation':'there is no verified destination, therefore DO NOT build the form'}.\n- Label it clearly as a request if there is no live availability/confirmation backend. Never display fake available slots or “prenotazione confermata”.`;
+  if(mode==='request')return `${universal}\nPRIMARY ACTION MODE: REQUEST / QUOTE.\n- Build a short real request form only if there is a verified destination. On submit, ${waUrl?'open WhatsApp with all form fields pre-filled':email?'open a pre-filled email with all form fields':phone?'route to the verified call action':'remove the form and show no fake submission'}.\n- No fake success toast before the user is transferred to the real destination.`;
+  if(mode==='call')return `${universal}\nPRIMARY ACTION MODE: DIRECT CALL.\n- The primary CTA must be a real tel: link using the verified phone. Do not add a fake cart/form around it. Secondary directions/contact actions are allowed only if real.`;
+  return `${universal}\nPRIMARY ACTION MODE: NONE.\n- Do not invent carts, forms, booking widgets or pseudo-checkouts. Keep the site informative with only verified contact/navigation links.`;
+}
+
+function activityBlueprint({name='',category='',templateId='',goal='',offer='',notes='',phone='',email='',whatsapp=''}={}){
+  const t=`${category} ${templateId} ${offer} ${notes}`.toLowerCase();
+  const food=/ristor|food|bar|cafe|caff|pizz|trattor|oster|forna|forno|panif|bakery|pastic|focacc|gelat|aliment/.test(t);
+  const hospitality=/hotel|camp|resort|bed|b&b|vacan|ospital|affitt|tour|travel/.test(t);
+  const pro=/consult|avvocat|commercial|studio|account|legal|notaio|architett|ingegner/.test(t);
+  const health=/medic|clinic|dent|health|physio|psicolog|terap|farmac/.test(t);
+  const retail=/shop|store|boutique|retail|fashion|negozio|gioiell|arredo/.test(t);
+  const craft=/officin|repair|auto|mechanic|carrozzer|elettric|idraulic|falegn|artigian|laborator/.test(t);
+  const beauty=/beauty|wellness|salon|spa|hair|parruc|estetic|barber/.test(t);
+  const base={
+    decision:'The visitor must understand what this business actually does, why it is credible, what to do next and how to reach it without decoding marketing language.',
+    priorities:['what the business actually offers','the strongest truthful reason to choose it','practical location/contact information','one real conversion path'],
+    questions:['What is this place/business?','Is it relevant to me?','Why should I trust/choose it?','What should I do next?'],
+    proof:'Use only real proof present in supplied facts/assets. If proof is missing, rely on clarity, specificity, process and real imagery rather than invented social proof.',
+    photoHierarchy:'Use imagery only where it proves or evokes something real. Never use people, products or places as interchangeable decoration.'
+  };
+  if(food)return {...base,
+    decision:'A hungry/local visitor should immediately understand what kind of place it is, what it is known for, whether it feels worth visiting, where it is and the easiest real way to order/call/visit.',
+    priorities:['signature products or product families ONLY if supplied','craft/material/process cues ONLY when supported','the physical place and local context','practical opening/contact/location cues when supplied','a real order/contact action'],
+    questions:['What do they actually make/serve?','What makes it distinctive without fake claims?','Can I see the real product/place?','Where is it?','How do I order, reserve or call?'],
+    proof:'For food/craft, real product and place photography is stronger than reviews or generic claims. Do not invent menu items, ingredients, fermentation hours, awards or tradition dates.',
+    photoHierarchy:'PRODUCT/CIBO is highest priority for product storytelling. LOCALE can establish place/atmosphere. TEAM is only for a real people/story section. TERRITORIO is contextual, never a product substitute.'};
+  if(hospitality)return {...base,decision:'The visitor should feel the place, understand the stay/use case and logistics, then make a truthful direct availability/contact request.',priorities:['sense of place','actual accommodation/service facts supplied','location and practical logistics','real direct request/contact path'],questions:['What is it like to stay/be there?','What do I actually get?','Where is it?','How do I request availability?'],proof:'Use real place/room/territory imagery. Never invent availability, room types, sea distance, ratings or amenities.',photoHierarchy:'LOCALE/AMBIENTE and TERRITORIO lead. PRODUCT only if it genuinely represents an included service. TEAM is optional human context.'};
+  if(pro)return {...base,decision:'A qualified visitor should quickly understand expertise, scope, working method and whether to start a conversation.',priorities:['area of expertise','real services','method/process if supplied','credibility through clarity and restraint','qualified contact'],questions:['Can they solve my kind of problem?','How do they work?','Why do they feel credible?','How do I start?'],proof:'Specific services, process and real professional context are proof. Do not invent clients, case studies, results or credentials.',photoHierarchy:'TEAM/PERSON and LAVORO/PROGETTO can be useful when real; generic office photography is secondary and must not become filler.'};
+  if(health)return {...base,decision:'The visitor should understand the service safely, feel oriented and know how to request the correct next step.',priorities:['services actually offered','clear practical information','reassuring professional context','truthful appointment/contact request'],questions:['Is this the right service?','Who/what will I encounter?','What is the next step?'],proof:'Use only supplied professional facts. No diagnosis promises, outcomes, fake credentials or medical claims.',photoHierarchy:'TEAM/PROFESSIONAL and LOCALE are useful if authentic. Avoid unrelated wellness/medical imagery.'};
+  if(retail)return {...base,decision:'The visitor should recognize the brand/product world, understand what can be found there and know how to visit or ask about availability.',priorities:['product world/category','distinctive taste/selection if evident','store/place','availability/contact path'],questions:['What do they sell?','Is this my taste?','What should I explore first?','Where/how can I get it?'],proof:'Real products and real retail environment are primary proof. Never invent products or prices.',photoHierarchy:'PRODUCT and LOCALE lead; TEAM only if there is a genuine brand story.'};
+  if(craft)return {...base,decision:'The visitor should immediately recognize competence, type of work and the fastest real way to request service.',priorities:['work/services handled','real work/process evidence','local trust through practical clarity','call/message/request action'],questions:['Do they handle my problem?','Do they look competent?','How do I reach them now?'],proof:'LAVORO/PROGETTO imagery and real workshop context beat stock people or generic icons.',photoHierarchy:'LAVORO/PROGETTO and LOCALE lead. TEAM is supporting. Never substitute unrelated equipment/people.'};
+  if(beauty)return {...base,decision:'The visitor should understand services and atmosphere, desire the experience, then make a truthful appointment request.',priorities:['services actually supplied','real visual atmosphere','practical location/contact','appointment request'],questions:['Does this feel right for me?','What can I book/request?','How do I make contact?'],proof:'Authentic work/place imagery is proof. Never invent treatments, prices or testimonials.',photoHierarchy:'LAVORO/PROGETTO and LOCALE lead; TEAM can humanize; TERRITORIO is rarely necessary.'};
+  return base;
+}
+function assetCoveragePlan(manifest=[]){
+  const assets=Array.isArray(manifest)?manifest:[];const counts={};for(const a of assets){const r=String(a.role||'altro').toLowerCase();counts[r]=(counts[r]||0)+1}
+  const inventory=Object.entries(counts).map(([k,v])=>`${k.toUpperCase()}: ${v}`).join(' · ')||'NESSUN ASSET APPROVATO';
+  const total=assets.length;
+  const density=total===0?'NO-PHOTO MODE: there are no approved business images. Build a complete, beautiful composition using type, spacing, rules, color and verified information. Do not leave image-shaped holes or placeholders.':total===1?'SINGLE-HERO MODE: there is only one approved image. Use it once as a deliberate flagship visual moment (or at most one subtle echo), then build the rest without photo placeholders.':total<=3?'CURATED-SPARSE MODE: there are few approved images. Use them as 1–3 editorial moments, not as partial coverage for a repeated card grid.': 'CURATED-RICH MODE: there are enough assets for multiple moments, but semantic role matching still overrides quantity.';
+  return `ASSET INVENTORY: ${inventory}\n${density}\nVISUAL CONSISTENCY LAW:\n- Decide the image system BEFORE laying out repeated content.\n- A repeated group (service cards, product tiles, team cards, rooms, treatments, projects, menu categories) may use per-item imagery ONLY when every visible item in that repeated group has a semantically correct approved asset.\n- If a group has 4 items but only 3 correct images, DO NOT create 3 image cards and 1 empty/text-only card. Recompose the whole group consistently: make all items text-led, use one shared contextual image outside the group, reduce/reframe the group using only verified content, or choose a different editorial structure.\n- Never fill a missing slot with an unrelated image. Never stretch one image across unrelated meanings. Never repeat the same photo across multiple unrelated items just to create symmetry.\n- If an image is absent, the design must look intentionally complete without it; no blank media boxes, broken rhythm or obvious missing-photo slots.\n- Image count is not a target. Coherence is the target.`;
+}
+
+function buildReviewPrompts(name,dna,assets=[],conversionRules='',assetPlan=''){
   const approved=assets.map(a=>a.url);
   const assetLock=approved.length?`APPROVED ASSET LOCK: the only business photography/logo URLs allowed in this project are: ${approved.join(' | ')}. Inspect the code and remove every business image/background URL that is not on this list. Never generate, search for, or substitute stock or substitute imagery. If a section has no suitable approved image, redesign it without an image.`:`ASSET LOCK: no approved business photography exists. Remove stock or substitute imagery and design with typography, color, rules and spacing instead.`;
-  const creative=`REDESIGN PASS — act as a demanding creative director from a top independent web studio. Review the ${name} site in the live preview and EDIT THE PROJECT NOW. This is not a polish pass. First delete generic generated-site patterns before adding anything. Fail the design if you see: a centered eyebrow/gradient headline, hero-left/image-right by default, two pill CTAs, 3–4 equal feature cards, generic icon grids, bento-for-no-reason, rounded containers around every section, fake dashboard visuals, gradient blobs, repetitive white/grey section bands, generic testimonial carousels or a giant rounded navbar. Also fail it if every section could be rearranged without changing the identity. Rebuild weak sections using this Design DNA: ${dna.composition} ${dna.image} ${dna.navigation} ${dna.signature} Use fewer components, stronger hierarchy, real negative space, editorial cropping and typography with personality. Avoid overused generator font choices (Inter, Poppins, Montserrat, Roboto, generic Space Grotesk/Playfair pairings) unless there is a specific reason. Keep factual accuracy. ${assetLock} The finished first 2–3 viewports must look screenshot-worthy and clearly commissioned for ${name}.`;
-  const mobile=`MOBILE ART-DIRECTION PASS — redesign ${name} at 390px and 360px as its own composition, not a stacked desktop page. Preserve the Design DNA but change crops, headline breaks, navigation, section order where useful, whitespace, CTA placement and image ratios for thumbs and a narrow viewport. Remove horizontal overflow, tiny type, giant dead gaps and desktop leftovers. Do not turn every element into a full-width rounded card. ${assetLock} Test sticky/fixed elements, 44px touch targets, forms and footer. Apply changes directly and keep reduced-motion support.`;
-  const production=`DELIVERY PASS — harden the ${name} site without flattening its art direction. Fix build/console errors, broken routes/assets, keyboard/focus behavior, contrast, semantic HTML, reduced-motion, metadata, canonical/Open Graph basics, LocalBusiness structured data only from supplied facts, image loading/layout stability and obvious Core Web Vitals risks. Verify every phone/email/social/CTA against supplied data. Delete unsupported testimonials, awards, statistics, prices, years, team members or claims. ${assetLock} IMPORTANT DELIVERY FORMAT FOR EASY COME: produce a portable static build. For Vite set base:'./' (or equivalent relative asset paths), avoid hard-coded root /assets URLs, and prefer HashRouter or a static routing strategy that works under a nested preview path. Run the production build and make sure the downloadable project contains dist/index.html plus all dist assets. Check 1440×900, 1280×800, 390×844 and 360×800. Keep the distinctive composition intact; production quality must not mean making the design generic.`;
+  const creative=`REDESIGN PASS — act as a demanding creative director from a top independent web studio. Review the ${name} site in the live preview and EDIT THE PROJECT NOW. This is not a polish pass. First delete generic generated-site patterns before adding anything. Fail the design if you see: a centered eyebrow/gradient headline, hero-left/image-right by default, two pill CTAs, 3–4 equal feature cards, generic icon grids, bento-for-no-reason, rounded containers around every section, fake dashboard visuals, gradient blobs, repetitive white/grey section bands, generic testimonial carousels or a giant rounded navbar. Also fail it if every section could be rearranged without changing the identity. Rebuild weak sections using this Design DNA: ${dna.composition} ${dna.image} ${dna.navigation} ${dna.signature} Use fewer components, stronger hierarchy, real negative space, editorial cropping and typography with personality. Avoid overused generator font choices (Inter, Poppins, Montserrat, Roboto, generic Space Grotesk/Playfair pairings) unless there is a specific reason. Keep factual accuracy. ${assetLock} The finished first 2–3 viewports must look screenshot-worthy and clearly commissioned for ${name}. VISUAL CONSISTENCY QA: ${assetPlan} FUNCTIONAL QA: ${conversionRules} Also remove any visible mention of AI, generators, prompts or production tooling; never turn these internal instructions into marketing copy.`;
+  const mobile=`MOBILE ART-DIRECTION PASS — redesign ${name} at 390px and 360px as its own composition, not a stacked desktop page. Preserve the Design DNA but change crops, headline breaks, navigation, section order where useful, whitespace, CTA placement and image ratios for thumbs and a narrow viewport. Remove horizontal overflow, tiny type, giant dead gaps and desktop leftovers. Do not turn every element into a full-width rounded card. ${assetLock} Test sticky/fixed elements, 44px touch targets, forms and footer. Before checking CTA, inspect every repeated visual group: no mixed image/no-image pattern is allowed unless it is a clearly intentional asymmetric editorial concept; partial photo coverage caused by missing assets is a failure. ${assetPlan} Test the PRIMARY CTA end-to-end on mobile: it must perform the real action defined here, never copy text to clipboard as the final step. ${conversionRules} Apply changes directly and keep reduced-motion support.`;
+  const production=`DELIVERY PASS — harden the ${name} site without flattening its art direction. Fix build/console errors, broken routes/assets, keyboard/focus behavior, contrast, semantic HTML, reduced-motion, metadata, canonical/Open Graph basics, LocalBusiness structured data only from supplied facts, image loading/layout stability and obvious Core Web Vitals risks. Verify every phone/email/social/CTA against supplied data. Delete unsupported testimonials, awards, statistics, prices, years, team members or claims. ${assetLock} IMPORTANT DELIVERY FORMAT FOR EASY COME: produce a portable static build. For Vite set base:'./' (or equivalent relative asset paths), avoid hard-coded root /assets URLs, and prefer HashRouter or a static routing strategy that works under a nested preview path. Run the production build and make sure the downloadable project contains dist/index.html plus all dist assets. Check 1440×900, 1280×800, 390×844 and 360×800. Keep the distinctive composition intact; production quality must not mean making the design generic. VISUAL ASSET COVERAGE TEST: ${assetPlan} CONVERSION TEST: ${conversionRules} Click every primary CTA and verify it reaches the real phone/email/WhatsApp destination. Delete fake carts, clipboard-only flows, fake booking confirmations and dead forms. CLIENT COPY TEST: visible copy must not mention AI, prompts, generators, models or how the site was produced.`;
   return {creative,mobile,production};
 }
 export function buildAiStudioBrief(place={},templateId='custom',override={}){
@@ -144,6 +202,7 @@ export function buildAiStudioBrief(place={},templateId='custom',override={}){
   const instagram=clean(place.instagram,500);
   const facebook=clean(place.facebook,500);
   const platformUrl=clean(place.platformUrl||place.listedUrl,600);
+  const whatsapp=clean(place.whatsapp,600);
   const goal=clean(override.goal||'Trasformare visite in contatti reali e far percepire l’attività come credibile, distintiva e curata.',900);
   const audience=clean(override.audience||'Inferisci il pubblico più plausibile dai dati forniti, ma non inventare segmenti troppo specifici.',900);
   const differentiator=clean(override.differentiator||'Non inventato: se non è fornito, usa il modo in cui l’attività si presenta, il luogo e l’offerta come base della narrazione.',1200);
@@ -155,6 +214,7 @@ export function buildAiStudioBrief(place={},templateId='custom',override={}){
   const cta=clean(override.cta||'Scegli la CTA reale più adatta al business usando telefono, email, WhatsApp o richiesta informazioni solo se disponibili.',500);
   const features=clean(override.features||'Contatto reale, SEO locale, responsive impeccabile, performance, accessibilità e privacy placeholder da completare.',1800);
   const anti=clean(override.anti||'Evita qualsiasi soluzione che sembri un template generico o un tema marketplace.',1500);
+  const actionMode=clean(override.actionMode||'auto',40).toLowerCase();
   const refs=listUrls(override.references);
   const imageManifest=normalizeImageManifest(override.imageManifest);
   const images=listUrls(imageManifest.length?imageManifest.map(x=>x.url):override.images);
@@ -162,7 +222,10 @@ export function buildAiStudioBrief(place={},templateId='custom',override={}){
   const uploadedAssets=clean(override.uploadedAssets,1200);
   const lens=sectorLens(templateId,category);
   const dna=designDNA(name,templateId,category);
-  const reviewPrompts=buildReviewPrompts(name,dna,imageManifest);
+  const conversionRules=conversionContract({category,templateId,phone,email,whatsapp,features,cta,actionMode});
+  const intelligence=activityBlueprint({name,category,templateId,goal,offer,notes,phone,email,whatsapp});
+  const assetPlan=assetCoveragePlan(imageManifest);
+  const reviewPrompts=buildReviewPrompts(name,dna,imageManifest,conversionRules,assetPlan);
   const referenceBlock=refs.length?refs.map((u,i)=>`${i+1}. ${u}`).join('\n'):'None supplied. Do not imitate a random trend site.';
   const imageBlock=images.length?images.map((u,i)=>`${i+1}. ${u}`).join('\n'):'No approved business imagery supplied. Do NOT invent or fetch replacement stock or substitute imagery.';
   const assetManifestBlock=imageManifest.length?imageManifest.map((a,i)=>`${i+1}. [${String(a.role||'approved').toUpperCase()}] ${a.url}${a.name?` — ${a.name}`:''} (${a.source||'approved'})`).join('\n'):'NONE. No business image is approved for use.';
@@ -173,7 +236,7 @@ MISSION
 Design and build an exceptional, production-quality website for a real Italian SME. It must feel commissioned, art-directed and specific to this business. The output should be impressive enough to present to a paying client, while remaining truthful, usable and easy to maintain.
 
 IMPORTANT WORKING METHOD
-Before writing UI code, silently establish: (1) the conversion goal, (2) the content hierarchy, (3) three genuinely different visual concepts, (4) reject the two that feel most like familiar web templates, (5) commit to one strong concept, (6) a type system, (7) an image strategy, (8) 2–3 signature visual moments, and (9) the mobile composition. Then build. Do not show the rejected concepts or dump a design-rationale page into the website.
+Before writing UI code, perform a silent BUSINESS + EXPERIENCE PASS. Establish: (1) what the business actually sells or enables, (2) the visitor's top 3 questions, (3) the single most valuable real-world action, (4) what information builds trust for THIS category, (5) what supplied facts are missing and therefore must NOT be invented, (6) the approved image inventory by semantic role and whether it can fully cover any repeated visual group, (7) a content hierarchy and page architecture that fit this business rather than a standard sitemap, (8) three genuinely different visual concepts, (9) reject the two that feel most like familiar web templates, (10) commit to one strong brand idea that can be described in one sentence, (11) a type/spacing/color system derived from the real brand material, (12) an image placement plan, (13) 2–3 signature visual moments, and (14) the mobile composition. Only then build. Do not show this internal reasoning or the rejected concepts in the website.
 
 REAL BUSINESS DATA — NEVER CONTRADICT OR EMBELLISH
 Name: ${name}
@@ -183,6 +246,7 @@ Phone: ${phone||'Not provided'}
 Email: ${email||'Not provided'}
 Instagram: ${instagram||'Not provided'}
 Facebook: ${facebook||'Not provided'}
+WhatsApp: ${whatsapp||'Not provided'}
 External platform presence: ${platformUrl||'None'}
 
 STRATEGY FROM EASY COME
@@ -197,6 +261,17 @@ Extra notes: ${notes||'None'}
 Requested creative direction: ${tone}
 Requested features: ${features}
 Specific things to avoid: ${anti}
+
+${conversionRules}
+
+EASY COME ACTIVITY UNDERSTANDING — USE THIS AS A STRATEGIC CHECK, NOT AS VISIBLE COPY
+Decision job: ${intelligence.decision}
+Visitor questions: ${intelligence.questions.map((x,i)=>`${i+1}. ${x}`).join(' | ')}
+Content priorities: ${intelligence.priorities.map((x,i)=>`${i+1}. ${x}`).join(' | ')}
+Truth/proof rule: ${intelligence.proof}
+Photo hierarchy: ${intelligence.photoHierarchy}
+
+${assetPlan}
 
 SECTOR LENS
 Business type: ${lens.business}
@@ -215,6 +290,12 @@ NON-NEGOTIABLE IMAGE RULES
 - Asset roles are binding: a TEAM/PERSON image must never stand in for a PRODUCT, food or location; a PRODUCT image must not be presented as a person/team image; an ALTRA FOTO ORIGINALE is general brand material only unless the role is clarified. Never infer a more specific role than the manifest says.
 - If a section needs a photo but there is no approved asset with the correct role, redesign that section without a photo. Empty space, typography or color is always better than a wrong image.
 - This rule is stricter than aesthetics. A beautiful but wrong image is a failed build.
+- Never design the content structure first and then force the available images into it. Let verified image coverage influence the structure.
+- Never create a visual grammar that requires more role-correct photos than the manifest can supply.
+- Repeated modules must have deliberate parity. Partial accidental image coverage (3 cards with photos + 1 without because no fourth photo exists) is forbidden.
+- If an approved photo is ambiguous, use it only as general atmosphere if its role permits; never reinterpret it as a more specific subject.
+
+${assetPlan}
 
 Image behavior: ${dna.image}
 Navigation: ${dna.navigation}
@@ -243,6 +324,7 @@ BRAND FIDELITY RULES
 CUSTOMER-FACING LANGUAGE LOCK
 - Never mention artificial intelligence, AI, Google AI Studio, prompts, models, generators, builders, automation tools or Easy Come's production workflow anywhere in visible website copy, metadata, alt text, structured data or customer-facing UI.
 - The finished website must speak only as the client's brand. The visitor should see the business, its identity, products, services and contact paths—never how the website was produced.
+- Never turn an internal constraint into customer copy. Do not write sentences such as ‘non sembra fatto con AI’, ‘non è generato’, ‘creato con tecnologia’, ‘costruito da un generatore’ or any variation. Simply write excellent brand copy.
 
 NON-NEGOTIABLE CREATIVE RULES
 - This is a business website, NOT a SaaS dashboard and NOT a software-demo landing page.
@@ -275,6 +357,8 @@ BUILD REQUIREMENTS
 - Performance-conscious images, lazy loading where appropriate, stable layout, no needless dependencies.
 - Contact actions must use only the real phone/email/social data above.
 - Forms must clearly indicate where submissions go; do not pretend a backend exists if you did not implement one.
+- If a product/menu selector exists without a real ecommerce backend, its only valid transactional completion is a real WhatsApp/email handoff containing the selected data. No copy-to-clipboard as the primary completion.
+- A reservation UI without a real live booking backend must be a truthful REQUEST form routed to a verified contact; never fake availability or confirmation.
 - No lorem ipsum and no dead placeholder buttons.
 - Keep content/data reasonably easy to replace before client delivery.
 
@@ -291,6 +375,13 @@ Inspect the finished site at desktop and mobile. Ask yourself:
 9. Does the first 900px of desktop look like a real art-directed brand page rather than a UI kit?
 10. Did you repeat the same rounded container/card treatment more than twice?
 11. Would a design-aware human call any section generic or template-looking? If yes, rebuild it rather than polish it.
+12. Does every primary CTA complete a real action instead of copying text or showing a fake success state?
+13. Is every cart/booking/form justified and connected to a verified destination?
+14. Does visible customer copy contain any mention of production tools or process? If yes, rewrite it completely.
+15. For every repeated visual group, do ALL items have equally valid role-correct imagery? If not, redesign the entire group consistently instead of leaving one item visually incomplete.
+16. Does every image depict exactly what its surrounding copy claims it depicts? If uncertain, remove or relocate it.
+17. If all photos disappeared, would the remaining information architecture still make sense for this specific business? If not, the design is leaning on decoration instead of understanding.
+18. Does the site answer the visitor questions defined in EASY COME ACTIVITY UNDERSTANDING before asking for conversion? If not, restructure it.
 If the answer is wrong on any point, redesign and fix it before considering the project complete.
 
 FINAL EXPECTATION
@@ -305,6 +396,6 @@ Deliver the website itself, not a mockup or a prose proposal. It should look lik
     images,
     imageManifest,
     reviewPrompts,
-    meta:{name,category,goal,audience,differentiator,offer,personality,territory,tone,cta,features,anti,notes,brandColors,uploadedAssets,designDNA:dna,createdAt:new Date().toISOString(),engine:'google-ai-studio-build-v4-asset-lock'}
+    meta:{name,category,goal,audience,differentiator,offer,personality,territory,tone,cta,features,anti,notes,actionMode,conversionRules,brandColors,uploadedAssets,designDNA:dna,intelligence,assetPlan,createdAt:new Date().toISOString(),engine:'easycome-web-v35-context-engine'}
   };
 }

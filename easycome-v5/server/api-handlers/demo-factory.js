@@ -100,7 +100,7 @@ export default async function handler(req,res){
       const previewUrl=String(req.body?.previewUrl||'').trim();let parsedHref='';if(previewUrl){try{const parsed=new URL(previewUrl);if(!['http:','https:'].includes(parsed.protocol))throw new Error('protocol');parsedHref=parsed.href}catch{throw new Error('URL preview non valido.');}}
       const price=Math.round(Number(req.body?.price||0));if(price<50||price>20000)throw new Error('Inserisci un prezzo tra 50 € e 20.000 €.');
       const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const existing=current.webProposal&&typeof current.webProposal==='object'?current.webProposal:{};const token=existing.token||crypto.randomBytes(18).toString('hex');const now=new Date();const expires=new Date(now.getTime()+30*86400000);
-      const proposal={...existing,token,previewUrl:parsedHref||existing.previewUrl||'',price,status:existing.status==='paid'?'paid':'draft',createdAt:existing.createdAt||now.toISOString(),updatedAt:now.toISOString(),expiresAt:expires.toISOString()};
+      const implementationFee=50;const proposal={...existing,token,previewUrl:parsedHref||existing.previewUrl||'',price,implementationFee,totalPrice:price+implementationFee,status:existing.status==='paid'?'paid':'draft',createdAt:existing.createdAt||now.toISOString(),updatedAt:now.toISOString(),expiresAt:expires.toISOString()};
       await updateTarget(target.id,{demo_config:{...current,webProposal:proposal}});const origin=baseUrl(req);return res.status(200).json({ok:true,proposal,proposalUrl:`${origin}/web-proposal.html?d=${encodeURIComponent(demoSlugValue)}&t=${encodeURIComponent(token)}`});
     }
     if(action==='prepare-website-ai'){
