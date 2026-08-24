@@ -1,4 +1,4 @@
-> **V31 Instant Portal Builder:** import AI Studio senza runtime `npm install`; dipendenze browser via ESM CDN, build più stabile su Vercel.
+> **V32 Browser Compiler:** import AI Studio senza Vite/Rollup runtime; TSX/JSX viene trasformato con un compilatore JavaScript puro e le dipendenze browser arrivano via ESM CDN.
 
 # Easy Come V30 — Zero‑Touch Web Builder
 
