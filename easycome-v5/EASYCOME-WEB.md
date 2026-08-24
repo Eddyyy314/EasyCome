@@ -43,3 +43,16 @@ Variabili richieste:
 - `EASYCOME_WEB_ASSET_SECRET`
 
 Il bucket rimane privato. Le preview vengono servite da Easy Come; gli asset binari grandi vengono forniti con signed URL temporanee.
+
+## V29 — Direct ZIP Auto Build
+
+La Factory non richiede più URL preview esterni. Il flusso è: Google AI Studio → Download ZIP → Importa in Easy Come → portale cliente.
+
+L'importer accetta:
+- build statiche con `dist/index.html`, `build/index.html` o `out/index.html`;
+- siti statici completi;
+- progetti React/Vite sorgente con `package.json`, `index.html` e `src/`.
+
+Quando riceve un progetto React/Vite sorgente, Easy Come esegue una build server-side con base path del portale, pubblica gli asset nello Storage privato e crea automaticamente la preview Easy Come. Non serve `npm run build` manuale.
+
+Il browser forza una nuova versione di `factory.js` a ogni release importante per evitare che una Factory vecchia rimanga in cache.

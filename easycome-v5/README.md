@@ -32,3 +32,10 @@ npm run build
 `dist-public/` è generata dalla build e non è inclusa nel pacchetto GitHub-ready.
 
 Vedi `EASYCOME-WEB.md` per il flow completo del prodotto Web.
+
+### V29 · Web Portal Auto Build
+- Fix cache Factory: `factory.js?v=29.0.0` + `no-store` sulle superfici Factory.
+- Rimosso definitivamente il requisito di URL preview esterno.
+- Import diretto ZIP Google AI Studio.
+- Auto-build server-side per progetti React/Vite comuni.
+- Errori di build mostrati esplicitamente nella Factory invece di lasciare il pulsante senza feedback.

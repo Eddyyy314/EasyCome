@@ -1,4 +1,11 @@
 import { unzipSync } from 'fflate';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+import { build as viteBuild } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { authenticatedUser } from '../server/_auth.js';
 import { isAdminUser } from '../server/_supabase.js';
 import { targetBySlug, updateTarget } from '../server/_demo-store.js';
@@ -6,94 +13,31 @@ import { createSignedUpload, downloadObject, signedObjectUrl, uploadObject } fro
 import { readJson, json, appOrigin } from '../server/_responses.js';
 export const config={api:{bodyParser:false}};
 
+const require=createRequire(import.meta.url);
 const MAX_ZIP_BYTES=50*1024*1024;
 const MAX_FILES=700;
 const MAX_UNPACKED_BYTES=80*1024*1024;
 const clean=v=>String(v||'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,120)||'site.zip';
 function query(req,name){try{return String(req.query?.[name]??new URL(req.url||'/','http://localhost').searchParams.get(name)??'').trim()}catch{return String(req.query?.[name]||'').trim()}}
-function safePath(v){
-  let p=decodeURIComponent(String(v||'')).replace(/\\/g,'/').replace(/^\/+/, '');
-  p=p.split('/').filter(Boolean).join('/');
-  if(!p||p==='.')return 'index.html';
-  if(p.includes('..')||p.includes('\0'))throw new Error('Percorso non valido.');
-  return p;
-}
-function mime(path=''){
-  const ext=(String(path).toLowerCase().match(/\.([a-z0-9]+)$/)||[])[1]||'';
-  return ({html:'text/html; charset=utf-8',htm:'text/html; charset=utf-8',css:'text/css; charset=utf-8',js:'text/javascript; charset=utf-8',mjs:'text/javascript; charset=utf-8',json:'application/json; charset=utf-8',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',avif:'image/avif',ico:'image/x-icon',woff:'font/woff',woff2:'font/woff2',ttf:'font/ttf',otf:'font/otf',pdf:'application/pdf',txt:'text/plain; charset=utf-8',xml:'application/xml; charset=utf-8',webmanifest:'application/manifest+json'})[ext]||'application/octet-stream';
-}
-function isText(path=''){return /\.(?:html?|css|js|mjs|json|svg|txt|xml|webmanifest)$/i.test(path)}
-function zipEntries(raw){
-  let unpacked;try{unpacked=unzipSync(new Uint8Array(raw))}catch{throw new Error('ZIP non leggibile. Scarica di nuovo il pacchetto completo dal generatore.');}
-  const entries=[];let total=0;
-  for(const [name,data] of Object.entries(unpacked)){
-    const normalized=String(name||'').replace(/\\/g,'/').replace(/^\/+/, '');
-    if(!normalized||normalized.endsWith('/')||normalized.startsWith('__MACOSX/')||normalized.includes('/.git/')||normalized.includes('/node_modules/'))continue;
-    if(normalized.split('/').some(x=>x==='..'))throw new Error('ZIP non sicuro: contiene percorsi non validi.');
-    total+=data.length;if(total>MAX_UNPACKED_BYTES)throw new Error('Pacchetto troppo grande dopo l’estrazione.');
-    entries.push({name:normalized,data});if(entries.length>MAX_FILES)throw new Error(`Pacchetto troppo complesso: massimo ${MAX_FILES} file pubblicabili.`);
-  }
-  if(!entries.length)throw new Error('ZIP vuoto.');
-  return entries;
-}
-function chooseSite(entries){
-  const names=new Set(entries.map(x=>x.name));const indexes=entries.filter(x=>/(^|\/)index\.html?$/i.test(x.name));
-  if(!indexes.length)throw new Error('Non trovo index.html. In AI Studio esegui il Production Pass e scarica il progetto completo con la build statica.');
-  const score=name=>{const n=name.toLowerCase();if(/(^|\/)dist\/index\.html$/.test(n))return 100;if(/(^|\/)build\/index\.html$/.test(n))return 95;if(/(^|\/)out\/index\.html$/.test(n))return 90;if(n==='index.html')return 80;return 60};
-  indexes.sort((a,b)=>score(b.name)-score(a.name));const chosen=indexes[0];const root=chosen.name.slice(0,chosen.name.length-chosen.name.split('/').pop().length).replace(/\/$/,'');
-  const rootPrefix=root?root+'/':'';const site=entries.filter(x=>!root||x.name.startsWith(rootPrefix)).map(x=>({name:root?x.name.slice(rootPrefix.length):x.name,data:x.data})).filter(x=>x.name&&!x.name.startsWith('.'));
-  const index=site.find(x=>/^index\.html?$/i.test(x.name));if(!index)throw new Error('Build non valida: index.html non è nella cartella pubblicabile.');
-  const indexText=Buffer.from(index.data).toString('utf8');
-  if((names.has('package.json')||entries.some(x=>/(^|\/)package\.json$/.test(x.name)))&&(/\/src\/(?:main|index)\.[jt]sx?/i.test(indexText)||/<script[^>]+src=["']\/src\//i.test(indexText))){
-    throw new Error('Hai caricato i sorgenti, non la build finale. In AI Studio lancia il Production Pass, esegui la build e verifica che nello ZIP esista dist/index.html.');
-  }
-  return{root:root||'.',files:site,indexText};
-}
-async function validateProposal(slug,token){
-  const target=await targetBySlug(slug);if(!target)throw new Error('Prospect non trovato.');
-  const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const proposal=current.webProposal||{};
-  if(!proposal.token||proposal.token!==token)throw new Error('Proposta non valida.');
-  if(proposal.expiresAt&&new Date(proposal.expiresAt).getTime()<Date.now()&&proposal.status!=='paid')throw new Error('Proposta scaduta.');
-  return{target,current,proposal};
-}
-async function uploadMany(base,files){
-  let cursor=0;const workers=Array.from({length:Math.min(8,files.length)},async()=>{while(cursor<files.length){const i=cursor++;const f=files[i];await uploadObject(`${base}/${f.name}`,Buffer.from(f.data),mime(f.name));}});await Promise.all(workers);
-}
-export default async function handler(req,res){
-  try{
-    const mode=query(req,'mode')||'prepare';const slug=query(req,'d'),token=query(req,'t');if(!slug||!token)throw new Error('Proposta non valida.');
-    if(req.method==='GET'){
-      const {proposal}=await validateProposal(slug,token);
-      if(mode==='download'){
-        if(proposal.status!=='paid')return json(res,403,{error:'Il pacchetto diventa scaricabile dopo l’acquisto.'});
-        if(!proposal.packagePath)return json(res,404,{error:'Pacchetto non disponibile.'});
-        const signed=await signedObjectUrl(proposal.packagePath,300);const sep=signed.includes('?')?'&':'?';res.statusCode=302;res.setHeader('location',`${signed}${sep}download=${encodeURIComponent(proposal.packageName||'easycome-web.zip')}`);res.setHeader('cache-control','no-store');return res.end();
-      }
-      if(mode==='file'){
-        if(!proposal.siteBasePath)return json(res,404,{error:'Portale sito non ancora pronto.'});
-        let rel=safePath(query(req,'p')||'index.html');if(rel.endsWith('/'))rel+='index.html';
-        let objectPath=`${proposal.siteBasePath}/${rel}`;let found;
-        try{found=await downloadObject(objectPath)}catch(e){if(!/\.[a-z0-9]{1,8}$/i.test(rel)){rel='index.html';objectPath=`${proposal.siteBasePath}/${rel}`;found=await downloadObject(objectPath)}else throw e}
-        const type=mime(rel);if(!isText(rel)||found.bytes.length>3_500_000){const signed=await signedObjectUrl(objectPath,600);res.statusCode=302;res.setHeader('location',signed);res.setHeader('cache-control','private, max-age=300');return res.end();}
-        res.statusCode=200;res.setHeader('content-type',type);res.setHeader('cache-control',/\.html?$/i.test(rel)?'private, no-store':'private, max-age=300');res.setHeader('x-frame-options','SAMEORIGIN');res.setHeader('access-control-allow-origin','*');if(/\.html?$/i.test(rel)){res.setHeader('content-security-policy',"sandbox allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads; base-uri 'none'; object-src 'none'");res.setHeader('referrer-policy','no-referrer');}return res.end(found.bytes);
-      }
-      return json(res,400,{error:'Modalità non valida.'});
-    }
-    if(req.method!=='POST')return json(res,405,{error:'Metodo non consentito.'});
-    const user=await authenticatedUser(req);if(!(await isAdminUser(user.id)))return json(res,403,{error:'Solo admin Easy Come.'});
-    const {target,current,proposal}=await validateProposal(slug,token);const body=await readJson(req,350_000);
-    if(mode==='prepare'){
-      const filename=clean(body.filename||'site.zip');const size=Number(body.size||0);if(!/\.zip$/i.test(filename))throw new Error('Carica un file ZIP.');if(size<100)throw new Error('Pacchetto vuoto.');if(size>MAX_ZIP_BYTES)throw new Error('Pacchetto troppo grande: massimo 50 MB.');
-      const path=`projects/${slug}/${token}/source/${Date.now()}-${filename}`;const signed=await createSignedUpload(path);const next={...proposal,uploadPending:true,packageName:filename,packageBytes:size,packagePath:path,updatedAt:new Date().toISOString()};await updateTarget(target.id,{demo_config:{...current,webProposal:next}});return json(res,200,{ok:true,upload:signed,proposal:next});
-    }
-    if(mode==='finalize'){
-      const path=String(body.path||proposal.packagePath||'').trim();if(!path.startsWith(`projects/${slug}/${token}/source/`))throw new Error('Pacchetto Easy Come non valido.');
-      const source=await downloadObject(path);if(source.bytes.length>MAX_ZIP_BYTES)throw new Error('Pacchetto troppo grande.');const entries=zipEntries(source.bytes);const site=chooseSite(entries);
-      const siteBasePath=`projects/${slug}/${token}/site-v${Date.now()}`;await uploadMany(siteBasePath,site.files);
-      const origin=appOrigin(req);const hostedPreviewUrl=`${origin}/web-sites/${encodeURIComponent(slug)}/${encodeURIComponent(token)}/`;
-      const next={...proposal,packagePath:path,packageName:proposal.packageName||clean(path.split('/').pop()),packageBytes:source.bytes.length,packageUploadedAt:new Date().toISOString(),uploadPending:false,status:proposal.status==='paid'?'paid':'ready',previewMode:'easycome-hosted',previewUrl:hostedPreviewUrl,hostedPreviewUrl,siteBasePath,siteRoot:site.root,siteFileCount:site.files.length,sitePublishedAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
-      await updateTarget(target.id,{demo_config:{...current,webProposal:next}});return json(res,200,{ok:true,proposal:next,hostedPreviewUrl});
-    }
-    return json(res,400,{error:'Modalità non valida.'});
-  }catch(e){return json(res,400,{error:e.message||'Importazione non riuscita.'})}
-}
+function safePath(v){let p=decodeURIComponent(String(v||'')).replace(/\\/g,'/').replace(/^\/+/, '');p=p.split('/').filter(Boolean).join('/');if(!p||p==='.')return 'index.html';if(p.includes('..')||p.includes('\0'))throw new Error('Percorso non valido.');return p}
+function mime(file=''){const ext=(String(file).toLowerCase().match(/\.([a-z0-9]+)$/)||[])[1]||'';return({html:'text/html; charset=utf-8',htm:'text/html; charset=utf-8',css:'text/css; charset=utf-8',js:'text/javascript; charset=utf-8',mjs:'text/javascript; charset=utf-8',json:'application/json; charset=utf-8',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',avif:'image/avif',ico:'image/x-icon',woff:'font/woff',woff2:'font/woff2',ttf:'font/ttf',otf:'font/otf',pdf:'application/pdf',txt:'text/plain; charset=utf-8',xml:'application/xml; charset=utf-8',webmanifest:'application/manifest+json'})[ext]||'application/octet-stream'}
+function isText(file=''){return /\.(?:html?|css|js|mjs|json|svg|txt|xml|webmanifest)$/i.test(file)}
+function zipEntries(raw){let unpacked;try{unpacked=unzipSync(new Uint8Array(raw))}catch{throw new Error('ZIP non leggibile. Scaricalo di nuovo da Google AI Studio.')}const entries=[];let total=0;for(const [name,data] of Object.entries(unpacked)){const normalized=String(name||'').replace(/\\/g,'/').replace(/^\/+/, '');if(!normalized||normalized.endsWith('/')||normalized.startsWith('__MACOSX/')||normalized.includes('/.git/')||normalized.includes('/node_modules/'))continue;if(normalized.split('/').some(x=>x==='..'))throw new Error('ZIP non sicuro: contiene percorsi non validi.');total+=data.length;if(total>MAX_UNPACKED_BYTES)throw new Error('Pacchetto troppo grande dopo l’estrazione.');entries.push({name:normalized,data});if(entries.length>MAX_FILES)throw new Error(`Pacchetto troppo complesso: massimo ${MAX_FILES} file importabili.`)}if(!entries.length)throw new Error('ZIP vuoto.');return entries}
+function parentOf(file){const i=String(file).lastIndexOf('/');return i<0?'':file.slice(0,i)}
+function projectInfo(entries){const pkgs=entries.filter(x=>/(^|\/)package\.json$/i.test(x.name)).sort((a,b)=>a.name.length-b.name.length);for(const pkg of pkgs){const root=parentOf(pkg.name),prefix=root?root+'/':'';const names=entries.map(x=>x.name);const hasIndex=names.some(n=>n===`${prefix}index.html`);const hasSrc=names.some(n=>n.startsWith(`${prefix}src/`));if(hasIndex&&hasSrc)return{root,prefix,pkg}}return null}
+function builtSite(entries){const indexes=entries.filter(x=>/(^|\/)(?:dist|build|out)\/index\.html?$/i.test(x.name));if(!indexes.length)return null;const score=n=>/\/dist\/index\.html$/i.test('/'+n)?100:/\/build\/index\.html$/i.test('/'+n)?95:90;indexes.sort((a,b)=>score(b.name)-score(a.name));const chosen=indexes[0],root=parentOf(chosen.name),prefix=root?root+'/':'';const files=entries.filter(x=>x.name.startsWith(prefix)).map(x=>({name:x.name.slice(prefix.length),data:x.data})).filter(x=>x.name&&!x.name.startsWith('.'));return{root,files,buildMode:'prebuilt'}}
+function staticSite(entries){const p=projectInfo(entries);if(p)return null;const indexes=entries.filter(x=>/(^|\/)index\.html?$/i.test(x.name)).sort((a,b)=>a.name.length-b.name.length);if(!indexes.length)return null;const chosen=indexes[0],root=parentOf(chosen.name),prefix=root?root+'/':'';const files=entries.filter(x=>!root||x.name.startsWith(prefix)).map(x=>({name:root?x.name.slice(prefix.length):x.name,data:x.data})).filter(x=>x.name&&!x.name.startsWith('.'));return{root:root||'.',files,buildMode:'static'}}
+function moduleAlias(){const exact=name=>{try{return require.resolve(name)}catch{return null}};const reactRoot=parentOf(require.resolve('react/package.json'));return[
+  {find:/^react$/,replacement:exact('react')},{find:/^react\/(.+)$/,replacement:`${reactRoot}/$1`},
+  {find:/^react-dom$/,replacement:exact('react-dom')},{find:/^react-dom\/(.+)$/,replacement:`${parentOf(require.resolve('react-dom/package.json'))}/$1`},
+  ...['react-router-dom','lucide-react','framer-motion','clsx','tailwind-merge'].map(name=>({find:new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}$`),replacement:exact(name)})).filter(x=>x.replacement)
+]}
+async function writeProject(entries,info,dir){for(const entry of entries){if(info.prefix&&!entry.name.startsWith(info.prefix))continue;const rel=info.prefix?entry.name.slice(info.prefix.length):entry.name;if(!rel||rel.startsWith('.')||rel.includes('/node_modules/'))continue;const dest=path.join(dir,rel);if(!dest.startsWith(dir))throw new Error('Percorso sorgente non valido.');await fs.mkdir(path.dirname(dest),{recursive:true});await fs.writeFile(dest,Buffer.from(entry.data))}}
+async function readTree(dir,base=dir){const out=[];for(const item of await fs.readdir(dir,{withFileTypes:true})){const full=path.join(dir,item.name);if(item.isDirectory())out.push(...await readTree(full,base));else out.push({name:path.relative(base,full).split(path.sep).join('/'),data:await fs.readFile(full)})}return out}
+function friendlyBuildError(e){const msg=String(e?.message||e||'Build non riuscita');const missing=msg.match(/(?:failed to resolve import|could not resolve|cannot find package)\s*["']([^"']+)["']/i);if(missing)return `Il progetto usa una libreria non ancora supportata da Easy Come (${missing[1]}). Mandami questo errore e la aggiungiamo al builder. Dettaglio: ${msg.slice(0,500)}`;return `Easy Come non è riuscito a compilare questo ZIP: ${msg.slice(0,700)}`}
+async function buildSource(entries,portalBase){const info=projectInfo(entries);if(!info)throw new Error('Non trovo una build pubblicabile né un progetto React/Vite riconoscibile.');const temp=await fs.mkdtemp(path.join(os.tmpdir(),'easycome-web-'));const project=path.join(temp,'project');await fs.mkdir(project,{recursive:true});try{await writeProject(entries,info,project);const indexPath=path.join(project,'index.html');try{await fs.access(indexPath)}catch{throw new Error('Nel progetto sorgente manca index.html.')}const usesTailwind=entries.some(x=>/\.(css|scss)$/i.test(x.name)&&/(?:@import\s+["']tailwindcss|@tailwind\s)/i.test(Buffer.from(x.data).toString('utf8')));const outDir=path.join(project,'easycome-dist');await viteBuild({root:project,configFile:false,base:portalBase,plugins:[react(),...(usesTailwind?[tailwindcss()]:[])],resolve:{alias:[{find:'@',replacement:path.join(project,'src')},...moduleAlias()]},define:{'process.env.NODE_ENV':'"production"','process.env.API_KEY':'""','process.env.GEMINI_API_KEY':'""'},build:{outDir,emptyOutDir:true,sourcemap:false,target:'es2020'},logLevel:'silent'});const files=await readTree(outDir);if(!files.some(x=>/^index\.html?$/i.test(x.name)))throw new Error('La compilazione è terminata senza generare index.html.');return{root:'generated-build',files,buildMode:'easycome-vite'}}catch(e){throw new Error(friendlyBuildError(e))}finally{await fs.rm(temp,{recursive:true,force:true}).catch(()=>{})}}
+function normalizeHosted(files,portalBase){return files.map(f=>{if(!isText(f.name))return f;let s=Buffer.from(f.data).toString('utf8');s=s.replace(/(["'(`=])\/assets\//g,`$1${portalBase}assets/`).replace(/(["'])\/(favicon\.(?:ico|svg|png)|site\.webmanifest|manifest\.webmanifest)/g,`$1${portalBase}$2`);return{name:f.name,data:Buffer.from(s)}})}
+async function resolveSite(entries,portalBase){const pre=builtSite(entries);if(pre)return{...pre,files:normalizeHosted(pre.files,portalBase)};if(projectInfo(entries))return buildSource(entries,portalBase);const stat=staticSite(entries);if(stat)return{...stat,files:normalizeHosted(stat.files,portalBase)};throw new Error('Non trovo index.html. Carica lo ZIP completo scaricato da Google AI Studio.')}
+async function validateProposal(slug,token){const target=await targetBySlug(slug);if(!target)throw new Error('Prospect non trovato.');const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const proposal=current.webProposal||{};if(!proposal.token||proposal.token!==token)throw new Error('Proposta non valida.');if(proposal.expiresAt&&new Date(proposal.expiresAt).getTime()<Date.now()&&proposal.status!=='paid')throw new Error('Proposta scaduta.');return{target,current,proposal}}
+async function uploadMany(base,files){let cursor=0;const workers=Array.from({length:Math.min(8,files.length)},async()=>{while(cursor<files.length){const i=cursor++;const f=files[i];await uploadObject(`${base}/${f.name}`,Buffer.from(f.data),mime(f.name))}});await Promise.all(workers)}
+export default async function handler(req,res){try{const mode=query(req,'mode')||'prepare',slug=query(req,'d'),token=query(req,'t');if(!slug||!token)throw new Error('Proposta non valida.');if(req.method==='GET'){const {proposal}=await validateProposal(slug,token);if(mode==='download'){if(proposal.status!=='paid')return json(res,403,{error:'Il pacchetto diventa scaricabile dopo l’acquisto.'});if(!proposal.packagePath)return json(res,404,{error:'Pacchetto non disponibile.'});const signed=await signedObjectUrl(proposal.packagePath,300),sep=signed.includes('?')?'&':'?';res.statusCode=302;res.setHeader('location',`${signed}${sep}download=${encodeURIComponent(proposal.packageName||'easycome-web.zip')}`);res.setHeader('cache-control','no-store');return res.end()}if(mode==='file'){if(!proposal.siteBasePath)return json(res,404,{error:'Portale sito non ancora pronto.'});let rel=safePath(query(req,'p')||'index.html');if(rel.endsWith('/'))rel+='index.html';let objectPath=`${proposal.siteBasePath}/${rel}`,found;try{found=await downloadObject(objectPath)}catch(e){if(!/\.[a-z0-9]{1,8}$/i.test(rel)){rel='index.html';objectPath=`${proposal.siteBasePath}/${rel}`;found=await downloadObject(objectPath)}else throw e}const type=mime(rel);if(!isText(rel)||found.bytes.length>3_500_000){const signed=await signedObjectUrl(objectPath,600);res.statusCode=302;res.setHeader('location',signed);res.setHeader('cache-control','private, max-age=300');return res.end()}res.statusCode=200;res.setHeader('content-type',type);res.setHeader('cache-control',/\.html?$/i.test(rel)?'private, no-store':'private, max-age=300');res.setHeader('x-frame-options','SAMEORIGIN');res.setHeader('access-control-allow-origin','*');if(/\.html?$/i.test(rel)){res.setHeader('content-security-policy',"sandbox allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads; base-uri 'self'; object-src 'none'");res.setHeader('referrer-policy','no-referrer')}return res.end(found.bytes)}return json(res,400,{error:'Modalità non valida.'})}if(req.method!=='POST')return json(res,405,{error:'Metodo non consentito.'});const user=await authenticatedUser(req);if(!(await isAdminUser(user.id)))return json(res,403,{error:'Solo admin Easy Come.'});const {target,current,proposal}=await validateProposal(slug,token),body=await readJson(req,350_000);if(mode==='prepare'){const filename=clean(body.filename||'site.zip'),size=Number(body.size||0);if(!/\.zip$/i.test(filename))throw new Error('Carica un file ZIP.');if(size<100)throw new Error('Pacchetto vuoto.');if(size>MAX_ZIP_BYTES)throw new Error('Pacchetto troppo grande: massimo 50 MB.');const objectPath=`projects/${slug}/${token}/source/${Date.now()}-${filename}`,signed=await createSignedUpload(objectPath),next={...proposal,uploadPending:true,packageName:filename,packageBytes:size,packagePath:objectPath,updatedAt:new Date().toISOString()};await updateTarget(target.id,{demo_config:{...current,webProposal:next}});return json(res,200,{ok:true,upload:signed,proposal:next})}if(mode==='finalize'){const objectPath=String(body.path||proposal.packagePath||'').trim();if(!objectPath.startsWith(`projects/${slug}/${token}/source/`))throw new Error('Pacchetto Easy Come non valido.');const source=await downloadObject(objectPath);if(source.bytes.length>MAX_ZIP_BYTES)throw new Error('Pacchetto troppo grande.');const entries=zipEntries(source.bytes),portalBase=`/web-sites/${encodeURIComponent(slug)}/${encodeURIComponent(token)}/`,site=await resolveSite(entries,portalBase),siteBasePath=`projects/${slug}/${token}/site-v${Date.now()}`;await uploadMany(siteBasePath,site.files);const origin=appOrigin(req),hostedPreviewUrl=`${origin}${portalBase}`,next={...proposal,packagePath:objectPath,packageName:proposal.packageName||clean(objectPath.split('/').pop()),packageBytes:source.bytes.length,packageUploadedAt:new Date().toISOString(),uploadPending:false,status:proposal.status==='paid'?'paid':'ready',previewMode:'easycome-hosted',previewUrl:hostedPreviewUrl,hostedPreviewUrl,siteBasePath,siteRoot:site.root,siteFileCount:site.files.length,siteBuildMode:site.buildMode,sitePublishedAt:new Date().toISOString(),updatedAt:new Date().toISOString()};await updateTarget(target.id,{demo_config:{...current,webProposal:next}});return json(res,200,{ok:true,proposal:next,hostedPreviewUrl,buildMode:site.buildMode})}return json(res,400,{error:'Modalità non valida.'})}catch(e){console.error('web-package-upload',e);return json(res,400,{error:e.message||'Importazione non riuscita.'})}}
