@@ -13,7 +13,7 @@
     const pec=legal.pec||local.pec||'';
     text('[data-legal-controller]',name);text('[data-legal-address]',address);text('[data-legal-vat]',vat);text('[data-legal-rea]',rea);text('[data-legal-pec]',pec);
     mail('[data-legal-email]',privacy);mail('[data-legal-support]',support);
-    text('[data-legal-updated]',base.lastUpdated||'10 agosto 2026');
+    text('[data-legal-updated]',base.lastUpdated||'29 agosto 2026');
     document.querySelectorAll('[data-legal-missing]').forEach(el=>{el.hidden=Boolean(name&&support)});
   }document.addEventListener('DOMContentLoaded',init);
 })();

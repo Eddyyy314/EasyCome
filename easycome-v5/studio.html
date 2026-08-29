@@ -6,6 +6,17 @@
   <title>Studio — Easy Come</title>
   <meta name="description" content="Componi gestionale, sito, app PWA, automazioni e database della tua impresa. Prova tutto in anteprima prima del pagamento.">
   <meta name="theme-color" content="#ff6b35">
+  <script>
+  (function(){
+    try {
+      const params = new URLSearchParams(location.search);
+      const allowedResume = params.get('resume') === '1';
+      if (!allowedResume && localStorage.getItem('easycome:product-tour-seen') !== '1') {
+        location.replace('/?from=studio#storia');
+      }
+    } catch (_) {}
+  })();
+  </script>
   <link rel="stylesheet" href="assets/styles.css">
   <link rel="stylesheet" href="assets/editorial.css">
   <link rel="stylesheet" href="assets/v7.css">
@@ -21,14 +32,14 @@
       </a>
       <div class="intro-copy">
         <span class="eyebrow light">UN SISTEMA DIGITALE COSTRUITO SUL TUO LAVORO</span>
-        <h2>Componi il tuo sistema. Provalo. Poi decidi.</h2>
-        <p>Gestionale, sito, app installabile, Excel, database e automazioni: scegli ciò che serve e naviga il risultato prima di pagare.</p>
+        <h2>Ora costruiamo il sistema che hai appena visto.</h2>
+        <p>Hai già visto cosa fa Easy Come. Qui traduci il tuo modo di lavorare in moduli, sezioni, regole e automazioni. Il percorso ti accompagna fino all’anteprima e all’attivazione.</p>
       </div>
       <nav id="stepList" class="step-list"></nav>
       <div class="left-footer">
-        <strong>Software da €99 una tantum</strong>
-        <span>Anteprima prima dell’acquisto</span>
-        <small>Implementazione e gestione tecnica a 30 €/mese sono sempre facoltative.</small>
+        <strong>Software da €99 + moduli</strong>
+        <span>+ €150 implementazione obbligatoria</span>
+        <small>Poi €150/mese · Easy Come Operativo</small>
       </div>
     </aside>
 

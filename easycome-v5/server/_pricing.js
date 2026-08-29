@@ -42,8 +42,8 @@ export function calculateServerPrice(project = {}) {
   const discountRate = paidModuleCount >= 8 ? 0.20 : paidModuleCount >= 5 ? 0.10 : 0;
   const bundleDiscount = Math.round(modulesTotal * discountRate * 100) / 100;
   const base = numberEnv('EASYCOME_BASE_PRICE', 99);
-  const implementationSelected = Boolean(project.delivery?.implementationSelected);
-  const implementation = implementationSelected ? numberEnv('EASYCOME_IMPLEMENTATION_PRICE', 150) : 0;
+  const implementationSelected = true;
+  const implementation = numberEnv('EASYCOME_IMPLEMENTATION_PRICE', 150);
   const extras = modulesTotal + customEntitiesTotal + customFieldsTotal + automationTotal + pricingRulesTotal - bundleDiscount;
   const total = Math.round((base + implementation + extras) * 100) / 100;
   return { base, implementation, modules: modulesTotal, customEntities: customEntitiesTotal, customFields: customFieldsTotal, automations: automationTotal, pricingRules: pricingRulesTotal, bundleDiscount, extras, total, totalCents: Math.round(total * 100) };
@@ -52,7 +52,7 @@ export function calculateServerPrice(project = {}) {
 export function compactProject(project = {}) {
   const company = project.company || {};
   return {
-    version: project.version || '10.0',
+    version: project.version || '10.2.0',
     organizationId: project.organizationId || '',
     company: {
       name: String(company.name || '').slice(0, 160),
@@ -77,9 +77,9 @@ export function compactProject(project = {}) {
     hub: project.hub || { enabled: true },
     delivery: {
       previewApproved: Boolean(project.delivery?.previewApproved),
-      implementationSelected: Boolean(project.delivery?.implementationSelected),
-      managedServiceSelected: Boolean(project.delivery?.managedServiceSelected),
-      managedServicePrice: 30,
+      implementationSelected: true,
+      managedServiceSelected: true,
+      managedServicePrice: 150,
       notes: String(project.delivery?.notes || '').slice(0, 2500),
     },
   };

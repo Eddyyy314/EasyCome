@@ -164,8 +164,8 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: { prefer: 'return=minimal' },
       body: JSON.stringify([
-        { id: subA, user_id: a.id, order_id: orderA, plan_code: 'audit', plan_name: 'Audit Managed A', amount_cents: 3000, currency: 'eur', status: 'active', stripe_subscription_id: `audit_sub_a_${suffix}`, metadata: { audit_id: auditId } },
-        { id: subB, user_id: b.id, order_id: orderB, plan_code: 'audit', plan_name: 'Audit Managed B', amount_cents: 3000, currency: 'eur', status: 'active', stripe_subscription_id: `audit_sub_b_${suffix}`, metadata: { audit_id: auditId } },
+        { id: subA, user_id: a.id, order_id: orderA, plan_code: 'audit', plan_name: 'Audit Operativo A', amount_cents: 15000, currency: 'eur', status: 'active', stripe_subscription_id: `audit_sub_a_${suffix}`, metadata: { audit_id: auditId } },
+        { id: subB, user_id: b.id, order_id: orderB, plan_code: 'audit', plan_name: 'Audit Operativo B', amount_cents: 15000, currency: 'eur', status: 'active', stripe_subscription_id: `audit_sub_b_${suffix}`, metadata: { audit_id: auditId } },
       ]),
     });
 

@@ -296,3 +296,6 @@
 .prospect-prefill-banner div{display:grid;gap:3px}.prospect-prefill-banner strong{font-size:14px}.prospect-prefill-banner small{color:#6f6b64;line-height:1.4}.prospect-prefill-banner>b{font-size:20px;white-space:nowrap}
 .entity-card-actions .configure-pricing{border:0;background:#171815;color:#fff;border-radius:999px;padding:7px 11px;font-weight:800;cursor:pointer}
 @media(max-width:760px){.prospect-prefill-banner{grid-template-columns:1fr}.prospect-prefill-banner>b{justify-self:start}}
+
+/* V10.2 mandatory activation/service */
+.mandatory-service-card{margin:18px 0;border:1px solid #20201c;background:#f2ede4;padding:20px}.mandatory-service-card>span{font-size:9px;letter-spacing:.14em;font-weight:900;color:#f25a2b}.mandatory-service-card>strong{display:block;font:600 38px/1 Georgia,serif;margin:8px 0}.mandatory-service-card>strong small{font:700 10px Arial,sans-serif;color:#6f685f}.mandatory-service-card h3{font:600 20px Georgia,serif;margin:0 0 8px}.mandatory-service-card p{font-size:11px;line-height:1.5;color:#665f57}.mandatory-service-card>div{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.mandatory-service-card>div b{font-size:9px;font-weight:750}.quote-card .quote-total small{display:block;margin-top:4px;line-height:1.4}@media(max-width:700px){.mandatory-service-card>div{grid-template-columns:1fr}}
