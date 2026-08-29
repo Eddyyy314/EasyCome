@@ -5,7 +5,7 @@
 - Percorso: Gestionale → Audit → Finance → Hub → Configura.
 - Mappatura esplicita di prenotazione, incasso, spesa e cliente: origine → registrazione → utilizzo → destinazione.
 - Studio accessibile ai nuovi prospect solo dopo il percorso guidato.
-- Pricing invariato: software + €150 implementazione obbligatoria + €150/mese Easy Come Operativo.
+- Storico: questa release introduceva un modello ricorrente, successivamente rimosso in V10.4.
 
 ---
 
@@ -16,12 +16,12 @@
 - Il configuratore compare come CTA finale, dopo la spiegazione del valore.
 - Il prodotto viene mostrato in sei forme: Gestionale, Finance, Audit, Brain, Automazioni, Hub.
 - Aggiunto simulatore di risparmio illustrativo con ipotesi trasparenti.
-- Percorso commerciale: Scopri → Capisci → Configura → Implementiamo → Vai online → Easy Come Operativo.
+- Percorso commerciale: Scopri → Capisci → Configura → Implementiamo → Vai online.
 
 ## Modello commerciale
 - Software base e moduli: una tantum, come prima.
 - Implementazione Easy Come: €150 una tantum, obbligatoria.
-- Easy Come Operativo: €150/mese, obbligatorio per il funzionamento continuativo.
+- [Superato in V10.4] Modello ricorrente rimosso.
 - Checkout e pricing server allineati ai vincoli obbligatori.
 - Se un account ha già un abbonamento Operativo attivo, il checkout non ne crea un secondo.
 
@@ -36,4 +36,4 @@
 - Sintassi di tutti i JavaScript sorgente: OK.
 - Build pubblica Vercel: OK.
 - Pricing server: implementazione e servizio Operativo non disattivabili dal payload cliente.
-- Pacchetto demo generato con implementazione €150 e Operativo €150/mese.
+- [Superato in V10.4] Il pacchetto attuale è acquistato una tantum con implementazione €150.

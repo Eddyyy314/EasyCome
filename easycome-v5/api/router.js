@@ -1,8 +1,6 @@
 import adminTools from '../server/api-handlers/admin-tools.js';
 import checkoutStatus from '../server/api-handlers/checkout-status.js';
-import createBillingPortal from '../server/api-handlers/create-billing-portal.js';
 import createCheckoutSession from '../server/api-handlers/create-checkout-session.js';
-import createManagedSubscription from '../server/api-handlers/create-managed-subscription.js';
 import demoEvent from '../server/api-handlers/demo-event.js';
 import demoFactory from '../server/api-handlers/demo-factory.js';
 import demoPublic from '../server/api-handlers/demo-public.js';
@@ -18,9 +16,7 @@ import { json } from '../server/_responses.js';
 const handlers = {
   'admin-tools': adminTools,
   'checkout-status': checkoutStatus,
-  'create-billing-portal': createBillingPortal,
   'create-checkout-session': createCheckoutSession,
-  'create-managed-subscription': createManagedSubscription,
   'demo-event': demoEvent,
   'demo-factory': demoFactory,
   'demo-public': demoPublic,

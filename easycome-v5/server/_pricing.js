@@ -52,7 +52,7 @@ export function calculateServerPrice(project = {}) {
 export function compactProject(project = {}) {
   const company = project.company || {};
   return {
-    version: project.version || '10.2.0',
+    version: project.version || '10.4.0',
     organizationId: project.organizationId || '',
     company: {
       name: String(company.name || '').slice(0, 160),
@@ -78,8 +78,8 @@ export function compactProject(project = {}) {
     delivery: {
       previewApproved: Boolean(project.delivery?.previewApproved),
       implementationSelected: true,
-      managedServiceSelected: true,
-      managedServicePrice: 150,
+      managedServiceSelected: false,
+      managedServicePrice: 0,
       notes: String(project.delivery?.notes || '').slice(0, 2500),
     },
   };
