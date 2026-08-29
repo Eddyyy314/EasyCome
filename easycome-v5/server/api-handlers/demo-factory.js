@@ -1,151 +1,32 @@
 import crypto from 'node:crypto';
 import { requireEasyComeAdmin } from '../_demo-auth.js';
 import { textSearch, placeDetails } from '../_google-places.js';
-import { discoverPublicBusinessContacts } from '../_email-discovery.js';
-import { seenPlaceIds, createCampaign, insertTargets, recentCampaigns, campaignTargets, markCampaign, targetBySlug, updateTarget } from '../_demo-store.js';
-import { buildQueryPlan, classifyPlace, buildDemoModel, demoSlug, demoPrice, outreachMessage, outreachSubject, outreachShortMessage, prospectScores } from '../_demo-factory-core.js';
-import { sendLiberoOutreach } from '../_libero-mail.js';
-import { buildWebsiteProfile, createWebsiteZip } from '../_website-factory.js';
-import { classifyWebsitePresence, socialFieldsFromPresence } from '../_web-presence.js';
-import { photoCards, storedAssetCards } from '../_web-brand.js';
+import { findPublicBusinessEmail } from '../_email-discovery.js';
+import { seenPlaceIds, createCampaign, insertTargets, recentCampaigns, campaignTargets, markCampaign } from '../_demo-store.js';
+import { buildQueryPlan, classifyPlace, buildDemoModel, demoSlug, demoPrice, outreachMessage, outreachSubject } from '../_demo-factory-core.js';
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function baseUrl(req){return String(process.env.APP_URL||`${req.headers?.['x-forwarded-proto']||'https'}://${req.headers?.host||'easy-come.it'}`).replace(/\/$/,'')}
-function queryValue(req,name){try{return String(req.query?.[name]||new URL(req.url||'','http://localhost').searchParams.get(name)||'').trim()}catch{return String(req.query?.[name]||'').trim()}}
-function publicPlace(place){const presence=classifyWebsitePresence(place.websiteUri||'');const social=socialFieldsFromPresence(presence);return {id:place.id||'',name:place.displayName?.text||'Azienda',address:place.formattedAddress||'',website:presence.owned?presence.url:'',listedUrl:presence.url||'',webPresenceType:presence.type,webPresenceLabel:presence.label,platformUrl:presence.type==='platform'?presence.url:'',...social,phone:place.nationalPhoneNumber||'',email:'',category:place.primaryTypeDisplayName?.text||place.primaryType||'Attività',primaryType:place.primaryType||'',types:place.types||[],photos:Array.isArray(place.photos)?place.photos.slice(0,8):[]}}
+function publicPlace(place){return {id:place.id||'',name:place.displayName?.text||'Azienda',address:place.formattedAddress||'',website:place.websiteUri||'',email:'',category:place.primaryTypeDisplayName?.text||place.primaryType||'Attività',primaryType:place.primaryType||'',types:place.types||[]}}
 
 export default async function handler(req,res){
   try{
     await requireEasyComeAdmin(req);
     if(req.method==='GET'){
-      const campaignId=queryValue(req,'campaign_id');
-      if(campaignId){
-        const rows=await campaignTargets(campaignId);
-        const origin=baseUrl(req);
-        const targets=(rows||[]).map(row=>{
-          const cfg=row.demo_config&&typeof row.demo_config==='object'?row.demo_config:{};
-          const snap=cfg.placeSnapshot&&typeof cfg.placeSnapshot==='object'?cfg.placeSnapshot:{};
-          const outreach=cfg.outreach&&typeof cfg.outreach==='object'?cfg.outreach:{};
-          const name=snap.name||'Azienda';
-          const place={displayName:{text:name}};
-          const demoUrl=`${origin}/demo.html?d=${encodeURIComponent(row.demo_slug)}`;
-          const price=Number(cfg.quotedPrice||198);
-          const emailed=Boolean(outreach.lastEmail);
-          const contactStatus=outreach.contactStatus==='contacted'||emailed?'contacted':'not_contacted';
-          const websiteProfile=cfg.websiteProfile&&typeof cfg.websiteProfile==='object'?cfg.websiteProfile:null;
-          return {
-            id:row.place_id,demoSlug:row.demo_slug,demoUrl,templateId:row.template_id,
-            templateLabel:cfg.label||row.template_id,name,address:snap.address||'',category:snap.category||'',
-            price,subject:outreachSubject(place),message:outreachMessage(place,demoUrl,price),shortMessage:outreachShortMessage(place,demoUrl,price),
-            emailDelivery:outreach.lastEmail||null,contactStatus,contactedAt:outreach.contactedAt||outreach.lastEmail?.sentAt||'',
-            websiteReady:Boolean(websiteProfile),websiteProfile,websiteDemoUrl:websiteProfile?`${origin}/web-demo.html?d=${encodeURIComponent(row.demo_slug)}`:'',
-            websiteCreative:cfg.websiteCreative||null,websiteHandoff:cfg.websiteHandoff||null,clientBrief:cfg.clientBrief||null,websiteAiReady:false,websiteAiBrief:null,websiteAiUrl:'',webProposal:cfg.webProposal||null,
-            contactability:0,potential:0,potentialReasons:[],mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}&query_place_id=${encodeURIComponent(row.place_id||'')}`,
-            createdAt:row.created_at||'',expiresAt:row.expires_at||''
-          };
-        });
-        return res.status(200).json({targets});
-      }
-      const campaigns=await recentCampaigns(200);return res.status(200).json({campaigns:campaigns||[]});
+      const campaignId=String(req.query?.campaign_id||'').trim();
+      if(campaignId){const rows=await campaignTargets(campaignId);return res.status(200).json({targets:rows||[]})}
+      const campaigns=await recentCampaigns(16);return res.status(200).json({campaigns:campaigns||[]});
     }
     if(req.method!=='POST')return res.status(405).json({error:'Metodo non consentito.'});
     const action=String(req.body?.action||'generate');
-    if(action==='send-test'){
-      const sent=await sendLiberoOutreach({to:req.body?.to,subject:req.body?.subject,message:req.body?.message});
-      return res.status(200).json({...sent,test:true,trackingSaved:false});
-    }
-    if(action==='send-email'){
-      const sent=await sendLiberoOutreach({to:req.body?.to,subject:req.body?.subject,message:req.body?.message});
-      const demoSlug=String(req.body?.demoSlug||'').trim();
-      let trackingSaved=false;
-      if(demoSlug){
-        try{
-          const target=await targetBySlug(demoSlug);
-          if(target){
-            const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
-            const outreach=current.outreach&&typeof current.outreach==='object'?current.outreach:{};
-            const event={status:sent.status,from:sent.from,to:sent.to,messageId:sent.messageId,response:sent.response,accepted:sent.accepted,rejected:sent.rejected,sentAt:sent.sentAt,sentCopy:sent.sentCopy||null};
-            const history=Array.isArray(outreach.emailHistory)?outreach.emailHistory.slice(-19):[];
-            history.push(event);
-            await updateTarget(target.id,{demo_config:{...current,outreach:{...outreach,lastEmail:event,emailHistory:history,contactStatus:'contacted',contactedAt:event.sentAt,contactedVia:'email'}}});
-            trackingSaved=true;
-          }
-        }catch(err){console.warn('Email inviata ma tracking Demo Factory non salvato:',err?.message||err)}
-      }
-      return res.status(200).json({...sent,trackingSaved});
-    }
-    if(action==='mark-contact'){
-      const demoSlug=String(req.body?.demoSlug||'').trim();
-      if(!demoSlug)return res.status(400).json({error:'Demo non valida.'});
-      const contacted=Boolean(req.body?.contacted);
-      const target=await targetBySlug(demoSlug);
-      if(!target)return res.status(404).json({error:'Prospect non trovato.'});
-      const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
-      const outreach=current.outreach&&typeof current.outreach==='object'?current.outreach:{};
-      const now=new Date().toISOString();
-      await updateTarget(target.id,{demo_config:{...current,outreach:{...outreach,contactStatus:contacted?'contacted':'not_contacted',contactedAt:contacted?now:null,contactedVia:contacted?(String(req.body?.via||'manual')):null}}});
-      return res.status(200).json({ok:true,contactStatus:contacted?'contacted':'not_contacted',contactedAt:contacted?now:null});
-    }
-    if(action==='website-brand-scan'){
-      const demoSlugValue=String(req.body?.demoSlug||'').trim();if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
-      const target=await targetBySlug(demoSlugValue);if(!target)return res.status(404).json({error:'Prospect non trovato.'});
-      const raw=await placeDetails(target.place_id);const place=publicPlace(raw);const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const uploaded=storedAssetCards(req,current.websiteBrandAssets||[]);const photos=[...uploaded,...photoCards(req,place.id,place.photos||[])].slice(0,12);
-      let discovered={email:'',website:'',contactPage:'',instagram:'',facebook:'',whatsapp:''};if(place.website){try{discovered=await discoverPublicBusinessContacts(place.website)}catch{}}
-      return res.status(200).json({ok:true,photos,sources:{facebook:place.facebook||discovered.facebook||'',instagram:place.instagram||discovered.instagram||'',listedUrl:place.listedUrl||'',mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${encodeURIComponent(place.id)}`},webPresenceType:place.webPresenceType,webPresenceLabel:place.webPresenceLabel});
-    }
-    if(action==='publish-web-proposal'){
-      const demoSlugValue=String(req.body?.demoSlug||'').trim();if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
-      const target=await targetBySlug(demoSlugValue);if(!target)return res.status(404).json({error:'Prospect non trovato.'});
-      const previewUrl=String(req.body?.previewUrl||'').trim();let parsedHref='';if(previewUrl){try{const parsed=new URL(previewUrl);if(!['http:','https:'].includes(parsed.protocol))throw new Error('protocol');parsedHref=parsed.href}catch{throw new Error('URL preview non valido.');}}
-      const price=Math.round(Number(req.body?.price||0));if(price<50||price>20000)throw new Error('Inserisci un prezzo tra 50 € e 20.000 €.');
-      const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};const existing=current.webProposal&&typeof current.webProposal==='object'?current.webProposal:{};const token=existing.token||crypto.randomBytes(18).toString('hex');const now=new Date();const expires=new Date(now.getTime()+30*86400000);
-      const implementationFee=50;const hasClientBrief=Boolean(current.clientBrief?.submittedAt);const proposal={...existing,token,previewUrl:parsedHref||existing.previewUrl||'',price,implementationFee,totalPrice:price+implementationFee,flowVersion:'needs-first-v40',needsRevision:hasClientBrief?true:Boolean(existing.needsRevision),status:existing.status==='paid'?'paid':'draft',createdAt:existing.createdAt||now.toISOString(),updatedAt:now.toISOString(),expiresAt:expires.toISOString()};
-      const rawHandoff=req.body?.handoffConfig&&typeof req.body.handoffConfig==='object'?req.body.handoffConfig:null;const handoff=rawHandoff?{version:String(req.body?.handoffVersion||'V40').slice(0,20),stage:hasClientBrief?'final':'draft',clientBriefSubmittedAt:current.clientBrief?.submittedAt||null,preparedAt:now.toISOString(),config:rawHandoff,prompt:String(req.body?.handoffPrompt||'').slice(0,60000)}:(current.websiteHandoff||null);
-      await updateTarget(target.id,{demo_config:{...current,webProposal:proposal,...(handoff?{websiteHandoff:handoff}:{})}});const origin=baseUrl(req);return res.status(200).json({ok:true,proposal,handoff,clientBrief:current.clientBrief||null,proposalUrl:`${origin}/web-proposal.html?d=${encodeURIComponent(demoSlugValue)}&t=${encodeURIComponent(token)}`});
-    }
-    if(action==='website-config'){
-      const demoSlugValue=String(req.body?.demoSlug||'').trim();
-      if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
-      const target=await targetBySlug(demoSlugValue);
-      if(!target)return res.status(404).json({error:'Prospect non trovato.'});
-      const raw=await placeDetails(target.place_id);
-      const place=publicPlace(raw);
-      let discovered={email:'',website:'',contactPage:'',instagram:'',facebook:'',whatsapp:''};
-      if(place.website){try{discovered=await discoverPublicBusinessContacts(place.website)}catch{}}
-      const override=req.body?.config&&typeof req.body.config==='object'?req.body.config:{};
-      const profile=buildWebsiteProfile({...place,...discovered,phone:place.phone,website:place.website},target.template_id,override);
-      const current=target.demo_config&&typeof target.demo_config==='object'?target.demo_config:{};
-      await updateTarget(target.id,{demo_config:{...current,websiteProfile:profile}});
-      const origin=baseUrl(req);
-      return res.status(200).json({ok:true,profile,websiteDemoUrl:`${origin}/web-demo.html?d=${encodeURIComponent(demoSlugValue)}`});
-    }
-    if(action==='download-website'){
-      const demoSlugValue=String(req.body?.demoSlug||'').trim();
-      if(!demoSlugValue)return res.status(400).json({error:'Demo non valida.'});
-      const target=await targetBySlug(demoSlugValue);
-      if(!target)return res.status(404).json({error:'Prospect non trovato.'});
-      let profile=target.demo_config?.websiteProfile;
-      if(!profile){
-        const raw=await placeDetails(target.place_id); const place=publicPlace(raw);
-        profile=buildWebsiteProfile(place,target.template_id,{});
-      }
-      const bytes=createWebsiteZip(profile,{siteUrl:`https://${profile.slug}.example.com`});
-      const filename=`${profile.slug}-easycome-web.zip`;
-      res.setHeader('content-type','application/zip');
-      res.setHeader('content-disposition',`attachment; filename="${filename}"`);
-      res.setHeader('cache-control','private, no-store, max-age=0');
-      return res.status(200).end(Buffer.from(bytes));
-    }
     if(action==='hydrate'){
       const ids=[...new Set((req.body?.placeIds||[]).map(String).filter(Boolean))].slice(0,5);
       const details=await Promise.all(ids.map(async id=>{
         try{
           const raw=await placeDetails(id);
           const place=publicPlace(raw);
-          const discovered=place.website ? await discoverPublicBusinessContacts(place.website) : {email:'',website:'',contactPage:'',instagram:'',facebook:'',whatsapp:''};
-          const templateId=classifyPlace(raw);
-          const scores=prospectScores(raw,templateId,{...discovered,phone:place.phone,website:place.website});
-          return {...place,...discovered,website:place.website,facebook:place.facebook||discovered.facebook||'',instagram:place.instagram||discovered.instagram||'',phone:place.phone,templateId,contactability:scores.contactability,potential:scores.potential,potentialReasons:scores.reasons,mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${encodeURIComponent(id)}`};
+          place.email=place.website ? await findPublicBusinessEmail(place.website) : '';
+          return place;
         }catch(e){return {id,error:e.message}}
       }));
       return res.status(200).json({places:details});
@@ -187,7 +68,7 @@ export default async function handler(req,res){
       await insertTargets(selected.map(x=>x.row));
       await markCampaign(campaignId,{status:selected.length===limit?'completed':'partial',generated_count:selected.length,queries_run:queriesRun,finished_at:new Date().toISOString()});
       const origin=baseUrl(req);
-      const targets=selected.map(({place,row})=>{const detail=publicPlace(place);const demoUrl=`${origin}/demo.html?d=${encodeURIComponent(row.demo_slug)}`;const price=Number(row.demo_config?.quotedPrice||demoPrice(place,row.template_id));return {...detail,id:row.place_id,demoSlug:row.demo_slug,demoUrl,templateId:row.template_id,templateLabel:row.demo_config?.label||row.template_id,expiresAt:row.expires_at,price,subject:outreachSubject(place),message:outreachMessage(place,demoUrl,price),shortMessage:outreachShortMessage(place,demoUrl,price),contactability:0,potential:prospectScores(place,row.template_id,{}).potential,potentialReasons:prospectScores(place,row.template_id,{}).reasons,mapsUrl:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(detail.name)}&query_place_id=${encodeURIComponent(row.place_id)}`}});
+      const targets=selected.map(({place,row})=>{const detail=publicPlace(place);const demoUrl=`${origin}/demo.html?d=${encodeURIComponent(row.demo_slug)}`;const price=Number(row.demo_config?.quotedPrice||demoPrice(place,row.template_id));return {...detail,id:row.place_id,demoSlug:row.demo_slug,demoUrl,templateId:row.template_id,templateLabel:row.demo_config?.label||row.template_id,expiresAt:row.expires_at,price,subject:outreachSubject(place),message:outreachMessage(place,demoUrl,price)}});
       return res.status(200).json({campaign:{...campaign,status:selected.length===limit?'completed':'partial',generated_count:selected.length,queries_run:queriesRun},targets,stats:{requested:limit,generated:selected.length,alreadySeen:existing.size,queriesRun,rawSeen,failedQueries},warning:selected.length<limit?`Trovate ${selected.length} nuove attività prima del limite di sicurezza delle query. Premi di nuovo Genera: i Place ID già usati resteranno esclusi.`:''});
     }catch(error){await markCampaign(campaignId,{status:'failed',generated_count:selected.length,queries_run:queriesRun,finished_at:new Date().toISOString(),error_message:String(error.message||error).slice(0,800)}).catch(()=>{});throw error}
   }catch(error){console.error(error);return res.status(400).json({error:error.message||'Errore Demo Factory.'})}

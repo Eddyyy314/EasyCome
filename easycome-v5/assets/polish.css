@@ -296,10 +296,3 @@
 .prospect-prefill-banner div{display:grid;gap:3px}.prospect-prefill-banner strong{font-size:14px}.prospect-prefill-banner small{color:#6f6b64;line-height:1.4}.prospect-prefill-banner>b{font-size:20px;white-space:nowrap}
 .entity-card-actions .configure-pricing{border:0;background:#171815;color:#fff;border-radius:999px;padding:7px 11px;font-weight:800;cursor:pointer}
 @media(max-width:760px){.prospect-prefill-banner{grid-template-columns:1fr}.prospect-prefill-banner>b{justify-self:start}}
-
-/* V14: deterministic prospect-demo handoff error state */
-.prospect-prefill-error{max-width:760px;margin:70px auto;padding:44px;border:1px solid #e6e6e0;border-radius:28px;background:#fff;box-shadow:0 24px 80px rgba(0,0,0,.06)}
-.prospect-prefill-error>span{display:block;font-size:11px;font-weight:900;letter-spacing:.12em;color:#ff6b35;margin-bottom:12px}
-.prospect-prefill-error h2{font-size:34px;line-height:1.05;margin:0 0 12px;letter-spacing:-.04em}
-.prospect-prefill-error p{color:#6f716b;line-height:1.65;margin:0 0 24px}
-.prospect-prefill-error .btn{margin-right:10px;margin-bottom:10px}

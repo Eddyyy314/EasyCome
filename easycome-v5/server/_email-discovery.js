@@ -63,8 +63,9 @@ async function fetchHtml(url, timeoutMs=3200) {
   const timer = setTimeout(()=>controller.abort(), timeoutMs);
   try {
     const r = await fetch(url, {
-      redirect:'follow', signal:controller.signal,
-      headers:{'user-agent':'Mozilla/5.0 (compatible; EasyComeProspectBot/2.0; +https://www.easy-come.it/)','accept':'text/html,application/xhtml+xml'}
+      redirect:'follow',
+      signal:controller.signal,
+      headers:{'user-agent':'Mozilla/5.0 (compatible; EasyComeProspectBot/1.0; +https://www.easy-come.it/)','accept':'text/html,application/xhtml+xml'}
     });
     if (!r.ok) return '';
     const type = r.headers.get('content-type') || '';
@@ -75,57 +76,43 @@ async function fetchHtml(url, timeoutMs=3200) {
   finally { clearTimeout(timer); }
 }
 
-function cleanExternalUrl(href='', baseUrl) {
-  try {
-    const u = new URL(href, baseUrl);
-    if (!['http:','https:'].includes(u.protocol)) return '';
-    return u.href;
-  } catch { return ''; }
-}
-
-function discoverLinks(html='', baseUrl) {
-  const out={contactPage:'',instagram:'',facebook:'',whatsapp:''};
+function contactLinks(html='', baseUrl) {
+  const links=[];
   const re=/<a\b[^>]*href=["']([^"']+)["'][^>]*>/gi;
   for (const m of String(html).matchAll(re)) {
-    const href=String(m[1]||'').trim();
-    const lower=href.toLowerCase();
-    const full=cleanExternalUrl(href,baseUrl);
-    if (!full) continue;
-    if (!out.instagram && /(^|\.)instagram\.com\//i.test(new URL(full).hostname + '/')) out.instagram=full;
-    if (!out.facebook && /(^|\.)facebook\.com\//i.test(new URL(full).hostname + '/')) out.facebook=full;
-    if (!out.whatsapp && /(wa\.me\/|api\.whatsapp\.com\/|whatsapp\.com\/send)/i.test(full)) out.whatsapp=full;
-    if (!out.contactPage && /(contatt|contact|chi-siamo|about|azienda|impressum)/i.test(href)) {
-      try { const u=new URL(href,baseUrl); if (u.origin===baseUrl.origin) out.contactPage=u.href; } catch {}
-    }
+    const href=m[1];
+    if (!/(contatt|contact|chi-siamo|about|azienda|impressum)/i.test(href)) continue;
+    try {
+      const u=new URL(href,baseUrl);
+      if (u.origin!==baseUrl.origin) continue;
+      links.push(u.href);
+    } catch {}
+    if (links.length>=3) break;
   }
-  return out;
-}
-
-function mergeLinks(a,b){return {contactPage:a.contactPage||b.contactPage||'',instagram:a.instagram||b.instagram||'',facebook:a.facebook||b.facebook||'',whatsapp:a.whatsapp||b.whatsapp||''}}
-
-export async function discoverPublicBusinessContacts(website='') {
-  const base = safeWebsite(website);
-  if (!base) return {email:'',website:'',contactPage:'',instagram:'',facebook:'',whatsapp:''};
-  const result={email:'',website:base.href,contactPage:'',instagram:'',facebook:'',whatsapp:''};
-  const home=await fetchHtml(base.href);
-  const emails=extractEmails(home,base.hostname);
-  if(emails.length) result.email=emails[0];
-  Object.assign(result,mergeLinks(result,discoverLinks(home,base)));
-
-  const pages=[];
-  if(result.contactPage) pages.push(result.contactPage);
-  for(const path of ['/contatti','/contact']){
-    try{const u=new URL(path,base.origin).href;if(!pages.includes(u)) pages.push(u)}catch{}
-  }
-  for(const url of pages.slice(0,2)){
-    const html=await fetchHtml(url,2600);
-    if(!result.email){const e=extractEmails(html,base.hostname);if(e.length)result.email=e[0]}
-    Object.assign(result,mergeLinks(result,discoverLinks(html,base)));
-    if(result.email && result.instagram && result.whatsapp) break;
-  }
-  return result;
+  return [...new Set(links)];
 }
 
 export async function findPublicBusinessEmail(website='') {
-  return (await discoverPublicBusinessContacts(website)).email || '';
+  const base = safeWebsite(website);
+  if (!base) return '';
+  const home = await fetchHtml(base.href);
+  let emails = extractEmails(home, base.hostname);
+  if (emails.length) return emails[0];
+  const candidates = contactLinks(home, base).slice(0,2);
+  for (const url of candidates) {
+    const html = await fetchHtml(url, 2600);
+    emails = extractEmails(html, base.hostname);
+    if (emails.length) return emails[0];
+  }
+  // Last resort: a couple of common contact pages, without crawling the whole website.
+  for (const path of ['/contatti','/contact']) {
+    try {
+      const url = new URL(path, base.origin).href;
+      if (candidates.includes(url)) continue;
+      const html = await fetchHtml(url, 2200);
+      emails = extractEmails(html, base.hostname);
+      if (emails.length) return emails[0];
+    } catch {}
+  }
+  return '';
 }

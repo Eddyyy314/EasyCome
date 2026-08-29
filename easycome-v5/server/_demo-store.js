@@ -12,7 +12,7 @@ export async function seenPlaceIds(){
 export async function createCampaign(row){const out=await req('easycome_demo_campaigns',{method:'POST',body:JSON.stringify(row)});return Array.isArray(out)?out[0]:out}
 export async function insertTargets(rows){if(!rows.length)return[];return req('easycome_demo_targets',{method:'POST',body:JSON.stringify(rows),headers:{prefer:'return=representation'}})}
 export async function campaignTargets(campaignId){return req(`easycome_demo_targets?campaign_id=eq.${encodeURIComponent(campaignId)}&select=*&order=created_at.asc`)}
-export async function recentCampaigns(limit=200){return req(`easycome_demo_campaigns?select=*&order=created_at.desc&limit=${Math.max(1,Math.min(500,Number(limit)||200))}`)}
+export async function recentCampaigns(limit=12){return req(`easycome_demo_campaigns?select=*&order=created_at.desc&limit=${Math.max(1,Math.min(50,Number(limit)||12))}`)}
 export async function targetBySlug(slug){const rows=await req(`easycome_demo_targets?demo_slug=eq.${encodeURIComponent(slug)}&select=*&limit=1`);return rows?.[0]||null}
 export async function targetById(id){const rows=await req(`easycome_demo_targets?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);return rows?.[0]||null}
 export async function updateTarget(id,patch){return req(`easycome_demo_targets?id=eq.${encodeURIComponent(id)}`,{method:'PATCH',body:JSON.stringify(patch),prefer:'return=minimal'})}

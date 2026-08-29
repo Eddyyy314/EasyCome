@@ -6,7 +6,7 @@
 - Dopo aver selezionato un prospect, Easy Come recupera il sito pubblico da Google Places e prova a trovare una **email aziendale pubblicata sul sito**.
 - Nessuna email viene inventata: se non viene trovata, la riga mostra `Email non trovata`.
 - Nuovo pulsante **Manda email**: apre Gmail con destinatario, oggetto, testo, link demo e prezzo già compilati.
-- Mittente operativo aggiornato successivamente a `infoeasycome@libero.it`; dalla V11 la composizione è provider-neutral e non dipende più da Gmail.
+- Mittente operativo impostato per ora su `edoardolaneve8@gmail.com` (tramite `authuser` di Gmail; l'account deve essere già collegato nel browser).
 - Messaggio commerciale riscritto: presentazione Easy Come, demo gratuita, gestionali da 99 €, prezzo della configurazione e CTA alla personalizzazione.
 - Ogni demo riceve un **prezzo indicativo calcolato sui moduli e sulla complessità del progetto generato**.
 - Il prezzo viene salvato dentro `demo_config`, così Factory e demo pubblica mostrano lo stesso importo.

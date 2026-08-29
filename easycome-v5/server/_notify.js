@@ -87,7 +87,12 @@ export async function notifyAdmin({
   }
   if (storeOk && !stored) return { stored: null, duplicate: true, email: { skipped: true }, webhook: { skipped: true } };
 
-  const adminEmail = 'infoeasycome@libero.it';
+  const adminEmail = String(
+    process.env.EASYCOME_NOTIFICATION_EMAIL ||
+    process.env.LEGAL_SUPPORT_EMAIL ||
+    process.env.LEGAL_PRIVACY_EMAIL ||
+    ''
+  ).trim();
 
   const email = await sendEmail({
     to: adminEmail,

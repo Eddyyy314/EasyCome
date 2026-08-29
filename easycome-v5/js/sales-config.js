@@ -12,7 +12,7 @@ window.EASYCOME_SALES = {
   // Facoltativo: fallback a un Payment Link Stripe statico se il backend non è ancora online.
   paymentUrl: '',
 
-  supportEmail: 'infoeasycome@libero.it',
+  supportEmail: 'ciao@easycome.it',
   whatsapp: '',
   termsUrl: '/termini',
   privacyUrl: '/privacy',

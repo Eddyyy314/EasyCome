@@ -116,15 +116,3 @@ export async function updateWithdrawalById(id, patch) {
     method: 'PATCH', body: JSON.stringify(patch), prefer: 'return=minimal',
   });
 }
-
-
-export async function getProjectByUserId(userId) {
-  const result = await request(`easycome_projects?user_id=eq.${encodeURIComponent(userId)}&select=*&limit=1`);
-  return Array.isArray(result) ? result[0] || null : null;
-}
-
-export async function updateProjectByUserId(userId, patch) {
-  return request(`easycome_projects?user_id=eq.${encodeURIComponent(userId)}`, {
-    method: 'PATCH', body: JSON.stringify(patch), prefer: 'return=representation',
-  });
-}

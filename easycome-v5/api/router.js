@@ -3,7 +3,6 @@ import checkoutStatus from '../server/api-handlers/checkout-status.js';
 import createBillingPortal from '../server/api-handlers/create-billing-portal.js';
 import createCheckoutSession from '../server/api-handlers/create-checkout-session.js';
 import createManagedSubscription from '../server/api-handlers/create-managed-subscription.js';
-import createAuditSubscription from '../server/api-handlers/create-audit-subscription.js';
 import demoEvent from '../server/api-handlers/demo-event.js';
 import demoFactory from '../server/api-handlers/demo-factory.js';
 import demoPublic from '../server/api-handlers/demo-public.js';
@@ -14,8 +13,6 @@ import stripeWebhook from '../server/api-handlers/stripe-webhook.js';
 import supportMessage from '../server/api-handlers/support-message.js';
 import supportRequest from '../server/api-handlers/support-request.js';
 import withdrawalRequest from '../server/api-handlers/withdrawal-request.js';
-import webProposalPublic from '../server/api-handlers/web-proposal-public.js';
-import webProposalCheckout from '../server/api-handlers/web-proposal-checkout.js';
 import { json } from '../server/_responses.js';
 
 const handlers = {
@@ -24,7 +21,6 @@ const handlers = {
   'create-billing-portal': createBillingPortal,
   'create-checkout-session': createCheckoutSession,
   'create-managed-subscription': createManagedSubscription,
-  'create-audit-subscription': createAuditSubscription,
   'demo-event': demoEvent,
   'demo-factory': demoFactory,
   'demo-public': demoPublic,
@@ -35,8 +31,6 @@ const handlers = {
   'support-message': supportMessage,
   'support-request': supportRequest,
   'withdrawal-request': withdrawalRequest,
-  'web-proposal-public': webProposalPublic,
-  'web-proposal-checkout': webProposalCheckout,
 };
 
 export default async function handler(req, res) {

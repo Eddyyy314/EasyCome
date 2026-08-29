@@ -1,25 +1,11 @@
 {
-  "name": "easycome-automation-ecosystem",
-  "version": "40.0.0",
+  "name": "easycome-studio-v10-1",
+  "version": "10.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "npx vercel dev",
     "static": "npx serve .",
     "build": "node scripts/build-public.mjs"
-  },
-  "dependencies": {
-    "nodemailer": "^9.0.3",
-    "imapflow": "^1.6.5",
-    "@supabase/supabase-js": "2.109.0",
-    "fflate": "0.8.3",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.8.2",
-    "lucide-react": "^0.468.0",
-    "framer-motion": "^12.23.12",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.3.1",
-    "sucrase": "^3.35.0"
   }
 }

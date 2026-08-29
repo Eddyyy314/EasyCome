@@ -51,7 +51,7 @@ export async function textSearch(textQuery,pageSize=10,pageToken=''){
 
 export async function placeDetails(placeId){
   if(!placeId) throw new Error('Place ID mancante.');
-  const mask='id,displayName,formattedAddress,websiteUri,nationalPhoneNumber,primaryType,primaryTypeDisplayName,types,businessStatus,photos';
+  const mask='id,displayName,formattedAddress,websiteUri,primaryType,primaryTypeDisplayName,types,businessStatus';
   const r=await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=it&regionCode=IT`,{
     headers:{'X-Goog-Api-Key':apiKey(),'X-Goog-FieldMask':mask}
   });

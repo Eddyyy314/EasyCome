@@ -4,48 +4,9 @@
   "functions": {
     "api/router.js": {
       "maxDuration": 30
-    },
-    "api/web-package-upload.js": {
-      "maxDuration": 300
-    },
-    "api/web-photo.js": {
-      "maxDuration": 20
-    },
-    "api/web-brand-asset.js": {
-      "maxDuration": 30
-    },
-    "api/web-handoff.js": {
-      "maxDuration": 60
     }
   },
   "headers": [
-    {
-      "source": "/factory",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/factory.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/js/factory.js",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate"
-        }
-      ]
-    },
     {
       "source": "/(.*)",
       "headers": [
@@ -68,30 +29,6 @@
   "outputDirectory": "dist-public",
   "rewrites": [
     {
-      "source": "/web-sites/:slug/:token",
-      "destination": "/api/web-package-upload?mode=file&d=:slug&t=:token&p=index.html"
-    },
-    {
-      "source": "/web-sites/:slug/:token/",
-      "destination": "/api/web-package-upload?mode=file&d=:slug&t=:token&p=index.html"
-    },
-    {
-      "source": "/web-sites/:slug/:token/:path*",
-      "destination": "/api/web-package-upload?mode=file&d=:slug&t=:token&p=:path*"
-    },
-    {
-      "source": "/api/web-proposal-public",
-      "destination": "/api/router?route=web-proposal-public"
-    },
-    {
-      "source": "/api/web-proposal-checkout",
-      "destination": "/api/router?route=web-proposal-checkout"
-    },
-    {
-      "source": "/web-proposal",
-      "destination": "/web-proposal.html"
-    },
-    {
       "source": "/api/admin-tools",
       "destination": "/api/router?route=admin-tools"
     },
@@ -110,10 +47,6 @@
     {
       "source": "/api/create-managed-subscription",
       "destination": "/api/router?route=create-managed-subscription"
-    },
-    {
-      "source": "/api/create-audit-subscription",
-      "destination": "/api/router?route=create-audit-subscription"
     },
     {
       "source": "/api/demo-event",
@@ -158,10 +91,6 @@
     {
       "source": "/demo",
       "destination": "/demo.html"
-    },
-    {
-      "source": "/web-demo",
-      "destination": "/web-demo.html"
     },
     {
       "source": "/factory",

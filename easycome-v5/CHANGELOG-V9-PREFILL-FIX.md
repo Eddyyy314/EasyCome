@@ -6,12 +6,5 @@
 - Il totale iniziale dello Studio viene allineato al prezzo mostrato nella demo.
 - Il modulo **Prezzi dinamici** ora è cliccabile: selezionarlo attiva automaticamente la modalità prezzi dinamici; rimuoverlo la disattiva.
 - Nella Struttura, la sezione Regole prezzo ha un pulsante Configura che porta direttamente alle regole di prezzo.
-- Email mittente outreach corretta in `infoeasycome@libero.it`.
+- Email mittente outreach corretta in `edoardolaneve8@gmail.com`.
 - Le demo prospect non ereditano email o telefono dell'account Easy Come eventualmente aperto nel browser.
-
-## V14 — deterministic demo → Studio handoff
-- Prospect Studio no longer waits for the `easycome:account-ready` event.
-- `?demo=<slug>` has absolute priority over account, cloud and local drafts.
-- Demo page stores the exact backend project in a short-lived `sessionStorage` handoff before navigation.
-- Studio refetches the demo from the backend and uses the handoff only as a network fallback.
-- If the proposal cannot be loaded, Studio shows a retry state instead of opening a blank/unrelated configuration.

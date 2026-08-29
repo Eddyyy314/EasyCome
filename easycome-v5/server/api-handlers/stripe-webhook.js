@@ -2,7 +2,6 @@ import { readRaw, json } from '../_responses.js';
 import { updateOrderById, updateOrderBySession, upsertSubscription, updateSubscriptionByStripeId } from '../_supabase.js';
 import { verifyStripeSignature, stripeGet } from '../_stripe.js';
 import { notifyAdmin, sendEmail } from '../_notify.js';
-import { targetBySlug, updateTarget } from '../_demo-store.js';
 
 export const config = { api: { bodyParser: false } };
 const isoFromUnix=(value)=>Number(value)?new Date(Number(value)*1000).toISOString():null;
@@ -16,18 +15,7 @@ export default async function handler(req,res){
     const event=JSON.parse(raw.toString('utf8'));const object=event.data?.object||{};
 
     if(event.type.startsWith('checkout.session.')){
-      const session=object;
-      if(session?.metadata?.purchase_type==='web_proposal'){
-        const slug=String(session.metadata.demo_slug||'');const token=String(session.metadata.proposal_token||'');const paid=((event.type==='checkout.session.completed'&&session.payment_status==='paid')||event.type==='checkout.session.async_payment_succeeded');
-        if(slug&&token){
-          const target=await targetBySlug(slug).catch(()=>null);if(target){const cfg=target.demo_config||{};const p=cfg.webProposal||{};if(p.token===token){const next={...p,status:paid?'paid':(event.type==='checkout.session.expired'?'expired':p.status),stripeSessionId:session.id,paymentStatus:session.payment_status||null,buyer:{...(p.buyer||{}),name:session.metadata.buyer_name||p.buyer?.name||'',email:session.customer_details?.email||session.customer_email||session.metadata.buyer_email||p.buyer?.email||'',phone:session.customer_details?.phone||session.metadata.buyer_phone||p.buyer?.phone||''},paidAt:paid?new Date().toISOString():p.paidAt||null,updatedAt:new Date().toISOString()};await updateTarget(target.id,{demo_config:{...cfg,webProposal:next}});}}
-        }
-        if(paid){
-          await notifyAdmin({eventKey:`web-proposal-paid:${session.id}`,eventType:'web.proposal.paid',severity:'high',title:'Easy Come Web acquistato',body:`${session.metadata.company_name||'Cliente'} · ${session.customer_details?.email||session.customer_email||''} · ${session.amount_total?(session.amount_total/100).toFixed(2)+' EUR':''}`,metadata:{stripe_event:event.id,session_id:session.id,demo_slug:slug}});
-          const customerEmail=session.customer_details?.email||session.customer_email||session.metadata.buyer_email||'';if(customerEmail){await sendEmail({to:customerEmail,subject:`Easy Come Web — pagamento confermato`,text:[`Ciao ${session.metadata.buyer_name||''},`,'','abbiamo ricevuto il pagamento per il progetto Easy Come Web mostrato nella tua proposta privata.','Easy Come ti contatterà per gli ultimi dettagli e la consegna definitiva.','',`Progetto: ${session.metadata.company_name||'Easy Come Web'}`,session.amount_total?`Importo: ${(session.amount_total/100).toFixed(2)} EUR`:'','',`Contatto: infoeasycome@libero.it`].filter(Boolean).join('\n')});}
-        }
-        return json(res,200,{received:true,webProposal:true});
-      }const orderId=session?.metadata?.order_id||session?.client_reference_id;const subscriptionId=stripeId(session?.subscription);
+      const session=object;const orderId=session?.metadata?.order_id||session?.client_reference_id;const subscriptionId=stripeId(session?.subscription);
       const common={stripe_session_id:session?.id||null,payment_status:session?.payment_status||null,stripe_customer_id:stripeId(session?.customer),stripe_payment_intent_id:stripeId(session?.payment_intent),stripe_subscription_id:subscriptionId,updated_at:new Date().toISOString()};
       let patch=null;
       if(event.type==='checkout.session.completed') patch={...common,status:session.payment_status==='paid'?'paid':'processing',delivery_status:session.payment_status==='paid'?'ready_to_generate':'not_ready',paid_at:session.payment_status==='paid'?new Date().toISOString():null};
@@ -63,7 +51,7 @@ export default async function handler(req,res){
               session?.metadata?.company_name?`Progetto: ${session.metadata.company_name}`:'',
               session?.amount_total?`Importo confermato ora: ${(session.amount_total/100).toFixed(2)} EUR`:'',
               session?.metadata?.implementation==='included'?'Implementazione assistita: inclusa.':'Implementazione assistita: non selezionata.',
-              (session?.metadata?.audit_service==='selected'||session?.metadata?.managed_service==='selected')?`Easy Come Audit: attivo, rinnovo mensile di ${(Number(process.env.EASYCOME_AUDIT_MONTHLY_CENTS||10000)/100).toFixed(2)} EUR fino a cancellazione.`:'Easy Come Audit: non selezionato.',
+              session?.metadata?.managed_service==='selected'?`Easy Come Managed: selezionato, rinnovo mensile di ${(Number(process.env.EASYCOME_MANAGED_MONTHLY_CENTS||3000)/100).toFixed(2)} EUR fino a cancellazione.`:'Easy Come Managed: non selezionato.',
               '',
               'Esecuzione e consegna: hai richiesto l’avvio immediato della fornitura digitale. Il pacchetto viene reso disponibile nell’area personale dopo la conferma del pagamento e la generazione tecnica.',
               'Recesso: per i consumatori valgono i diritti inderogabili previsti dalla legge e le eccezioni applicabili a contenuti digitali e servizi; durante il checkout hai richiesto espressamente l’avvio immediato. La funzione online resta disponibile al link sotto.',
@@ -71,7 +59,7 @@ export default async function handler(req,res){
               'Politica rimborsi: EC-REF-2026-08-10-v1',
               '',
               `Fornitore: ${process.env.LEGAL_CONTROLLER_NAME||'Easy Come'}`,
-              `Contatto: infoeasycome@libero.it`,
+              (process.env.LEGAL_SUPPORT_EMAIL||process.env.LEGAL_PRIVACY_EMAIL)?`Contatto: ${process.env.LEGAL_SUPPORT_EMAIL||process.env.LEGAL_PRIVACY_EMAIL}`:'',
               '',
               `Profilo e ordini: ${app}/profilo`,
               `Termini: ${app}/termini`,
@@ -83,20 +71,20 @@ export default async function handler(req,res){
       }
       if(subscriptionId&&session?.metadata?.user_id){
         let subscription={};try{subscription=await stripeGet(`subscriptions/${encodeURIComponent(subscriptionId)}`)}catch{}
-        await upsertSubscription({user_id:session.metadata.user_id,order_id:orderId||null,plan_code:'audit_100',plan_name:'Easy Come Audit',amount_cents:Number(process.env.EASYCOME_AUDIT_MONTHLY_CENTS||10000),currency:'eur',status:subscription.status||'active',stripe_customer_id:stripeId(session.customer),stripe_subscription_id:subscriptionId,current_period_end:isoFromUnix(subscription.current_period_end),cancel_at_period_end:Boolean(subscription.cancel_at_period_end),metadata:{checkout_session_id:session.id},updated_at:new Date().toISOString()});
+        await upsertSubscription({user_id:session.metadata.user_id,order_id:orderId||null,plan_code:'managed_tech_30',plan_name:'Gestione tecnica Easy Come',amount_cents:Number(process.env.EASYCOME_MANAGED_MONTHLY_CENTS||3000),currency:'eur',status:subscription.status||'active',stripe_customer_id:stripeId(session.customer),stripe_subscription_id:subscriptionId,current_period_end:isoFromUnix(subscription.current_period_end),cancel_at_period_end:Boolean(subscription.cancel_at_period_end),metadata:{checkout_session_id:session.id},updated_at:new Date().toISOString()});
       }
     }
 
     if(event.type.startsWith('customer.subscription.')){
       const subscription=object;const subscriptionId=subscription.id;const userId=subscription.metadata?.user_id;const orderId=subscription.metadata?.order_id||null;
-      const row={user_id:userId,order_id:orderId,plan_code:subscription.metadata?.plan_code||'audit_100',plan_name:'Easy Come Audit',amount_cents:Number(subscription.items?.data?.[0]?.price?.unit_amount||process.env.EASYCOME_AUDIT_MONTHLY_CENTS||10000),currency:subscription.currency||'eur',status:subscription.status||'unknown',stripe_customer_id:stripeId(subscription.customer),stripe_subscription_id:subscriptionId,current_period_end:isoFromUnix(subscription.current_period_end),cancel_at_period_end:Boolean(subscription.cancel_at_period_end),metadata:{event:event.type},updated_at:new Date().toISOString()};
+      const row={user_id:userId,order_id:orderId,plan_code:subscription.metadata?.plan_code||'managed_tech_30',plan_name:'Gestione tecnica Easy Come',amount_cents:Number(subscription.items?.data?.[0]?.price?.unit_amount||process.env.EASYCOME_MANAGED_MONTHLY_CENTS||3000),currency:subscription.currency||'eur',status:subscription.status||'unknown',stripe_customer_id:stripeId(subscription.customer),stripe_subscription_id:subscriptionId,current_period_end:isoFromUnix(subscription.current_period_end),cancel_at_period_end:Boolean(subscription.cancel_at_period_end),metadata:{event:event.type},updated_at:new Date().toISOString()};
       if(userId) await upsertSubscription(row); else await updateSubscriptionByStripeId(subscriptionId,{status:row.status,current_period_end:row.current_period_end,cancel_at_period_end:row.cancel_at_period_end,stripe_customer_id:row.stripe_customer_id,updated_at:row.updated_at});
       if(event.type==='customer.subscription.deleted'){
         await notifyAdmin({
           eventKey:`managed-ended:${subscriptionId}`,
-          eventType:'audit.ended',
+          eventType:'managed.ended',
           severity:'high',
-          title:'Easy Come Audit terminato',
+          title:'Easy Come Managed terminato',
           body:`Subscription ${subscriptionId} · utente ${userId||'non associato'}`,
           userId:userId||null,
           orderId,
@@ -111,9 +99,9 @@ export default async function handler(req,res){
       if(event.type==='invoice.payment_failed'){
         await notifyAdmin({
           eventKey:`invoice-failed:${object.id||event.id}`,
-          eventType:'audit.payment_failed',
+          eventType:'managed.payment_failed',
           severity:'urgent',
-          title:'Pagamento Audit fallito',
+          title:'Pagamento Managed fallito',
           body:`Fattura ${object.number||object.id||'—'} · cliente Stripe ${stripeId(object.customer)||'—'} · subscription ${subscriptionId||'—'}`,
           metadata:{stripe_event:event.id,invoice_id:object.id||null,stripe_subscription_id:subscriptionId||null},
         });

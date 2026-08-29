@@ -17,13 +17,14 @@
     { id: 'structure', label: 'Struttura', subtitle: 'Cosa vuoi tenere sotto controllo' },
     { id: 'logic', label: 'Regole', subtitle: 'Prezzi, procedure e automazioni' },
     { id: 'design', label: 'Layout', subtitle: 'Scegli un’identità già progettata' },
-    { id: 'preview', label: 'Anteprima', subtitle: 'Naviga il tuo Easy Come' },
+    { id: 'preview', label: 'Anteprima', subtitle: 'Naviga il gestionale vero' },
     { id: 'delivery', label: 'Acquisto', subtitle: 'Pacchetto e servizi opzionali' },
   ];
 
   const TEMPLATES = [
-    { id: 'complete', icon: '◆', name: 'Ecosistema PMI completo', description: 'Gestionale, dati, attività, preventivi, pagamenti, report, automazioni, app e Hub.', industry: 'Impresa e servizi', modules: ['crm','tasks','quotes','payments','reports','automations','multiuser','mobile_app','branding','ai','easycome_hub'] },
+    { id: 'complete', icon: '◆', name: 'Sistema aziendale completo', description: 'Clienti, attività, preventivi, pagamenti, report, automazioni, app e manuale.', industry: 'Impresa e servizi', modules: ['crm','tasks','quotes','payments','expenses','invoices','reports','automations','multiuser','finance','brain','audit','website','mobile_app','branding','easycome_hub'] },
     { id: 'custom', icon: '✦', name: 'Parti essenziale', description: 'Clienti, attività, manuale e Easy Come Hub. Aggiungi solo ciò che serve.', modules: ['crm', 'tasks', 'easycome_hub'] },
+    { id: 'intelligence', icon: '◈', name: 'CFO & Intelligence', description: 'Finance, Brain, Audit, clienti, attività e controlli per guidare le decisioni.', industry: 'Impresa e controllo di gestione', modules: ['crm','tasks','invoices','payments','expenses','reports','finance','brain','audit','automations','multiuser','easycome_hub'] },
     { id: 'booking', icon: '▦', name: 'Prenotazioni e disponibilità', description: 'Camere, spazi, noleggi, strutture e servizi con calendario risorse.', industry: 'Attività con prenotazioni', modules: ['crm', 'tasks', 'bookings', 'quotes', 'payments', 'dynamic_pricing', 'automations', 'multiuser','easycome_hub'], pricingMode: 'dynamic' },
     { id: 'appointments', icon: '◷', name: 'Agenda e appuntamenti', description: 'Studi, saloni, centri, consulenti e professionisti.', industry: 'Servizi su appuntamento', modules: ['crm', 'tasks', 'appointments', 'payments', 'quotes', 'automations', 'multiuser','easycome_hub'], pricingMode: 'manual_quote' },
     { id: 'restaurant', icon: '♨', name: 'Ristorazione', description: 'Prenotazioni, ordini, tavoli, fornitori, turni e cassa.', industry: 'Ristorazione', modules: ['crm', 'tasks', 'bookings', 'orders', 'inventory', 'expenses', 'staff', 'reports', 'automations','easycome_hub'] },
@@ -103,10 +104,7 @@
     p.pricing.mode = p.pricing.mode || (p.pricing.enabled ? 'dynamic' : 'none');
     p.delivery.previewApproved = Boolean(p.delivery.previewApproved);
     p.delivery.implementationSelected = Boolean(p.delivery.implementationSelected);
-    p.delivery.auditServiceSelected = Boolean(p.delivery.auditServiceSelected ?? p.delivery.managedServiceSelected);
-    p.delivery.auditMonthlyPrice = 100;
-    p.delivery.managedServiceSelected = Boolean(p.delivery.auditServiceSelected);
-    if (Number(p.delivery.packagePrice) === 99) p.delivery.packagePrice = 198;
+    p.delivery.managedServiceSelected = Boolean(p.delivery.managedServiceSelected);
     p.templateId = p.templateId || 'custom';
     return p;
   }
@@ -182,7 +180,7 @@
 
   function prospectBanner() {
     if (!PROSPECT_MODE || !project.demoSource?.generatedForDemo) return '';
-    const quoted = Number(project.demoSource?.quotedPrice || G.calculatePrice(project).total || 198);
+    const quoted = Number(project.demoSource?.quotedPrice || G.calculatePrice(project).total || 99);
     return `<div class="prospect-prefill-banner"><span>DEMO GIÀ CARICATA</span><div><strong>Stai personalizzando la configurazione vista nella demo.</strong><small>Le funzioni selezionate sono già quelle dell’anteprima. Puoi toglierle, aggiungerne altre e il prezzo si aggiorna automaticamente.</small></div><b>${money(quoted)}</b></div>`;
   }
 
@@ -194,7 +192,7 @@
 
   function ideaStep() {
     const c = project.company;
-    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 1</span><h1>Cosa vuoi automatizzare nella tua impresa?</h1><p>Partiamo dal tuo lavoro reale. Puoi costruire l’ecosistema in autonomia oppure raccontarci i processi che vuoi semplificare.</p></div><div class="heading-badge">Anteprima sempre gratuita</div></div>
+    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 1</span><h1>Che impresa vuoi semplificare?</h1><p>Puoi comporre il sistema in autonomia oppure partire da una consulenza completamente personalizzata.</p></div><div class="heading-badge">Anteprima sempre gratuita</div></div>
       <section class="start-paths"><article class="start-path active"><span>1</span><div><strong>Lo configuro adesso</strong><small>Scegli funzioni, struttura e layout. Vedrai tutto prima di pagare.</small></div></article><a class="start-path custom" href="/profilo.html?tab=meeting"><span>✦</span><div><strong>Voglio una soluzione su misura</strong><small>Raccontaci il problema e richiedi un incontro gratuito con Easy Come.</small></div><b>Richiedi incontro →</b></a></section>
       <div class="section-title"><div><h2>Scegli una partenza intelligente</h2><p>I modelli accelerano la configurazione, ma non limitano il risultato.</p></div><span>${TEMPLATES.length} modelli</span></div>
       <div class="template-grid">${TEMPLATES.map((template) => `<button class="template-card ${project.templateId === template.id ? 'active' : ''}" data-template="${template.id}"><span class="template-icon">${template.icon}</span><strong>${esc(template.name)}</strong><small>${esc(template.description)}</small>${template.id === 'custom' ? '<em>Universale</em>' : ''}</button>`).join('')}</div>
@@ -205,13 +203,13 @@
         <label class="field"><span>Email titolare *</span><input id="companyEmail" type="email" value="${esc(c.email)}" placeholder="titolare@azienda.it"><small>Serve per creare in sicurezza il primo account amministratore.</small></label>
         <label class="field"><span>Telefono</span><input id="companyPhone" value="${esc(c.phone)}" placeholder="+39 …"></label>
       </div>
-      <div class="info-card"><strong>Risultato finale</strong><p>Riceverai il tuo Easy Come: Gestionale responsive, database, automazioni e Easy Come Hub, più gli asset e i moduli scelti. Tutto costruito sulla stessa struttura dati.</p></div>`;
+      <div class="info-card"><strong>Risultato finale</strong><p>Riceverai gestionale responsive, workbook Excel, database Supabase, sito pubblico, PWA installabile, Easy Come Hub, brand kit, automazioni e documentazione nello stesso ZIP, in base ai moduli scelti.</p></div>`;
   }
 
   function modulesStep() {
     const categories = [...new Set(G.MODULES.map((item) => item.category))];
-    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 2</span><h1>Scegli soltanto ciò che serve.</h1><p>I moduli hanno prezzi piccoli e trasparenti. Clienti, attività, dashboard e gestione dati sono già compresi nel pacchetto.</p></div><div class="heading-badge">Base ${money(198)}</div></div>
-      <div class="saving-note">✓ Extra ridotti: la maggior parte costa tra €16 e €40 una tantum</div>
+    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 2</span><h1>Scegli soltanto ciò che serve.</h1><p>I moduli hanno prezzi piccoli e trasparenti. Clienti, attività, dashboard e gestione dati sono già compresi nel pacchetto.</p></div><div class="heading-badge">Base ${money(99)}</div></div>
+      <div class="saving-note">✓ Extra ridotti: la maggior parte costa tra €8 e €20 una tantum</div>
       ${categories.map((category) => `<section class="module-section"><div class="section-title"><h2>${esc(category)}</h2><span>${G.MODULES.filter((item) => item.category === category).length} funzioni</span></div><div class="module-grid">${G.MODULES.filter((item) => item.category === category).map(moduleCard).join('')}</div></section>`).join('')}`;
   }
 
@@ -232,7 +230,7 @@
       <section class="section-composer">
         <div class="section-composer-head">
           <div><span class="micro-label">${editingSectionKey ? 'MODIFICA AREA' : 'NUOVA AREA'}</span><h2>${composerTitle}</h2><p>${composerSubtitle}</p></div>
-          <div class="section-composer-actions"><span class="price-pill">${editingSectionKey ? 'Incluso' : '+ ' + money(12)}</span><button id="closeSectionComposer" class="composer-close" aria-label="Chiudi">×</button></div>
+          <div class="section-composer-actions"><span class="price-pill">${editingSectionKey ? 'Incluso' : '+ ' + money(6)}</span><button id="closeSectionComposer" class="composer-close" aria-label="Chiudi">×</button></div>
         </div>
         <div class="composer-template-block">
           <div class="composer-block-title"><strong>Da dove vuoi partire?</strong><small>Un clic prepara già nomi e campi. Poi puoi cambiare tutto.</small></div>
@@ -260,7 +258,7 @@
               <div class="mini-product-sidebar"><i>EC</i><span class="active">${esc(previewLabel)}</span><span>Dashboard</span><span>Attività</span></div>
               <div class="mini-product-main"><small>${esc(previewLabel).toUpperCase()}</small><h3>${esc(previewLabel)}</h3><div class="mini-record-card"><header><strong>Nuovo ${esc(previewSingular)}</strong><b>＋</b></header>${previewFields.map((field)=>`<label><span>${esc(field.label)}${field.required?' *':''}</span><i>${field.type==='date'?'gg/mm/aaaa':field.type==='currency'?'0,00 €':field.type==='select'?'Seleziona…':'Inserisci…'}</i></label>`).join('')}${previewFields.length===0?'<div class="mini-preview-empty">I campi compariranno qui mentre li aggiungi.</div>':''}${customFieldDraft.length>5?`<div class="mini-preview-more">+ altri ${customFieldDraft.length-5} campi</div>`:''}<button>Salva ${esc(previewSingular)}</button></div></div>
             </div>
-            <div class="composer-price-note"><strong>${editingSectionKey?'Modifica inclusa':'Questa sezione costa '+money(12)+' una tantum'}</strong><small>I primi 6 campi sono inclusi. Dal settimo: +2 € per campo.</small></div>
+            <div class="composer-price-note"><strong>${editingSectionKey?'Modifica inclusa':'Questa sezione costa '+money(6)+' una tantum'}</strong><small>I primi 6 campi sono inclusi. Dal settimo: +1 € per campo.</small></div>
           </aside>
         </div>
         <div class="section-composer-footer"><button id="cancelSectionComposer" class="btn btn-secondary">Annulla</button><button id="addEntity" class="btn btn-primary create-section-button">${editingSectionKey?'Salva modifiche':'Aggiungi “'+esc(previewLabel)+'” al gestionale'}</button></div>
@@ -269,7 +267,7 @@
       <section class="data-map structure-map">
         <div class="data-map-head"><div><span class="micro-label">IL TUO GESTIONALE</span><h2>Queste saranno le voci principali</h2><p>Le aree incluse arrivano dalle funzioni scelte. Quelle arancioni sono costruite da te.</p></div></div>
         <div class="entity-showcase structure-canvas">${entities.map((entity) => `<article class="entity-showcase-card ${entity.custom ? 'custom' : ''}"><header><span class="entity-showcase-icon">${entity.custom ? '✦' : esc(entity.label.slice(0,1))}</span><div><strong>${esc(entity.label)}</strong><small>${entity.custom ? 'Sezione su misura' : 'Inclusa automaticamente'}</small></div>${entity.custom ? `<div class="entity-card-actions"><button class="edit-entity" data-key="${esc(entity.key)}">Modifica</button><button class="icon-button remove-entity" data-key="${esc(entity.key)}" aria-label="Elimina">×</button></div>` : entity.key === 'pricing_rules' ? '<div class="entity-card-actions"><button class="configure-pricing">Configura</button><span class="included-tag">Inclusa</span></div>' : '<span class="included-tag">Inclusa</span>'}</header><div class="field-chip-row">${entity.fields.slice(0,5).map((field)=>`<span>${esc(field.label)}</span>`).join('')}${entity.fields.length>5?`<span class="more-chip">+${entity.fields.length-5}</span>`:''}</div></article>`).join('')}
-          <button id="openSectionComposer" class="add-section-tile"><span>＋</span><strong>Aggiungi una sezione</strong><small>Creala da zero o parti da un modello</small><b>+ ${money(12)}</b></button>
+          <button id="openSectionComposer" class="add-section-tile"><span>＋</span><strong>Aggiungi una sezione</strong><small>Creala da zero o parti da un modello</small><b>+ ${money(6)}</b></button>
         </div>
       </section>
       ${composer}`;
@@ -283,7 +281,7 @@
         <div class="price-mode-grid">${PRICE_MODES.map((mode)=>`<button class="price-mode-card ${currentMode===mode.id?'active':''}" data-price-mode="${mode.id}"><b>${mode.icon}</b><span><strong>${mode.name}</strong><small>${mode.description}</small></span><i>${currentMode===mode.id?'✓':''}</i></button>`).join('')}</div>
         <div class="pricing-explainer">${pricingBuilder()}</div>
       </section>
-      <section class="builder-card recipe-builder"><div class="section-title"><div><span class="micro-label">AUTOMAZIONI GUIDATE</span><h2>Cosa vuoi che succeda da solo?</h2><p>Scegli un risultato. Easy Come prepara il flusso tecnico; potrai rifinirlo durante l’implementazione.</p></div><span class="price-pill">${money(8)} ciascuna</span></div>
+      <section class="builder-card recipe-builder"><div class="section-title"><div><span class="micro-label">AUTOMAZIONI GUIDATE</span><h2>Cosa vuoi che succeda da solo?</h2><p>Scegli un risultato. Easy Come prepara il flusso tecnico; potrai rifinirlo durante l’implementazione.</p></div><span class="price-pill">${money(4)} ciascuna</span></div>
         <div class="automation-recipe-grid">${AUTOMATION_RECIPES.map((recipe)=>{const added=project.automations.some((flow)=>flow.recipeId===recipe.id);return `<button class="automation-recipe ${added?'added':''}" data-recipe="${recipe.id}" ${added?'disabled':''}><b>${recipe.icon}</b><span><strong>${recipe.name}</strong><small>${recipe.description}</small></span><i>${added?'Aggiunta':'+'}</i></button>`}).join('')}</div>
         <div class="automation-list improved">${project.automations.map((flow,index)=>`<article class="automation-row"><span class="automation-bolt">⚡</span><div><strong>${esc(flow.name)}</strong><small>Quando: ${esc(triggerLabel(flow.trigger))} · Azione: ${esc(actionLabel(flow.action))}</small></div><button class="icon-button remove-automation" data-index="${index}">×</button></article>`).join('')||'<div class="empty-mini">Nessuna automazione selezionata. Puoi aggiungerla anche più avanti.</div>'}</div>
         <details class="advanced-automation"><summary>Configurazione avanzata <span>per chi sa già cosa vuole</span></summary><div class="form-grid two compact automation-form"><label class="field"><span>Nome del flusso</span><input id="automationName" value="${esc(automationDraft.name)}" placeholder="Es. Avvisa il team"></label><label class="field"><span>Su quale sezione?</span><select id="automationEntity"><option value="">Qualsiasi sezione</option>${entities.map((entity)=>`<option value="${entity.key}" ${automationDraft.entity===entity.key?'selected':''}>${esc(entity.label)}</option>`).join('')}</select></label><label class="field"><span>Quando parte?</span><select id="automationTrigger">${G.AUTOMATION_TRIGGERS.map((item)=>`<option value="${item.id}" ${automationDraft.trigger===item.id?'selected':''}>${esc(item.label)}</option>`).join('')}</select></label><label class="field"><span>Cosa deve fare?</span><select id="automationAction">${G.AUTOMATION_ACTIONS.map((item)=>`<option value="${item.id}" ${automationDraft.action===item.id?'selected':''}>${esc(item.label)}</option>`).join('')}</select></label><label class="field full"><span>Destinatario, URL o nuovo stato</span><input id="automationTarget" value="${esc(automationDraft.target)}" placeholder="Es. {{email}}, team, URL Make/n8n"></label><label class="field full"><span>Messaggio o istruzione</span><textarea id="automationMessage" placeholder="Cosa deve comunicare o creare?">${esc(automationDraft.message)}</textarea></label></div><button id="addAutomation" class="btn btn-secondary">Aggiungi flusso avanzato</button></details>
@@ -317,7 +315,7 @@
   function previewStep() {
     const previewAudit = G.auditProject({ ...project, delivery: { ...project.delivery, previewApproved: true } });
     const canApprove = previewAudit.blockers.length === 0;
-    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 6</span><h1>Guarda il tuo Easy Come prima di acquistarlo.</h1><p>Passa tra dashboard, lavoro, automazioni e Hub. Desktop e mobile sono navigabili.</p></div><div class="heading-badge ${canApprove?'success':''}">${canApprove?'Anteprima pronta':`${previewAudit.blockers.length} controlli da risolvere`}</div></div>${previewStage()}
+    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 6</span><h1>Guarda il gestionale prima di acquistarlo.</h1><p>Passa tra dashboard, lavoro, calendario e Hub. Desktop e mobile sono navigabili.</p></div><div class="heading-badge ${canApprove?'success':''}">${canApprove?'Anteprima pronta':`${previewAudit.blockers.length} controlli da risolvere`}</div></div>${previewStage()}
       <section class="audit-panel"><div class="audit-score"><strong>${previewAudit.score}</strong><span>/100</span><small>${esc(previewAudit.grade)}</small></div><div><h3>Controllo prima dell’acquisto</h3><div class="audit-list">${previewAudit.blockers.map((item)=>`<p class="blocker">✕ ${esc(item)}</p>`).join('')}${previewAudit.warnings.slice(0,4).map((item)=>`<p class="warning">! ${esc(item)}</p>`).join('')}${!previewAudit.blockers.length?'<p class="passed">✓ Il progetto è coerente e può essere acquistato.</p>':''}</div></div></section>
       <div class="approval-card"><label class="${canApprove?'':'disabled'}"><input id="approvePreview" type="checkbox" ${project.delivery.previewApproved?'checked':''} ${canApprove?'':'disabled'}><span><strong>Ho provato il gestionale e la struttura mi rappresenta</strong><small>${canApprove?'Potrai ancora cambiare il progetto prima del pagamento.':'Risolvi prima i controlli indicati sopra.'}</small></span></label><button id="fullscreenPreview" class="btn btn-preview">Apri a schermo intero</button></div>`;
   }
@@ -405,9 +403,9 @@
     return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 7</span><h1>Il tuo sistema è pronto.</h1><p>Controlla cosa ricevi e scegli solo i servizi che vuoi aggiungere.</p></div><div class="heading-badge ${ready ? 'success' : ''}">${audit.score}/100 · ${esc(audit.grade)}</div></div>
       <div class="quality-grid"><article class="quality-card"><span>FILE CONSEGNATI</span><strong>45+</strong></article><article class="quality-card"><span>SEZIONI</span><strong>${entities.length}</strong></article><article class="quality-card"><span>VISTE OPERATIVE</span><strong>6</strong></article><article class="quality-card"><span>FOGLI EXCEL</span><strong>${Math.max(2, entities.length)}</strong></article></div>
       <section class="audit-panel delivery-audit"><div class="audit-score"><strong>${audit.score}</strong><span>/100</span><small>${esc(audit.grade)}</small></div><div><h3>Esito del controllo automatico</h3><div class="audit-list">${audit.blockers.map((item) => `<p class="blocker">✕ ${esc(item)}</p>`).join('')}${audit.warnings.slice(0, 5).map((item) => `<p class="warning">! ${esc(item)}</p>`).join('')}${audit.strengths.slice(0, 5).map((item) => `<p class="passed">✓ ${esc(item)}</p>`).join('')}</div></div></section>
-      <div class="delivery-grid"><section class="package-card"><div class="package-icon">PRO</div><div><h2>${esc(project.company.name || 'Gestionale personalizzato')}</h2><p>Un sistema di lavoro completo, pronto per essere configurato sul database dell’impresa.</p></div><div class="package-files">${['Dashboard con KPI e indicatori', 'Foglio operativo modificabile tipo Excel', 'Calendario disponibilità e risorse', 'Workbook .xlsx già strutturato', 'Tabella, kanban, agenda e schede', 'Import/export, filtri e azioni massive', 'Preventivi, ordini e documenti stampabili', 'Ruoli, audit log e backup', 'Easy Come Hub: manuale, assistenza e nuove funzioni', 'Database Supabase e automazioni', 'Manuale PDF ed executive summary', 'Brand kit vettoriale', project.modules.includes('mobile_app') ? 'App PWA installabile' : 'App PWA selezionabile', project.modules.includes('ai') ? 'Assistente AI configurabile' : 'Modulo AI selezionabile'].map((item) => `<span>✓ ${item}</span>`).join('')}</div><button id="reviewPreview" class="btn btn-secondary" style="grid-column:1/-1">Rivedi anteprima</button><button id="downloadPackage" class="btn btn-primary download-button" ${ready ? '' : 'disabled'}>${SALES.mode === 'customer' ? 'Prepara il progetto e continua' : 'Prepara e scarica il pacchetto'}</button>${ready ? '' : `<p class="validation-note">Il pacchetto non è ancora consegnabile: risolvi i controlli rossi e approva l’anteprima.</p>`}</section>
-      <section class="quote-card"><span class="eyebrow">Prezzo una tantum</span><div class="quote-lines"><div><span>Pacchetto software</span><strong>${money(price.base)}</strong></div><div><span>Moduli</span><strong>${money(price.modules)}</strong></div><div><span>Sezioni e campi su misura</span><strong>${money(price.customEntities + price.customFields)}</strong></div><div><span>Automazioni</span><strong>${money(price.automations)}</strong></div><div><span>Regole prezzo extra</span><strong>${money(price.pricingRules)}</strong></div>${price.bundleDiscount ? `<div><span>Sconto bundle funzioni</span><strong>- ${money(price.bundleDiscount)}</strong></div>` : ''}${price.implementation ? `<div><span>Implementazione assistita</span><strong>${money(price.implementation)}</strong></div>` : ''}</div><label class="implementation-addon"><input id="implementationSelected" type="checkbox" ${project.delivery.implementationSelected ? 'checked' : ''}><span><strong>Setup assistito</strong><small>Configuriamo e pubblichiamo tutto con te.</small></span><b>+ ${money(project.delivery.implementationPrice || 150)}</b></label><label class="managed-addon"><input id="managedServiceSelected" type="checkbox" ${project.delivery.auditServiceSelected ? 'checked' : ''}><span><strong>Easy Come Audit</strong><small>Controlla direttamente il database del tuo Gestionale Easy Come, spiega le anomalie e propone soluzioni operative.</small></span><b>100 € / mese</b></label><div class="quote-total"><span>Totale da pagare ora</span><strong>${money(price.total)}</strong><small>${project.delivery.auditServiceSelected ? 'Più 100 € al mese per Easy Come Audit' : 'Easy Come Audit non selezionato'}</small></div><label class="field"><span>Note commerciali</span><textarea id="deliveryNotes" placeholder="Tempi, formazione, condizioni…">${esc(project.delivery.notes)}</textarea></label><button id="printQuote" class="btn btn-secondary" style="width:100%">Stampa offerta professionale</button></section></div>
-      <div class="truth-card"><strong>${SALES.mode === 'customer' ? 'Scegli tu gli extra' : 'Modalità Builder Easy Come'}</strong><p>${SALES.mode === 'customer' ? 'Setup resta facoltativo. Audit è un modulo mensile integrato e richiede il Gestionale Easy Come.' : 'Audit è complementare al Gestionale e non viene venduto come software separato.'}</p></div>`;
+      <div class="delivery-grid"><section class="package-card"><div class="package-icon">PRO</div><div><h2>${esc(project.company.name || 'Gestionale personalizzato')}</h2><p>Un sistema di lavoro completo, pronto per essere configurato sul database dell’impresa.</p></div><div class="package-files">${['Dashboard con KPI e indicatori', 'Foglio operativo modificabile tipo Excel', 'Calendario disponibilità e risorse', 'Workbook .xlsx già strutturato', 'Tabella, kanban, agenda e schede', 'Import/export, filtri e azioni massive', 'Preventivi, ordini e documenti stampabili', 'Ruoli, audit log e backup', 'Easy Come Hub: manuale, assistenza e nuove funzioni', 'Database Supabase e automazioni', 'Manuale PDF ed executive summary', 'Brand kit vettoriale', project.modules.includes('website') ? 'Sito pubblico coordinato' : 'Sito pubblico selezionabile', project.modules.includes('mobile_app') ? 'App PWA installabile' : 'App PWA selezionabile', project.modules.includes('ai') ? 'Assistente AI configurabile' : 'Modulo AI selezionabile'].map((item) => `<span>✓ ${item}</span>`).join('')}</div><button id="reviewPreview" class="btn btn-secondary" style="grid-column:1/-1">Rivedi anteprima</button><button id="downloadPackage" class="btn btn-primary download-button" ${ready ? '' : 'disabled'}>${SALES.mode === 'customer' ? 'Prepara il progetto e continua' : 'Prepara e scarica il pacchetto'}</button>${ready ? '' : `<p class="validation-note">Il pacchetto non è ancora consegnabile: risolvi i controlli rossi e approva l’anteprima.</p>`}</section>
+      <section class="quote-card"><span class="eyebrow">Prezzo una tantum</span><div class="quote-lines"><div><span>Pacchetto software</span><strong>${money(price.base)}</strong></div><div><span>Moduli</span><strong>${money(price.modules)}</strong></div><div><span>Sezioni e campi su misura</span><strong>${money(price.customEntities + price.customFields)}</strong></div><div><span>Automazioni</span><strong>${money(price.automations)}</strong></div><div><span>Regole prezzo extra</span><strong>${money(price.pricingRules)}</strong></div>${price.bundleDiscount ? `<div><span>Sconto bundle funzioni</span><strong>- ${money(price.bundleDiscount)}</strong></div>` : ''}${price.implementation ? `<div><span>Implementazione assistita</span><strong>${money(price.implementation)}</strong></div>` : ''}</div><label class="implementation-addon"><input id="implementationSelected" type="checkbox" ${project.delivery.implementationSelected ? 'checked' : ''}><span><strong>Setup assistito</strong><small>Configuriamo e pubblichiamo tutto con te.</small></span><b>+ ${money(project.delivery.implementationPrice || 150)}</b></label><label class="managed-addon"><input id="managedServiceSelected" type="checkbox" ${project.delivery.managedServiceSelected ? 'checked' : ''}><span><strong>Easy Come Managed</strong><small>Software, database e supporto tecnico gestiti da noi.</small></span><b>30 € / mese</b></label><div class="quote-total"><span>Totale da pagare ora</span><strong>${money(price.total)}</strong><small>${project.delivery.managedServiceSelected ? 'Più 30 € al mese per la gestione tecnica' : 'Nessun canone selezionato'}</small></div><label class="field"><span>Note commerciali</span><textarea id="deliveryNotes" placeholder="Tempi, formazione, condizioni…">${esc(project.delivery.notes)}</textarea></label><button id="printQuote" class="btn btn-secondary" style="width:100%">Stampa offerta professionale</button></section></div>
+      <div class="truth-card"><strong>${SALES.mode === 'customer' ? 'Scegli tu gli extra' : 'Modalità Builder Easy Come'}</strong><p>${SALES.mode === 'customer' ? 'Setup e gestione mensile restano sempre facoltativi.' : 'Servizi e implementazione restano separati dal software.'}</p></div>`;
   }
 
   function qualityScore() {
@@ -415,7 +413,7 @@
   }
   function renderSummary() {
     const price = G.calculatePrice(project), entities = G.buildEntities(project), audit = G.auditProject(project);
-    $('#summary').innerHTML = `<div class="summary-brand"><span>${logoMarkup()}</span><div><strong>${esc(project.company.name || 'Nuovo Easy Come')}</strong><small>${esc(project.company.industry || 'Progetto universale')}</small></div></div><div class="summary-metrics"><div><span>Moduli</span><strong>${project.modules.length}</strong></div><div><span>Sezioni</span><strong>${entities.length}</strong></div><div><span>Qualità</span><strong>${audit.score}</strong></div></div><div class="summary-quality ${audit.ready ? 'ready' : ''}"><span>${audit.ready ? 'PRONTO ALLA CONSEGNA' : 'CONTROLLO IN CORSO'}</span><strong>${esc(audit.grade)}</strong><small>${audit.blockers.length ? `${audit.blockers.length} elementi bloccanti` : 'Nessun blocco rilevato'}</small></div><div class="summary-capabilities"><span>Excel</span><span>Database</span><span>PWA</span><span>Brand kit</span></div><div class="summary-list"><div><span>Software base</span><strong>${money(price.base)}</strong></div><div><span>Extra scelti</span><strong>${money(price.extras)}</strong></div>${price.implementation ? `<div><span>Implementazione opzionale</span><strong>${money(price.implementation)}</strong></div>` : ''}</div><div class="summary-total"><span>Totale una tantum</span><strong>${money(price.total)}</strong><small>${price.implementation ? 'Implementazione selezionata' : 'Implementazione non inclusa'}</small></div><button id="summaryPreview" class="btn btn-preview summary-cta">Prova l’anteprima</button><button id="resetProject" class="btn btn-ghost">Ricomincia da zero</button>`;
+    $('#summary').innerHTML = `<div class="summary-brand"><span>${logoMarkup()}</span><div><strong>${esc(project.company.name || 'Nuovo gestionale')}</strong><small>${esc(project.company.industry || 'Progetto universale')}</small></div></div><div class="summary-metrics"><div><span>Moduli</span><strong>${project.modules.length}</strong></div><div><span>Sezioni</span><strong>${entities.length}</strong></div><div><span>Qualità</span><strong>${audit.score}</strong></div></div><div class="summary-quality ${audit.ready ? 'ready' : ''}"><span>${audit.ready ? 'PRONTO ALLA CONSEGNA' : 'CONTROLLO IN CORSO'}</span><strong>${esc(audit.grade)}</strong><small>${audit.blockers.length ? `${audit.blockers.length} elementi bloccanti` : 'Nessun blocco rilevato'}</small></div><div class="summary-capabilities"><span>Excel</span><span>Database</span><span>PWA</span><span>Brand kit</span></div><div class="summary-list"><div><span>Software base</span><strong>${money(price.base)}</strong></div><div><span>Extra scelti</span><strong>${money(price.extras)}</strong></div>${price.implementation ? `<div><span>Implementazione opzionale</span><strong>${money(price.implementation)}</strong></div>` : ''}</div><div class="summary-total"><span>Totale una tantum</span><strong>${money(price.total)}</strong><small>${price.implementation ? 'Implementazione selezionata' : 'Implementazione non inclusa'}</small></div><button id="summaryPreview" class="btn btn-preview summary-cta">Prova l’anteprima</button><button id="resetProject" class="btn btn-ghost">Ricomincia da zero</button>`;
     $('#summaryPreview').onclick = openPreviewOverlay;
     $('#resetProject').onclick = () => { if (confirm('Eliminare la configurazione corrente?')) { project = normalizeProject(G.defaultProject()); currentStep = 0; customFieldDraft = []; render(); } };
   }
@@ -589,7 +587,7 @@
   }
 
   function openPreviewOverlay() {
-    $('#previewRoot').innerHTML = `<div class="preview-overlay"><div class="preview-overlay-head"><div><h2>Anteprima live · ${esc(project.company.name || 'Nuovo Easy Come')}</h2><p>Naviga dashboard, area operativa, calendario e Easy Come Hub. Passa da desktop a mobile.</p></div><button class="close-preview" id="closePreview">×</button></div>${previewStage()}</div>`;
+    $('#previewRoot').innerHTML = `<div class="preview-overlay"><div class="preview-overlay-head"><div><h2>Anteprima live · ${esc(project.company.name || 'Nuovo gestionale')}</h2><p>Naviga dashboard, area operativa, calendario e Easy Come Hub. Passa da desktop a mobile.</p></div><button class="close-preview" id="closePreview">×</button></div>${previewStage()}</div>`;
     $('#closePreview').onclick = () => $('#previewRoot').innerHTML = '';
     bindOverlayPreview();
   }
@@ -698,17 +696,17 @@
     const lines = orderLines(price).filter(([, value]) => Number(value) !== 0);
     document.body.style.overflow = 'hidden';
     root.innerHTML = `<div class="checkout-overlay" role="dialog" aria-modal="true" aria-labelledby="checkoutTitle"><section class="checkout-sheet">
-      <div class="checkout-copy"><div class="checkout-top"><div><span class="process-kicker">ORDINE EASY COME</span><h2 id="checkoutTitle">Il tuo Easy Come è pronto.</h2><p>Controlla la configurazione e passa al pagamento sicuro.</p></div><button class="checkout-close" id="closeCheckout" type="button" aria-label="Chiudi">×</button></div>
+      <div class="checkout-copy"><div class="checkout-top"><div><span class="process-kicker">ORDINE EASY COME</span><h2 id="checkoutTitle">Il tuo sistema digitale è pronto.</h2><p>Controlla i dati e passa al pagamento sicuro.</p></div><button class="checkout-close" id="closeCheckout" type="button" aria-label="Chiudi">×</button></div>
         <div class="order-company"><span>Sistema configurato per</span><h3>${esc(project.company.name || 'La tua impresa')}</h3><p>${esc(project.company.description || '')}</p></div>
         <div class="order-lines">${lines.map(([label, value]) => `<div><span>${esc(label)}</span><strong>${value < 0 ? '− ' : ''}${money(Math.abs(value))}</strong></div>`).join('')}</div>
-        <div class="order-total"><div><span class="checkout-label">TOTALE DA PAGARE ORA</span><small>${project.delivery.auditServiceSelected ? 'Easy Come Audit: 100 € al mese dal pagamento' : 'Easy Come Audit non selezionato'}</small></div><strong>${money(price.total)}</strong></div>${project.delivery.auditServiceSelected ? '<div class="managed-checkout-note"><b>◎</b><span><strong>Easy Come Audit</strong><small>100 € / mese · usa lo stesso database del Gestionale Easy Come. Analizza i record reali, spiega i problemi, propone soluzioni e ti porta al ricontrollo. Non è acquistabile senza Gestionale.</small></span></div>' : ''}
-        <div class="checkout-guarantees"><span>✓ Anteprima approvata prima del pagamento</span>${price.implementation ? '<span>✓ Implementazione assistita selezionata</span>' : '<span>✓ Pacchetto software senza servizi obbligatori</span>'}<span>✓ Pagamento protetto tramite Stripe</span><span>✓ Download automatico dopo la conferma Stripe</span>${project.delivery.auditServiceSelected ? '<span>✓ Easy Come Audit integrato nello stesso Hub e database</span>' : ''}</div>
+        <div class="order-total"><div><span class="checkout-label">TOTALE DA PAGARE ORA</span><small>${project.delivery.managedServiceSelected ? 'Gestione tecnica: 30 € al mese dal pagamento' : 'Nessun abbonamento selezionato'}</small></div><strong>${money(price.total)}</strong></div>${project.delivery.managedServiceSelected ? '<div class="managed-checkout-note"><b>↻</b><span><strong>Gestione tecnica Easy Come</strong><small>30 € / mese · software, database, aggiornamenti minori e assistenza prioritaria. Gestibile o disdettabile dal profilo.</small></span></div>' : ''}
+        <div class="checkout-guarantees"><span>✓ Anteprima approvata prima del pagamento</span>${price.implementation ? '<span>✓ Implementazione assistita selezionata</span>' : '<span>✓ Pacchetto software senza servizi obbligatori</span>'}<span>✓ Pagamento protetto tramite Stripe</span><span>✓ Download automatico dopo la conferma Stripe</span>${project.delivery.managedServiceSelected ? '<span>✓ Abbonamento mensile gestibile dal profilo</span>' : ''}</div>
       </div>
       <div class="checkout-form-wrap"><form id="checkoutForm" class="checkout-form"><span class="checkout-label">DATI PER L’ORDINE</span><h3>A chi intestiamo il progetto?</h3><p>Questi dati vengono associati al pagamento e alla consegna del pacchetto software.</p>
         <div class="form-grid two"><label class="field"><span>Nome e cognome</span><input name="customerName" required autocomplete="name" value=""></label><label class="field"><span>Email</span><input name="email" required type="email" autocomplete="email" value="${esc(project.company.email || '')}"></label><label class="field"><span>Telefono</span><input name="phone" autocomplete="tel"></label><label class="field"><span>Partita IVA / CF</span><input name="taxId" autocomplete="off"></label><label class="field full"><span>Ragione sociale</span><input name="companyName" required value="${esc(project.company.name || '')}"></label></div>
         <label class="legal-check"><input type="checkbox" name="terms" required><span>Accetto i <a href="${esc(SALES.termsUrl || '/termini')}" target="_blank" rel="noopener">Termini e condizioni</a> e confermo di aver letto la <a href="${esc(SALES.privacyUrl || '/privacy')}" target="_blank" rel="noopener">Privacy Policy</a> e la <a href="/rimborsi" target="_blank" rel="noopener">politica rimborsi e recesso</a>.</span></label>
         <label class="legal-check"><input type="checkbox" name="immediatePerformance" required><span>Chiedo che la fornitura digitale e gli eventuali servizi selezionati inizino subito dopo il pagamento. Se acquisto come consumatore, riconosco che l'inizio della fornitura del contenuto digitale può comportare la perdita del diritto di recesso nei casi previsti dalla legge e che, per i servizi già iniziati, possono applicarsi le regole sul corrispettivo proporzionale.</span></label>
-        <div id="checkoutError"></div><button class="btn btn-primary checkout-button" id="payButton" type="submit">${project.delivery.auditServiceSelected ? `Paga ${money(price.total)} e attiva Audit · 100 € / mese` : `Vai al pagamento sicuro · ${money(price.total)}`}</button><div class="secure-row"><span>🔒</span><span>I dati della carta vengono gestiti direttamente da Stripe.</span></div>
+        <div id="checkoutError"></div><button class="btn btn-primary checkout-button" id="payButton" type="submit">${project.delivery.managedServiceSelected ? `Paga ${money(price.total)} e attiva 30 € / mese` : `Vai al pagamento sicuro · ${money(price.total)}`}</button><div class="secure-row"><span>🔒</span><span>I dati della carta vengono gestiti direttamente da Stripe.</span></div>
       </form></div>
     </section></div>`;
     $('#closeCheckout').onclick = () => { root.innerHTML = ''; document.body.style.overflow = ''; };
@@ -733,7 +731,7 @@
           const next = encodeURIComponent(location.pathname + location.search);
           errorBox.innerHTML = `<div class="checkout-error">Per acquistare, crea o accedi al tuo account Easy Come. La demo resta disponibile.<br><a href="/accedi?mode=signup&next=${next}" style="font-weight:900;text-decoration:underline">Crea account e continua →</a></div>`;
           button.disabled = false;
-          button.textContent = project.delivery.auditServiceSelected ? `Paga ${money(price.total)} e attiva Audit · 100 € / mese` : `Vai al pagamento sicuro · ${money(price.total)}`;
+          button.textContent = project.delivery.managedServiceSelected ? `Paga ${money(price.total)} e attiva 30 € / mese` : `Vai al pagamento sicuro · ${money(price.total)}`;
           return;
         }
         const response = await fetch(SALES.checkoutEndpoint, {
@@ -760,7 +758,7 @@
         console.error(error);
         errorBox.innerHTML = `<div class="checkout-error">${esc(error.message || String(error))}${location.protocol === 'file:' ? '<br>Per provare il checkout devi pubblicare il sito o avviarlo tramite un server locale.' : ''}</div>`;
         button.disabled = false;
-        button.textContent = project.delivery.auditServiceSelected ? `Paga ${money(price.total)} e attiva Audit · 100 € / mese` : `Vai al pagamento sicuro · ${money(price.total)}`;
+        button.textContent = project.delivery.managedServiceSelected ? `Paga ${money(price.total)} e attiva 30 € / mese` : `Vai al pagamento sicuro · ${money(price.total)}`;
       }
     };
   }
@@ -780,7 +778,7 @@
 
   function bindDelivery() {
     if ($('#implementationSelected')) $('#implementationSelected').onchange = (event) => { project.delivery.implementationSelected = event.target.checked; saveDraft(); render(); };
-    if ($('#managedServiceSelected')) $('#managedServiceSelected').onchange = (event) => { project.delivery.auditServiceSelected = event.target.checked; project.delivery.managedServiceSelected = event.target.checked; project.delivery.auditMonthlyPrice = 100; saveDraft(); render(); };
+    if ($('#managedServiceSelected')) $('#managedServiceSelected').onchange = (event) => { project.delivery.managedServiceSelected = event.target.checked; saveDraft(); render(); };
     if ($('#deliveryNotes')) $('#deliveryNotes').oninput = () => { project.delivery.notes = $('#deliveryNotes').value; saveDraft(); };
     $('#reviewPreview').onclick = () => { currentStep = 5; render(); };
     const button = $('#downloadPackage');
@@ -807,7 +805,7 @@
 
   function printQuote() {
     const price = G.calculatePrice(project), modules = project.modules.map((id) => G.MODULES.find((item) => item.id === id)?.name).filter(Boolean), popup = window.open('', '_blank');
-    popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Offerta ${esc(project.company.name)}</title><style>body{font-family:Arial,sans-serif;background:#f4f5f1;margin:0;padding:50px;color:#171815}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:26px;padding:48px;box-shadow:0 25px 80px #0001}.tag{display:inline-block;background:#fff0e9;color:#ff6b35;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:bold}h1{font-size:44px;letter-spacing:-2px;margin:15px 0}.muted{color:#777}.row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}.total{background:#171815;color:#fff;border-radius:19px;padding:23px;margin-top:20px}.total strong{display:block;font-size:35px;margin-top:5px}.modules{columns:2}.footer{margin-top:45px;font-size:11px;color:#888}</style></head><body><div class="sheet"><span class="tag">EASY COME · OFFERTA UNA TANTUM</span><h1>${esc(project.company.name || 'Easy Come personalizzato')}</h1><p class="muted">${esc(project.company.description || '')}</p><h2>Investimento</h2><div class="row"><span>Pacchetto software</span><strong>${money(price.base)}</strong></div>${price.implementation ? `<div class="row"><span>Implementazione assistita (opzionale)</span><strong>${money(price.implementation)}</strong></div>` : ''}<div class="row"><span>Moduli e personalizzazioni</span><strong>${money(price.extras)}</strong></div><div class="total"><span>Totale una tantum</span><strong>${money(price.total)}</strong><small>${project.delivery.auditServiceSelected ? 'Easy Come Audit: 100 € / mese.' : 'Nessun canone obbligatorio.'}</small></div><h2>Funzioni incluse</h2><div class="modules">${modules.map((module) => `<p>✓ ${esc(module)}</p>`).join('')}</div>${project.delivery.notes ? `<h2>Note</h2><p>${esc(project.delivery.notes)}</p>` : ''}<p class="footer">Anteprima approvata. L’implementazione è inclusa soltanto quando compare tra le voci dell’offerta.</p></div></body></html>`);
+    popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Offerta ${esc(project.company.name)}</title><style>body{font-family:Arial,sans-serif;background:#f4f5f1;margin:0;padding:50px;color:#171815}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:26px;padding:48px;box-shadow:0 25px 80px #0001}.tag{display:inline-block;background:#fff0e9;color:#ff6b35;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:bold}h1{font-size:44px;letter-spacing:-2px;margin:15px 0}.muted{color:#777}.row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}.total{background:#171815;color:#fff;border-radius:19px;padding:23px;margin-top:20px}.total strong{display:block;font-size:35px;margin-top:5px}.modules{columns:2}.footer{margin-top:45px;font-size:11px;color:#888}</style></head><body><div class="sheet"><span class="tag">EASY COME · OFFERTA UNA TANTUM</span><h1>${esc(project.company.name || 'Gestionale personalizzato')}</h1><p class="muted">${esc(project.company.description || '')}</p><h2>Investimento</h2><div class="row"><span>Pacchetto software</span><strong>${money(price.base)}</strong></div>${price.implementation ? `<div class="row"><span>Implementazione assistita (opzionale)</span><strong>${money(price.implementation)}</strong></div>` : ''}<div class="row"><span>Moduli e personalizzazioni</span><strong>${money(price.extras)}</strong></div><div class="total"><span>Totale una tantum</span><strong>${money(price.total)}</strong><small>Nessun canone Easy Come.</small></div><h2>Funzioni incluse</h2><div class="modules">${modules.map((module) => `<p>✓ ${esc(module)}</p>`).join('')}</div>${project.delivery.notes ? `<h2>Note</h2><p>${esc(project.delivery.notes)}</p>` : ''}<p class="footer">Anteprima approvata. L’implementazione è inclusa soltanto quando compare tra le voci dell’offerta.</p></div></body></html>`);
     popup.document.close(); popup.focus(); setTimeout(() => popup.print(), 300);
   }
 
@@ -822,120 +820,48 @@
   $('#globalPreviewMobile').onclick = openPreviewOverlay;
 
 
-  const demoHandoffKey = (slug = PROSPECT_DEMO_SLUG) => slug ? `easycome:demo-handoff:${slug}` : '';
-
-  function sanitizeProspectProject(incoming, data = {}) {
-    const next = structuredClone(incoming || {});
-    // A prospect demo is its own source of truth. Never merge identity/contact data
-    // from a logged-in Easy Come account or from an older local/cloud draft.
-    next.company = { ...(next.company || {}), email: '', phone: '' };
-    next.delivery = { ...(next.delivery || {}), previewApproved: true };
-    next.demoSource = {
-      ...(next.demoSource || {}),
-      generatedForDemo: true,
-      slug: PROSPECT_DEMO_SLUG,
-      quotedPrice: Number(data.price || next.demoSource?.quotedPrice || 198),
-    };
-    return next;
-  }
-
-  function readDemoHandoff() {
-    const key = demoHandoffKey();
-    if (!key) return null;
-    try {
-      const raw = sessionStorage.getItem(key);
-      if (!raw) return null;
-      const saved = JSON.parse(raw);
-      const age = Date.now() - Number(saved?.savedAt || 0);
-      if (!saved?.project || age < 0 || age > 30 * 60 * 1000) {
-        sessionStorage.removeItem(key);
-        return null;
-      }
-      return sanitizeProspectProject(saved.project, { price: saved.price });
-    } catch (_) {
-      return null;
-    }
-  }
-
-  async function loadDemoProjectFromUrl() {
+  async function loadDemoProjectFromUrl(user) {
     const slug = PROSPECT_DEMO_SLUG;
     if (!slug) return null;
     try {
       const response = await fetch(`/api/demo-public?slug=${encodeURIComponent(slug)}`, { cache: 'no-store' });
-      let data = {};
-      try { data = await response.json(); } catch (_) {}
+      const data = await response.json();
       if (!response.ok || !data.project) throw new Error(data.error || 'Demo non disponibile.');
-      const incoming = sanitizeProspectProject(data.project, data);
-      try {
-        sessionStorage.setItem(demoHandoffKey(slug), JSON.stringify({
-          project: incoming,
-          price: Number(data.price || incoming.demoSource?.quotedPrice || 198),
-          savedAt: Date.now(),
-        }));
-      } catch (_) {}
+      const incoming = data.project;
+      // Prospect demos must never inherit the currently logged-in Easy Come account.
+      // Contact details stay intentionally empty until the prospect enters their own data.
+      incoming.company = { ...(incoming.company || {}), email: '', phone: '' };
+      incoming.delivery = { ...(incoming.delivery || {}), previewApproved: true };
+      incoming.demoSource = { ...(incoming.demoSource || {}), generatedForDemo: true, slug, quotedPrice: Number(data.price || incoming.demoSource?.quotedPrice || 99) };
       return incoming;
     } catch (error) {
-      // If the prospect has just clicked from the demo page, use the exact snapshot
-      // that page received from the backend. This makes the handoff resilient to a
-      // transient network/API failure without ever falling back to an unrelated draft.
-      const handoff = readDemoHandoff();
-      if (handoff) return handoff;
-      throw error;
+      console.warn('Impossibile precaricare la demo:', error);
+      return null;
     }
   }
 
-  function resetComposerForDemo() {
-    currentStep = 1;
-    customFieldDraft = [];
-    sectionDraft = { label: '', singular: '' };
-    automationDraft = { name: '', trigger: 'record_created', entity: '', action: 'notify', target: '', message: '', enabled: true };
-    previewMode = 'dashboard';
-    previewDevice = 'desktop';
-    previewEntityKey = '';
-    previewHubTab = 'home';
-  }
-
-  function renderDemoLoadError(error) {
-    const panel = $('#panel');
-    if (!panel) return;
-    $('#stepList').innerHTML = '';
-    $('#summary').innerHTML = '';
-    panel.innerHTML = `<div class="prospect-prefill-error"><span>DEMO EASY COME</span><h2>Non riesco a caricare questa proposta.</h2><p>${esc(error?.message || 'Riprova tra qualche secondo.')}</p><button class="btn btn-primary" id="retryDemoPrefill">Riprova a caricare la demo</button><a class="btn btn-secondary" href="/demo?d=${encodeURIComponent(PROSPECT_DEMO_SLUG)}">Torna alla demo</a></div>`;
-    $('#retryDemoPrefill')?.addEventListener('click', () => bootstrapProspectDemo(true));
-  }
-
-  let prospectBootPromise = null;
-  async function bootstrapProspectDemo(force = false) {
-    if (!PROSPECT_MODE) return;
-    if (prospectBootPromise && !force) return prospectBootPromise;
-    prospectBootPromise = (async () => {
-      try {
-        const demoProject = await loadDemoProjectFromUrl();
-        if (!demoProject) throw new Error('La proposta non contiene una configurazione valida.');
-        activeUserId = `prospect:${PROSPECT_DEMO_SLUG}`;
-        // Critical rule: demo project wins over every cloud/local/account draft.
-        project = normalizeProject(demoProject);
-        resetComposerForDemo();
-        saveDraft();
-        render();
-      } catch (error) {
-        console.warn('Impossibile precaricare la demo:', error);
-        renderDemoLoadError(error);
-      }
-    })();
-    try { await prospectBootPromise; } finally { prospectBootPromise = null; }
-  }
-
-  async function bootstrapAccountProject(user) {
-    if (PROSPECT_MODE || !user?.id) return;
+  window.addEventListener('easycome:account-ready', async (event) => {
+    const user = event.detail?.user;
+    if (!user?.id) return;
     const switchedAccount = Boolean(activeUserId && activeUserId !== user.id);
     activeUserId = user.id;
-    const saved = await window.EasyComeAccount?.loadLatestProject?.();
-    const local = loadDraft(user.id);
-    const legacy = legacyDraftForUser(user);
-    project = normalizeProject(saved || local || legacy || G.defaultProject());
-    if (!project.company.email) project.company.email = user.email || '';
-    if (switchedAccount || (!saved && !local && !legacy)) {
+    const demoProject = await loadDemoProjectFromUrl(user);
+    const saved = demoProject ? null : await window.EasyComeAccount?.loadLatestProject?.();
+    const local = demoProject ? null : loadDraft(user.id);
+    const legacy = demoProject ? null : legacyDraftForUser(user);
+    project = normalizeProject(demoProject || saved || local || legacy || G.defaultProject());
+    if (!demoProject && !project.company.email) project.company.email = user.email || '';
+    if (demoProject) {
+      // A prospect must start from the exact product shown in the demo, not from a fresh configurator.
+      currentStep = 1;
+      customFieldDraft = [];
+      sectionDraft = { label: '', singular: '' };
+      automationDraft = { name: '', trigger: 'record_created', entity: '', action: 'notify', target: '', message: '', enabled: true };
+      previewMode = 'dashboard';
+      previewDevice = 'desktop';
+      previewEntityKey = '';
+      previewHubTab = 'home';
+    } else if (switchedAccount || (!saved && !local && !legacy)) {
       currentStep = 0;
       customFieldDraft = [];
       sectionDraft = { label: '', singular: '' };
@@ -947,16 +873,7 @@
     }
     saveDraft();
     render();
-  }
-
-  window.addEventListener('easycome:account-ready', (event) => {
-    // In prospect mode account timing must never decide which project is loaded.
-    if (PROSPECT_MODE) return;
-    bootstrapAccountProject(event.detail?.user).catch((error) => console.warn('Errore caricamento progetto account:', error));
   });
 
   render();
-  // Deterministic demo bootstrap: do not wait for account.js. This removes the
-  // intermittent race where easycome:account-ready fired before app.js listened.
-  if (PROSPECT_MODE) bootstrapProspectDemo();
 }());
