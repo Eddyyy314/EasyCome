@@ -12,7 +12,7 @@
       const params = new URLSearchParams(location.search);
       const allowedResume = params.get('resume') === '1';
       if (!allowedResume && localStorage.getItem('easycome:product-tour-seen') !== '1') {
-        location.replace('/?from=studio#storia');
+        location.replace('/tour.html?from=studio');
       }
     } catch (_) {}
   })();
@@ -32,8 +32,8 @@
       </a>
       <div class="intro-copy">
         <span class="eyebrow light">UN SISTEMA DIGITALE COSTRUITO SUL TUO LAVORO</span>
-        <h2>Ora costruiamo il sistema che hai appena visto.</h2>
-        <p>Hai già visto cosa fa Easy Come. Qui traduci il tuo modo di lavorare in moduli, sezioni, regole e automazioni. Il percorso ti accompagna fino all’anteprima e all’attivazione.</p>
+        <h2>Ora trasformiamo i tuoi processi nel tuo Easy Come.</h2>
+        <p>Hai completato il percorso guidato. Qui parti dai processi reali della tua impresa e scegli quali devono entrare nel sistema. Il configuratore ti accompagna fino all’anteprima e all’attivazione.</p>
       </div>
       <nav id="stepList" class="step-list"></nav>
       <div class="left-footer">

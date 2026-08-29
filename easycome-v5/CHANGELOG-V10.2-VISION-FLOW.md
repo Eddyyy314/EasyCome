@@ -1,3 +1,14 @@
+# Easy Come V10.3 — Process Journey
+
+- Home ridotta a storia, vision, prodotto e CTA.
+- Nuovo tour.html prima del configuratore.
+- Percorso: Gestionale → Audit → Finance → Hub → Configura.
+- Mappatura esplicita di prenotazione, incasso, spesa e cliente: origine → registrazione → utilizzo → destinazione.
+- Studio accessibile ai nuovi prospect solo dopo il percorso guidato.
+- Pricing invariato: software + €150 implementazione obbligatoria + €150/mese Easy Come Operativo.
+
+---
+
 # Easy Come V10.2 — Vision Flow
 
 ## Nuovo percorso cliente
