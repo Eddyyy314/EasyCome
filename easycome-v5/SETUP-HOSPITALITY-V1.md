@@ -1,4 +1,4 @@
-# Setup Easy Come Hospitality V1.3
+# Setup Easy Come Hospitality V1.4
 
 1. Configura la struttura nello Studio Hospitality.
 2. Genera l’anteprima e verifica che il flusso operativo rispecchi il lavoro reale.

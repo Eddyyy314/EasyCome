@@ -1,4 +1,4 @@
-# Easy Come Hospitality V1.3
+# Easy Come Hospitality V1.4
 
 Easy Come Hospitality è un gestionale verticale per B&B, affittacamere e case vacanza.
 

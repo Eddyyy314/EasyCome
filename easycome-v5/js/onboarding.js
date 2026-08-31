@@ -5,7 +5,7 @@
   const orgId = project.organizationId || 'easycome';
   const storage = (()=>{try{localStorage.setItem('__ec_guide_test','1');localStorage.removeItem('__ec_guide_test');return localStorage}catch(_){const mem={};return{getItem:k=>mem[k]||null,setItem:(k,v)=>mem[k]=String(v)}}})();
   const isPerformance = Boolean(document.getElementById('performanceApp')) || document.body.classList.contains('intelligence-page');
-  const key = `easycome:${orgId}:${isPerformance?'performance':'main'}:guide-hospitality-v1`;
+  const key = `easycome:${orgId}:${isPerformance?'performance':'main'}:guide-hospitality-v2`;
   const steps = isPerformance ? [
     {k:'CONTROLLO',t:'Qui controlli che il lavoro sia davvero chiuso.',d:'Easy Come usa i dati già presenti nel gestionale per evidenziare saldi aperti, anomalie, informazioni mancanti e situazioni da verificare.'},
     {k:'FINANCE',t:'Qui capisci come sta andando la struttura.',d:'Occupazione, ricavi, incassi, costi e performance vengono letti dagli stessi dati operativi. Non devi ricopiare nulla.'},
