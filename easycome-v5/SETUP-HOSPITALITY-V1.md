@@ -1,9 +1,9 @@
-# Setup Easy Come Hospitality V1.1
+# Setup Easy Come Hospitality V1.2
 
-1. Configura il progetto e genera il pacchetto.
-2. Installa Supabase/schema e le Edge Functions.
-3. Configura Stripe per i pagamenti diretti.
-4. Pubblica `booking-connector` sul dominio/sottodominio scelto.
-5. Inserisci il booking nel sito esistente con link, iframe o `embed.js`.
-6. Verifica che una prenotazione test entri nel Front Desk e che il pagamento sia associato.
-7. Collega eventuali calendari OTA/provider e collauda i conflitti.
+1. Configura la struttura nello Studio Hospitality.
+2. Genera l’anteprima e verifica che il flusso operativo rispecchi il lavoro reale.
+3. Durante l’implementazione configura database, utenti, ruoli e dati iniziali.
+4. Importa o collega i dati necessari per prenotazioni, pagamenti e canali secondo gli strumenti disponibili alla struttura.
+5. Testa Front Desk, calendario, Controllo, Finance e Hub prima della consegna.
+
+Le integrazioni esterne vengono configurate soltanto quando servono e quando il relativo provider le supporta.

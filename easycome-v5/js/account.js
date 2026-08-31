@@ -56,7 +56,6 @@
   }
 
   function showShell() {
-    if (!state.session && !prospectMode) return;
     gate.innerHTML = '';
     gate.classList.add('hidden');
     shell?.classList.remove('account-pending');
@@ -83,7 +82,7 @@
 
   function signupForm(disabled = false) {
     return `<form id="accountSignup" class="account-form">
-      <div><span>Il tuo account centrale</span><h2>Partiamo da te.</h2><p>Crealo una volta: resterà valido per sito, gestionale e Hub.</p></div>
+      <div><span>Il tuo account centrale</span><h2>Partiamo da te.</h2><p>Crealo una volta: resterà valido per configuratore, gestionale e Hub.</p></div>
       <div class="account-two">
         <label>Nome e cognome<input name="fullName" required autocomplete="name" ${disabled ? 'disabled' : ''}></label>
         <label>Nome attività<input name="companyName" required autocomplete="organization" ${disabled ? 'disabled' : ''}></label>
@@ -103,7 +102,7 @@
       <section class="account-story">
         <a class="account-brand" href="/"><b>EC</b><span><strong>Easy Come</strong><small>Studio per imprese</small></span></a>
         <div><span>UN SOLO ACCOUNT</span><h1>Costruisci oggi.<br>Accedi domani con le stesse credenziali.</h1><p>Il tuo account collega configuratore, acquisti, gestionale, manuale e Easy Come Hub.</p></div>
-        <div class="account-points"><span>✓ Progetti salvati online</span><span>✓ Accesso al gestionale acquistato</span><span>✓ Assistenza e nuove funzioni nello stesso spazio</span></div>
+        <div class="account-points"><span>Progetti salvati online</span><span>Accesso al gestionale acquistato</span><span>Assistenza e nuove funzioni nello stesso spazio</span></div>
       </section>
       <section class="account-panel">
         <div class="account-card">
@@ -321,16 +320,11 @@
   }
 
   async function init(force = false) {
-    state.ready = false;
+    state.ready = true;
     state.initError = null;
-    if (prospectMode) {
-      state.ready = true;
-      state.session = null;
-      // account.js is loaded before app.js: defer the event so the Studio listener exists.
-      setTimeout(() => showShell(), 0);
-      return;
-    }
-    renderStudioLoading();
+    // Lo Studio è sempre utilizzabile come ospite. L'account serve solo per cloud e acquisto.
+    setTimeout(() => showShell(), 0);
+    if (prospectMode) return;
     try {
       const client = await ensureClient(force);
       const { data, error } = await client.auth.getSession();
@@ -338,17 +332,14 @@
       state.session = data.session;
       client.auth.onAuthStateChange((_event, session) => {
         state.session = session;
-        if (session) showShell();
-        else if (state.ready) redirectToAuth();
+        showShell();
       });
-      state.ready = true;
-      if (state.session) showShell();
-      else redirectToAuth();
+      showShell();
     } catch (err) {
       state.initError = err;
       state.client = null;
-      state.ready = false;
-      renderStudioError(humanConfigError(err));
+      // Nessun blocco: la configurazione locale continua a funzionare.
+      showShell();
     }
   }
 

@@ -1,15 +1,19 @@
-# Easy Come Hospitality V1.1 — Booking Connector + PMS
+# Easy Come Hospitality V1.2
 
-Easy Come non crea il sito. Si collega al sito che la struttura possiede già.
-
-## Architettura
-
-Sito esistente → Booking Connector → disponibilità/pagamento → prenotazione → Front Desk → Controllo → Finance → Hub.
-
-## Compatibilità sito
-
-Il Connector è web-standard e può essere installato come link, iframe o script/overlay. Questo lo rende utilizzabile con WordPress, Wix, Webflow e siti custom, nei limiti delle funzioni di embed consentite dal singolo CMS.
+Easy Come Hospitality è un gestionale verticale per B&B, affittacamere, case vacanza e piccole strutture ricettive.
 
 ## Principio
+Una sola interfaccia per gestire il lavoro quotidiano: prenotazioni, calendario, ospiti, camere/alloggi, pagamenti, pulizie, controllo operativo, performance e Hub.
 
-Il sito rimane responsabilità/design del cliente o della sua web agency. Easy Come gestisce booking e operatività.
+## Configurazione
+Il cliente compila soltanto cinque passaggi semplici:
+1. La struttura
+2. Cosa vuole gestire
+3. Come lavora
+4. Anteprima del gestionale
+5. Prezzo e acquisto
+
+Le scelte tecniche e le personalizzazioni avanzate vengono gestite durante l’implementazione obbligatoria.
+
+## Modello commerciale
+Acquisto una tantum. Il software base e le funzioni selezionate formano il prezzo del pacchetto; l’implementazione costa €150 ed è obbligatoria. Nessun canone Easy Come obbligatorio.

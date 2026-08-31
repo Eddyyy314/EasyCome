@@ -1,7 +1,7 @@
 export const MODULE_PRICES = Object.freeze({
-  hospitality_core: 0, direct_booking: 0, website: 0, reports: 0, easycome_hub: 0,
+  hospitality_core: 0, reports: 0, easycome_hub: 0,
   channel_sync: 12, guest_comms: 10, self_checkin: 10, tourist_tax: 6, dynamic_pricing: 12,
-  expenses: 6, finance: 18, audit: 16, brain: 20, automations: 8, multiuser: 6, mobile_app: 12, branding: 6,
+  expenses: 6, finance: 18, audit: 16, brain: 20, automations: 8, multiuser: 6, mobile_app: 12,
 });
 
 const LEGACY_MODULE_ALIASES = Object.freeze({

@@ -11,9 +11,9 @@ export const SEARCH_KEYWORDS = [
 
 const HOSPITALITY_TEMPLATE = {
   label:'Easy Come Hospitality', icon:'⌂', color:'#416a54', accent:'#171815',
-  nav:['Dashboard','Booking Connector','Prenotazioni','Ospiti','Camere','Pulizie','Pagamenti'],
+  nav:['Oggi','Calendario','Prenotazioni','Ospiti','Camere','Pulizie','Pagamenti','Controllo','Finance'],
   kpis:['Arrivi oggi','Partenze','Occupazione','Da incassare'], base:[3,2,74,860],
-  rows:[['Giulia Romano','Camera Deluxe','Oggi','Sito diretto'],['Marco De Luca','Matrimoniale 2','Oggi','Booking.com'],['Anna Klein','Family 1','Domani','Airbnb']],
+  rows:[['Giulia Romano','Camera Deluxe','Oggi','Diretta'],['Marco De Luca','Matrimoniale 2','Oggi','Booking.com'],['Anna Klein','Family 1','Domani','Airbnb']],
   activity:['Prenotazione diretta ricevuta','Check-in pronto','Camera segnata da pulire']
 };
 
@@ -30,8 +30,8 @@ function inferredUnits(place){const seed=hashSeed(place.id||place.displayName?.t
 export function buildProject(place,_templateId='hospitality',ownerEmail=''){
   const p=ECGenerator.defaultProject(), units=inferredUnits(place), name=place.displayName?.text||'La tua struttura', city=String(place.formattedAddress||'').split(',').slice(-2,-1)[0]?.trim()||'';
   p.version='1.0.0-hospitality-demo';p.templateId='hospitality';
-  p.company.name=name;p.company.industry='B&B · Affittacamere · Case vacanza';p.company.description=`Sistema operativo hospitality per ${name}: booking collegabile al sito esistente, Front Desk, controllo operativo, Finance e Hub. I dati della demo sono fittizi.`;p.company.email=ownerEmail||'';p.company.primaryColor='#416a54';p.company.accentColor='#171815';p.company.surfaceColor='#f3efe7';p.company.style='studio';p.company.layout='studio';
-  p.modules=['hospitality_core','direct_booking','website','dynamic_pricing','reports','audit','finance','easycome_hub','automations'];
+  p.company.name=name;p.company.industry='B&B · Affittacamere · Case vacanza';p.company.description=`Gestionale hospitality per ${name}: Front Desk, calendario, ospiti, camere, pagamenti, controllo operativo, Finance e Hub. I dati della demo sono fittizi.`;p.company.email=ownerEmail||'';p.company.primaryColor='#416a54';p.company.accentColor='#171815';p.company.surfaceColor='#f3efe7';p.company.style='studio';p.company.layout='studio';
+  p.modules=['hospitality_core','dynamic_pricing','reports','audit','finance','easycome_hub','automations','channel_sync'];
   p.hospitality={...(p.hospitality||{}),type:'B&B / Affittacamere',city,address:place.formattedAddress||'',unitCount:units,maxGuests:units*2,checkinFrom:'15:00',checkoutBy:'10:30',directBooking:true,paymentsEnabled:true,depositMode:'percentage',cancellationPolicy:'Flessibile',connectorMode:'overlay',unitTypes:[{name:'Camera Matrimoniale',count:Math.max(1,units-2),capacity:2,basePrice:95},{name:'Camera Deluxe',count:1,capacity:2,basePrice:125},{name:'Family',count:1,capacity:4,basePrice:155}]};
   p.pricing.mode='dynamic';p.pricing.enabled=true;p.pricing.basePrice=95;p.pricing.depositPercent=30;
   p.delivery.packagePrice=99;p.delivery.implementationSelected=true;p.delivery.managedServiceSelected=false;p.delivery.previewApproved=true;
@@ -41,4 +41,4 @@ export function buildQueryPlan(seedValue='0',max=220){const seed=hashSeed(seedVa
 export function demoSlug(placeId){return `ec-h-${crypto.createHash('sha256').update(String(placeId)+':hospitality-v1').digest('hex').slice(0,18)}`}
 export function demoPrice(place){const raw=Number(ECGenerator.calculatePrice(buildProject(place)).total||249);return Math.max(249,Math.ceil((raw+1)/10)*10-1)}
 export function outreachSubject(place){return `Abbiamo ridisegnato il sistema digitale di ${place.displayName?.text||'la vostra struttura'}`}
-export function outreachMessage(place,demoUrl,price=249){const name=place.displayName?.text||'la vostra struttura';return `Buongiorno,\n\nsono Edoardo di Easy Come Hospitality. Abbiamo preparato gratuitamente una demo per ${name}: un sistema unico che si collega al vostro sito esistente: prenotazione diretta, Front Desk, calendario, pagamenti, controllo operativo e numeri della struttura.\n\nLa demo usa dati fittizi e serve solo a mostrarvi come potrebbe funzionare:\n${demoUrl}\n\nLa configurazione mostrata ha un prezzo indicativo di €${price} una tantum, inclusa l'implementazione prevista nel progetto. Nessun acquisto è richiesto per vedere la demo.\n\nSe l'idea vi interessa, dal link potete partire dalla configurazione e adattarla alla vostra struttura.\n\nUn saluto,\nEdoardo\nEasy Come Hospitality`;}
+export function outreachMessage(place,demoUrl,price=249){const name=place.displayName?.text||'la vostra struttura';return `Buongiorno,\n\nsono Edoardo di Easy Come Hospitality. Abbiamo preparato gratuitamente una demo per ${name}: un gestionale costruito per strutture ricettive: Front Desk, calendario, prenotazioni, ospiti, pagamenti, controllo operativo e numeri della struttura.\n\nLa demo usa dati fittizi e serve solo a mostrarvi come potrebbe funzionare:\n${demoUrl}\n\nLa configurazione mostrata ha un prezzo indicativo di €${price} una tantum, inclusa l'implementazione prevista nel progetto. Nessun acquisto è richiesto per vedere la demo.\n\nSe l'idea vi interessa, dal link potete partire dalla configurazione e adattarla alla vostra struttura.\n\nUn saluto,\nEdoardo\nEasy Come Hospitality`;}
