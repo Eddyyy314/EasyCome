@@ -2257,7 +2257,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
       { name: 'vercel.json', data: JSON.stringify({ cleanUrls: true, trailingSlash: false }, null, 2) },
       { name: 'netlify.toml', data: '[build]\n  publish = "."\n\n[[headers]]\n  for = "/*"\n  [headers.values]\n    X-Frame-Options = "DENY"\n    X-Content-Type-Options = "nosniff"\n' },
     ];
-    return { project: configObject, entities, price, files, filename: `${project.company.slug || 'gestionale'}-easycome-hospitality-v1-2.zip` };
+    return { project: configObject, entities, price, files, filename: `${project.company.slug || 'gestionale'}-easycome-hospitality-v1-3.zip` };
   }
 
   function escapeHtml(value) {
