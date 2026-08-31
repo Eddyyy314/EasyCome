@@ -12,29 +12,20 @@
   const PROSPECT_MODE = Boolean(PROSPECT_DEMO_SLUG && URL_PARAMS.get('source') === 'prospect');
 
   const steps = [
-    { id: 'idea', label: 'Attività', subtitle: 'Chi sei e cosa vuoi semplificare' },
-    { id: 'modules', label: 'Funzioni', subtitle: 'Cosa deve fare il sistema' },
-    { id: 'structure', label: 'Struttura', subtitle: 'Cosa vuoi tenere sotto controllo' },
-    { id: 'logic', label: 'Regole', subtitle: 'Prezzi, procedure e automazioni' },
-    { id: 'design', label: 'Layout', subtitle: 'Scegli un’identità già progettata' },
-    { id: 'preview', label: 'Anteprima', subtitle: 'Naviga il gestionale vero' },
-    { id: 'delivery', label: 'Attivazione', subtitle: 'Riepilogo, implementazione e servizio' },
+    { id: 'idea', label: 'Struttura', subtitle: 'Nome, tipologia e dimensione' },
+    { id: 'modules', label: 'Funzioni', subtitle: 'Cosa vuoi automatizzare' },
+    { id: 'structure', label: 'Alloggi', subtitle: 'Camere, appartamenti e capacità' },
+    { id: 'logic', label: 'Tariffe', subtitle: 'Prezzi, caparra e automazioni' },
+    { id: 'design', label: 'Sito', subtitle: 'Identità e stile della struttura' },
+    { id: 'preview', label: 'Anteprima', subtitle: 'Sito + gestionale + controllo' },
+    { id: 'delivery', label: 'Attivazione', subtitle: 'Riepilogo e acquisto una tantum' },
   ];
 
   const TEMPLATES = [
-    { id: 'complete', icon: '◆', name: 'Sistema aziendale completo', description: 'Clienti, attività, preventivi, pagamenti, report, automazioni, app e manuale.', industry: 'Impresa e servizi', modules: ['crm','tasks','quotes','payments','expenses','invoices','reports','automations','multiuser','finance','brain','audit','website','mobile_app','branding','easycome_hub'] },
-    { id: 'custom', icon: '✦', name: 'Parti essenziale', description: 'Clienti, attività, manuale e Easy Come Hub. Aggiungi solo ciò che serve.', modules: ['crm', 'tasks', 'easycome_hub'] },
-    { id: 'intelligence', icon: '◈', name: 'CFO & Intelligence', description: 'Finance, Brain, Audit, clienti, attività e controlli per guidare le decisioni.', industry: 'Impresa e controllo di gestione', modules: ['crm','tasks','invoices','payments','expenses','reports','finance','brain','audit','automations','multiuser','easycome_hub'] },
-    { id: 'booking', icon: '▦', name: 'Prenotazioni e disponibilità', description: 'Camere, spazi, noleggi, strutture e servizi con calendario risorse.', industry: 'Attività con prenotazioni', modules: ['crm', 'tasks', 'bookings', 'quotes', 'payments', 'dynamic_pricing', 'automations', 'multiuser','easycome_hub'], pricingMode: 'dynamic' },
-    { id: 'appointments', icon: '◷', name: 'Agenda e appuntamenti', description: 'Studi, saloni, centri, consulenti e professionisti.', industry: 'Servizi su appuntamento', modules: ['crm', 'tasks', 'appointments', 'payments', 'quotes', 'automations', 'multiuser','easycome_hub'], pricingMode: 'manual_quote' },
-    { id: 'restaurant', icon: '♨', name: 'Ristorazione', description: 'Prenotazioni, ordini, tavoli, fornitori, turni e cassa.', industry: 'Ristorazione', modules: ['crm', 'tasks', 'bookings', 'orders', 'inventory', 'expenses', 'staff', 'reports', 'automations','easycome_hub'] },
-    { id: 'workshop', icon: '⌁', name: 'Officina e interventi', description: 'Veicoli, lavori, preventivi, ricambi e stato intervento.', industry: 'Officina o assistenza tecnica', modules: ['crm', 'tasks', 'quotes', 'orders', 'inventory', 'payments', 'assets', 'automations', 'multiuser','easycome_hub'], pricingMode: 'manual_quote', custom: [{ key: 'vehicles', label: 'Veicoli', singular: 'Veicolo', fields: [{ key: 'plate', label: 'Targa', type: 'text', required: true }, { key: 'customer', label: 'Cliente', type: 'text', required: true }, { key: 'brand', label: 'Marca e modello', type: 'text' }, { key: 'mileage', label: 'Chilometraggio', type: 'number' }, { key: 'notes', label: 'Note', type: 'longtext' }] }] },
-    { id: 'professional', icon: '§', name: 'Studio professionale', description: 'Clienti, pratiche, documenti, scadenze, preventivi e attività.', industry: 'Studio professionale', modules: ['crm', 'tasks', 'projects', 'quotes', 'invoices', 'payments', 'documents', 'automations', 'multiuser','easycome_hub'], pricingMode: 'manual_quote', custom: [{ key: 'cases', label: 'Pratiche', singular: 'Pratica', fields: [{ key: 'title', label: 'Oggetto', type: 'text', required: true }, { key: 'customer', label: 'Cliente', type: 'text', required: true }, { key: 'status', label: 'Stato', type: 'select', options: ['Nuova', 'In lavorazione', 'In attesa', 'Chiusa'] }, { key: 'deadline', label: 'Scadenza', type: 'date' }, { key: 'notes', label: 'Note', type: 'longtext' }] }] },
-    { id: 'health', icon: '✚', name: 'Studio medico o dentistico', description: 'Pazienti, appuntamenti, trattamenti, documenti e preventivi personalizzati.', industry: 'Studio sanitario', modules: ['crm','tasks','appointments','quotes','payments','documents','multiuser','easycome_hub'], pricingMode: 'manual_quote', custom: [{ key:'patients', label:'Pazienti', singular:'Paziente', fields:[{key:'name',label:'Nome e cognome',type:'text',required:true},{key:'phone',label:'Telefono',type:'phone'},{key:'birth_date',label:'Data di nascita',type:'date'},{key:'treatment',label:'Trattamento',type:'text'},{key:'next_visit',label:'Prossimo controllo',type:'date'},{key:'notes',label:'Note riservate',type:'longtext'}]}] },
-    { id: 'retail', icon: '◇', name: 'Negozio e vendite', description: 'Prodotti, ordini, scorte, clienti, pagamenti e report.', industry: 'Commercio', modules: ['crm', 'tasks', 'orders', 'inventory', 'invoices', 'payments', 'expenses', 'reports', 'automations', 'multiuser','easycome_hub'], pricingMode:'fixed' },
-    { id: 'projects', icon: '△', name: 'Progetti e cantieri', description: 'Commesse, sopralluoghi, materiali, documenti e avanzamento.', industry: 'Impresa a commessa', modules: ['crm', 'tasks', 'projects', 'quotes', 'expenses', 'staff', 'documents', 'assets', 'reports', 'automations', 'multiuser','easycome_hub'], pricingMode:'manual_quote' },
-    { id: 'membership', icon: '◎', name: 'Iscrizioni e abbonati', description: 'Palestre, scuole, corsi, associazioni e membership.', industry: 'Attività con iscritti', modules: ['crm', 'tasks', 'appointments', 'payments', 'documents', 'reports', 'automations', 'multiuser','easycome_hub'], pricingMode:'subscription', custom: [{ key: 'memberships', label: 'Abbonamenti', singular: 'Abbonamento', fields: [{ key: 'customer', label: 'Iscritto', type: 'text', required: true }, { key: 'plan', label: 'Piano', type: 'text', required: true }, { key: 'start_date', label: 'Inizio', type: 'date' }, { key: 'end_date', label: 'Scadenza', type: 'date' }, { key: 'status', label: 'Stato', type: 'select', options: ['Attivo', 'In scadenza', 'Scaduto'] }] }] },
+    { id: 'hospitality', icon: '⌂', name: 'Easy Come Hospitality', description: 'Sistema completo per B&B, affittacamere, case vacanza e piccoli property manager.', industry: 'Ospitalità indipendente', modules: ['hospitality_core','direct_booking','website','reports','easycome_hub','dynamic_pricing','automations'], pricingMode: 'dynamic' },
   ];
+
+  const HOSPITALITY_MODULES = new Set(['hospitality_core','direct_booking','website','channel_sync','guest_comms','self_checkin','tourist_tax','dynamic_pricing','expenses','reports','finance','audit','brain','automations','multiuser','mobile_app','branding','easycome_hub']);
 
   const LAYOUT_PRESETS = [
     { id:'studio', name:'Studio', description:'Chiaro, ordinato e autorevole', primary:'#275dff', accent:'#17213b', surface:'#f7f8fb', sample:['#17213b','#275dff','#ffffff'] },
@@ -46,14 +37,9 @@
   ];
 
   const SECTION_PRESETS = [
-    { id:'patients', icon:'✚', label:'Pazienti', singular:'Paziente', fields:[['Nome e cognome','text',true],['Telefono','phone'],['Data di nascita','date'],['Trattamento','text'],['Prossimo controllo','date'],['Note riservate','longtext']] },
-    { id:'vehicles', icon:'⌁', label:'Veicoli', singular:'Veicolo', fields:[['Targa','text',true],['Cliente','text',true],['Marca e modello','text'],['Chilometraggio','number'],['Stato intervento','select'],['Note','longtext']] },
-    { id:'cases', icon:'§', label:'Pratiche', singular:'Pratica', fields:[['Oggetto','text',true],['Cliente','text',true],['Stato','select'],['Scadenza','date'],['Responsabile','text'],['Note','longtext']] },
-    { id:'properties', icon:'⌂', label:'Immobili', singular:'Immobile', fields:[['Codice','text',true],['Indirizzo','text',true],['Proprietario','text'],['Stato','select'],['Valore','currency'],['Note','longtext']] },
-    { id:'worksites', icon:'△', label:'Cantieri', singular:'Cantiere', fields:[['Nome cantiere','text',true],['Cliente','text',true],['Indirizzo','text'],['Stato','select'],['Data fine prevista','date'],['Budget','currency']] },
-    { id:'courses', icon:'◎', label:'Corsi', singular:'Corso', fields:[['Titolo','text',true],['Docente','text'],['Data inizio','date'],['Posti','number'],['Stato','select'],['Note','longtext']] },
-    { id:'interventions', icon:'⚒', label:'Interventi', singular:'Intervento', fields:[['Titolo','text',true],['Cliente','text',true],['Data e ora','datetime'],['Tecnico','text'],['Stato','select'],['Costo','currency']] },
-    { id:'suppliers_custom', icon:'◇', label:'Fornitori', singular:'Fornitore', fields:[['Ragione sociale','text',true],['Referente','text'],['Email','email'],['Telefono','phone'],['Categoria','select'],['Note','longtext']] },
+    { id:'rooms', icon:'⌂', label:'Alloggi', singular:'Alloggio', fields:[['Nome','text',true],['Tipologia','select'],['Capacità','number'],['Prezzo base','currency'],['Stato camera','select'],['Note','longtext']] },
+    { id:'housekeeping', icon:'✦', label:'Pulizie', singular:'Pulizia', fields:[['Camera / alloggio','text',true],['Data','date',true],['Stato','select'],['Responsabile','text'],['Priorità','select'],['Note','longtext']] },
+    { id:'extras', icon:'＋', label:'Extra soggiorno', singular:'Extra', fields:[['Nome extra','text',true],['Prezzo','currency'],['Unità','select'],['Attivo','boolean'],['Note','longtext']] },
   ];
 
   const PRICE_MODES = [
@@ -76,6 +62,7 @@
 
   let activeUserId = '';
   let project = normalizeProject(G.defaultProject());
+  project.templateId='hospitality';
   let currentStep = 0;
   let customFieldDraft = [];
   let sectionDraft = { label: '', singular: '' };
@@ -101,6 +88,8 @@
     p.company.layout = p.company.layout || p.company.style || 'studio';
     p.company.logoData = p.company.logoData || '';
     p.hub = { enabled: true, manual: true, support: true, featureRequests: true, onboarding: true, ...(p.hub || {}) };
+    p.hospitality = { type:'B&B', city:'', address:'', unitCount:4, maxGuests:10, checkinFrom:'15:00', checkoutBy:'10:30', directBooking:true, paymentsEnabled:true, depositMode:'percentage', cancellationPolicy:'Flessibile', airbnbIcal:'', bookingIcal:'', connectorMode:'overlay', unitTypes:[{name:'Camera Matrimoniale',count:2,capacity:2,basePrice:95},{name:'Camera Deluxe',count:1,capacity:2,basePrice:125},{name:'Family',count:1,capacity:4,basePrice:155}], ...(p.hospitality||{}) };
+    p.templateId = 'hospitality';
     p.pricing.mode = p.pricing.mode || (p.pricing.enabled ? 'dynamic' : 'none');
     p.delivery.previewApproved = Boolean(p.delivery.previewApproved);
     p.delivery.implementationSelected = true;
@@ -141,7 +130,8 @@
   function logoMarkup() { return project.company.logoData ? `<img src="${project.company.logoData}" alt="">` : esc(initials()); }
 
   function syncEffects() {
-    if (!project.modules.includes('easycome_hub')) project.modules.push('easycome_hub');
+    ['hospitality_core','direct_booking','website','reports','easycome_hub'].forEach(id=>{if(!project.modules.includes(id))project.modules.push(id)});
+    project.modules = project.modules.filter(id=>HOSPITALITY_MODULES.has(id));
     project.hub = { enabled: true, manual: true, support: true, featureRequests: true, onboarding: true, ...(project.hub || {}) };
     const mode = project.pricing?.mode || 'none';
     project.pricing.enabled = ['fixed','hourly','subscription','dynamic'].includes(mode);
@@ -193,26 +183,30 @@
   }
 
   function ideaStep() {
-    const c = project.company;
-    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 1</span><h1>Che impresa vuoi semplificare?</h1><p>Puoi comporre il sistema in autonomia oppure partire da una consulenza completamente personalizzata.</p></div><div class="heading-badge">Anteprima sempre gratuita</div></div>
-      <section class="start-paths"><article class="start-path active"><span>1</span><div><strong>Lo configuro adesso</strong><small>Scegli funzioni, struttura e layout. Vedrai tutto prima di pagare.</small></div></article><a class="start-path custom" href="/profilo.html?tab=meeting"><span>✦</span><div><strong>Voglio una soluzione su misura</strong><small>Raccontaci il problema e richiedi un incontro gratuito con Easy Come.</small></div><b>Richiedi incontro →</b></a></section>
-      <div class="section-title"><div><h2>Scegli una partenza intelligente</h2><p>I modelli accelerano la configurazione, ma non limitano il risultato.</p></div><span>${TEMPLATES.length} modelli</span></div>
-      <div class="template-grid">${TEMPLATES.map((template) => `<button class="template-card ${project.templateId === template.id ? 'active' : ''}" data-template="${template.id}"><span class="template-icon">${template.icon}</span><strong>${esc(template.name)}</strong><small>${esc(template.description)}</small>${template.id === 'custom' ? '<em>Universale</em>' : ''}</button>`).join('')}</div>
-      <div class="form-grid two">
-        <label class="field"><span>Nome dell’attività *</span><input id="companyName" value="${esc(c.name)}" placeholder="Es. Studio Aurora" autofocus></label>
-        <label class="field"><span>Settore</span><input id="industry" value="${esc(c.industry)}" placeholder="Es. Officina, ristorante, consulenza"></label>
-        <label class="field full"><span>Quale lavoro deve rendere più semplice?</span><textarea id="description" placeholder="Racconta cosa viene fatto oggi a mano, cosa si perde e cosa deve diventare automatico…">${esc(c.description)}</textarea><small>Questo testo aiuta a progettare sezioni, manuale e flussi coerenti con il tuo lavoro.</small></label>
-        <label class="field"><span>Email titolare *</span><input id="companyEmail" type="email" value="${esc(c.email)}" placeholder="titolare@azienda.it"><small>Serve per creare in sicurezza il primo account amministratore.</small></label>
+    const c = project.company, h = project.hospitality || {};
+    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 1</span><h1>Partiamo dalla tua struttura.</h1><p>Easy Come Hospitality non ti chiede di progettare un software. Ci dici come lavori e prepara il sistema intorno alla struttura.</p></div><div class="heading-badge">Sito + booking + gestionale</div></div>
+      <section class="hospitality-intro"><div><b>01</b><strong>Vendita diretta</strong><small>Il sito riceve prenotazioni e pagamenti.</small></div><div><b>02</b><strong>Operatività</strong><small>Calendario, ospiti, camere, pulizie e incassi.</small></div><div><b>03</b><strong>Controllo</strong><small>Easy Come segnala ciò che non torna.</small></div><div><b>04</b><strong>Numeri</strong><small>Occupazione, ADR, ricavi e margini.</small></div></section>
+      <div class="form-grid two hospitality-form">
+        <label class="field"><span>Nome della struttura *</span><input id="companyName" value="${esc(c.name)}" placeholder="Es. Dimora Aurora" autofocus></label>
+        <label class="field"><span>Tipologia</span><select id="hospitalityType">${['B&B','Affittacamere','Casa vacanza','Appartamenti','Guest house','Piccolo residence','Property manager'].map(v=>`<option ${h.type===v?'selected':''}>${v}</option>`).join('')}</select></label>
+        <label class="field"><span>Città / destinazione</span><input id="hospitalityCity" value="${esc(h.city||'')}" placeholder="Es. Roma"></label>
+        <label class="field"><span>Indirizzo</span><input id="hospitalityAddress" value="${esc(h.address||'')}" placeholder="Via …"></label>
+        <label class="field"><span>Numero camere / alloggi</span><input id="unitCount" type="number" min="1" max="50" value="${Number(h.unitCount||4)}"></label>
+        <label class="field"><span>Capienza massima ospiti</span><input id="maxGuests" type="number" min="1" max="200" value="${Number(h.maxGuests||10)}"></label>
+        <label class="field"><span>Email titolare *</span><input id="companyEmail" type="email" value="${esc(c.email)}" placeholder="titolare@struttura.it"></label>
         <label class="field"><span>Telefono</span><input id="companyPhone" value="${esc(c.phone)}" placeholder="+39 …"></label>
+        <label class="field full"><span>Come lavori oggi?</span><textarea id="description" placeholder="Es. Prenotazioni da Booking e Airbnb, richieste dirette su WhatsApp, pulizie gestite a voce…">${esc(c.description)}</textarea><small>Serve per personalizzare flussi, onboarding e documentazione.</small></label>
+        <input id="industry" type="hidden" value="Ospitalità indipendente">
       </div>
-      <div class="info-card"><strong>Risultato finale</strong><p>Riceverai gestionale responsive, workbook Excel, database Supabase, sito pubblico, PWA installabile, Easy Come Hub, brand kit, automazioni e documentazione nello stesso ZIP, in base ai moduli scelti.</p></div>`;
+      <div class="info-card"><strong>Obiettivo</strong><p>Una prenotazione nasce una volta e alimenta disponibilità, ospite, pagamento, check-in, pulizia, controllo e performance. Nessuna ricopiatura tra sistemi.</p></div>`;
   }
 
   function modulesStep() {
-    const categories = [...new Set(G.MODULES.map((item) => item.category))];
-    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 2</span><h1>Scegli soltanto ciò che serve.</h1><p>I moduli hanno prezzi piccoli e trasparenti. Clienti, attività, dashboard e gestione dati sono già compresi nel pacchetto.</p></div><div class="heading-badge">Base ${money(99)}</div></div>
-      <div class="saving-note">✓ Extra ridotti: la maggior parte costa tra €8 e €20 una tantum</div>
-      ${categories.map((category) => `<section class="module-section"><div class="section-title"><h2>${esc(category)}</h2><span>${G.MODULES.filter((item) => item.category === category).length} funzioni</span></div><div class="module-grid">${G.MODULES.filter((item) => item.category === category).map(moduleCard).join('')}</div></section>`).join('')}`;
+    const visible = G.MODULES.filter((item)=>HOSPITALITY_MODULES.has(item.id));
+    const categories = [...new Set(visible.map((item) => item.category))];
+    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 2</span><h1>Cosa vuoi far fare a Easy Come?</h1><p>Il cuore Hospitality è già incluso. Qui aggiungi soltanto ciò che rende la gestione più automatica o più intelligente.</p></div><div class="heading-badge">Core incluso</div></div>
+      <div class="saving-note">✓ Ospiti, prenotazioni, alloggi, pagamenti, pulizie, sito, booking diretto, dashboard e Hub sono la base del prodotto.</div>
+      ${categories.map((category) => `<section class="module-section"><div class="section-title"><h2>${esc(category)}</h2><span>${visible.filter((item) => item.category === category).length}</span></div><div class="module-grid">${visible.filter((item) => item.category === category).map(moduleCard).join('')}</div></section>`).join('')}`;
   }
 
   function moduleCard(module) {
@@ -221,58 +215,11 @@
   }
 
   function structureStep() {
-    const entities = G.buildEntities(project);
-    const customCount = project.customEntities.length;
-    const composerTitle = editingSectionKey ? 'Modifica la tua sezione' : 'Costruisci una nuova sezione';
-    const composerSubtitle = editingSectionKey ? 'Cambia nome, ordine e informazioni senza perdere la struttura del progetto.' : 'Parti da una base oppure costruiscila da zero. La vedi mentre la componi.';
-    const previewLabel = sectionDraft.label.trim() || 'Nuova sezione';
-    const previewSingular = sectionDraft.singular.trim() || previewLabel.replace(/i$/i,'o');
-    const previewFields = customFieldDraft.slice(0,5);
-    const composer = !sectionComposerOpen ? '' : `
-      <section class="section-composer">
-        <div class="section-composer-head">
-          <div><span class="micro-label">${editingSectionKey ? 'MODIFICA AREA' : 'NUOVA AREA'}</span><h2>${composerTitle}</h2><p>${composerSubtitle}</p></div>
-          <div class="section-composer-actions"><span class="price-pill">${editingSectionKey ? 'Incluso' : '+ ' + money(6)}</span><button id="closeSectionComposer" class="composer-close" aria-label="Chiudi">×</button></div>
-        </div>
-        <div class="composer-template-block">
-          <div class="composer-block-title"><strong>Da dove vuoi partire?</strong><small>Un clic prepara già nomi e campi. Poi puoi cambiare tutto.</small></div>
-          <div class="section-preset-grid composer-presets">
-            <button class="section-preset blank ${selectedSectionPresetId==='blank'?'active':''}" data-section-preset="blank"><b>＋</b><span><strong>Da zero</strong><small>Costruisci la tua area</small></span></button>
-            ${SECTION_PRESETS.map((preset)=>`<button class="section-preset ${selectedSectionPresetId===preset.id?'active':''}" data-section-preset="${preset.id}"><b>${preset.icon}</b><span><strong>${esc(preset.label)}</strong><small>${preset.fields.length} campi pronti</small></span></button>`).join('')}
-          </div>
-        </div>
-        <div class="section-composer-grid">
-          <div class="composer-editor">
-            <div class="composer-card identity-card">
-              <div class="composer-card-head"><span>1</span><div><strong>Come la chiamate?</strong><small>Usa le stesse parole che usate davvero al lavoro.</small></div></div>
-              <div class="form-grid two compact"><label class="field"><span>Nome nel menu</span><input id="entityLabel" value="${esc(sectionDraft.label)}" placeholder="Es. Pazienti"></label><label class="field"><span>Una singola voce</span><input id="entitySingular" value="${esc(sectionDraft.singular)}" placeholder="Es. Paziente"></label></div>
-            </div>
-            <div class="composer-card fields-card">
-              <div class="composer-card-head"><span>2</span><div><strong>Quali informazioni vuoi vedere?</strong><small>Trascina mentalmente il flusso: metti prima ciò che consulti più spesso.</small></div><em>${customFieldDraft.length} campi</em></div>
-              <div class="draft-fields composer-field-list">${customFieldDraft.map((field,index)=>`<div class="draft-field composer-field-row"><div class="field-order-controls"><button class="move-draft-field" data-index="${index}" data-dir="-1" ${index===0?'disabled':''}>↑</button><button class="move-draft-field" data-index="${index}" data-dir="1" ${index===customFieldDraft.length-1?'disabled':''}>↓</button></div><span class="field-main"><strong>${esc(field.label)}</strong><small>${fieldTypeLabel(field.type)}</small></span><button class="required-toggle ${field.required?'active':''}" data-index="${index}" title="Campo obbligatorio">${field.required?'Obbligatorio':'Facoltativo'}</button><button class="icon-button remove-draft-field" data-index="${index}" aria-label="Rimuovi">×</button></div>`).join('')||'<div class="empty-section-fields"><b>Ancora nessun campo</b><span>Scegli una base sopra oppure aggiungi la prima informazione qui sotto.</span></div>'}</div>
-              <div class="quick-field-row composer-quick-fields"><span>Aggiungi al volo</span>${[['Stato','select'],['Scadenza','date'],['Responsabile','text'],['Importo','currency'],['Note','longtext']].map(([label,type])=>`<button class="quick-field" data-quick-field="${label}" data-quick-type="${type}">+ ${label}</button>`).join('')}</div>
-              <details class="custom-field-details" ${customFieldDraft.length===0?'open':''}><summary>+ Crea un campo personalizzato</summary><div class="field-adder clearer composer-field-adder"><label><span>Nome campo</span><input id="fieldLabel" placeholder="Es. Prossimo controllo"></label><label><span>Tipo</span><select id="fieldType"><option value="text">Testo breve</option><option value="longtext">Note lunghe</option><option value="number">Numero</option><option value="currency">Importo</option><option value="date">Data</option><option value="datetime">Data e ora</option><option value="email">Email</option><option value="phone">Telefono</option><option value="boolean">Sì / No</option><option value="select">Elenco di scelte</option></select></label><label id="fieldOptionsWrap" class="hidden"><span>Scelte possibili</span><input id="fieldOptions" placeholder="Nuovo, In corso, Completato"></label><label class="inline-check"><input id="fieldRequired" type="checkbox"> Obbligatorio</label><button id="addField" class="btn btn-secondary">Aggiungi campo</button></div></details>
-            </div>
-          </div>
-          <aside class="section-live-preview">
-            <div class="live-preview-label"><span>ANTEPRIMA LIVE</span><small>Così la ritroverai nel gestionale</small></div>
-            <div class="mini-product-shell">
-              <div class="mini-product-sidebar"><i>EC</i><span class="active">${esc(previewLabel)}</span><span>Dashboard</span><span>Attività</span></div>
-              <div class="mini-product-main"><small>${esc(previewLabel).toUpperCase()}</small><h3>${esc(previewLabel)}</h3><div class="mini-record-card"><header><strong>Nuovo ${esc(previewSingular)}</strong><b>＋</b></header>${previewFields.map((field)=>`<label><span>${esc(field.label)}${field.required?' *':''}</span><i>${field.type==='date'?'gg/mm/aaaa':field.type==='currency'?'0,00 €':field.type==='select'?'Seleziona…':'Inserisci…'}</i></label>`).join('')}${previewFields.length===0?'<div class="mini-preview-empty">I campi compariranno qui mentre li aggiungi.</div>':''}${customFieldDraft.length>5?`<div class="mini-preview-more">+ altri ${customFieldDraft.length-5} campi</div>`:''}<button>Salva ${esc(previewSingular)}</button></div></div>
-            </div>
-            <div class="composer-price-note"><strong>${editingSectionKey?'Modifica inclusa':'Questa sezione costa '+money(6)+' una tantum'}</strong><small>I primi 6 campi sono inclusi. Dal settimo: +1 € per campo.</small></div>
-          </aside>
-        </div>
-        <div class="section-composer-footer"><button id="cancelSectionComposer" class="btn btn-secondary">Annulla</button><button id="addEntity" class="btn btn-primary create-section-button">${editingSectionKey?'Salva modifiche':'Aggiungi “'+esc(previewLabel)+'” al gestionale'}</button></div>
-      </section>`;
-    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 3</span><h1>Costruisci la mappa del tuo lavoro.</h1><p>Ogni sezione è un’area reale della tua attività: clienti, pratiche, mezzi, corsi, immobili, commesse o qualsiasi cosa vuoi gestire.</p></div><div class="heading-badge">${entities.length} aree · ${customCount} su misura</div></div>
-      <section class="data-map structure-map">
-        <div class="data-map-head"><div><span class="micro-label">IL TUO GESTIONALE</span><h2>Queste saranno le voci principali</h2><p>Le aree incluse arrivano dalle funzioni scelte. Quelle arancioni sono costruite da te.</p></div></div>
-        <div class="entity-showcase structure-canvas">${entities.map((entity) => `<article class="entity-showcase-card ${entity.custom ? 'custom' : ''}"><header><span class="entity-showcase-icon">${entity.custom ? '✦' : esc(entity.label.slice(0,1))}</span><div><strong>${esc(entity.label)}</strong><small>${entity.custom ? 'Sezione su misura' : 'Inclusa automaticamente'}</small></div>${entity.custom ? `<div class="entity-card-actions"><button class="edit-entity" data-key="${esc(entity.key)}">Modifica</button><button class="icon-button remove-entity" data-key="${esc(entity.key)}" aria-label="Elimina">×</button></div>` : entity.key === 'pricing_rules' ? '<div class="entity-card-actions"><button class="configure-pricing">Configura</button><span class="included-tag">Inclusa</span></div>' : '<span class="included-tag">Inclusa</span>'}</header><div class="field-chip-row">${entity.fields.slice(0,5).map((field)=>`<span>${esc(field.label)}</span>`).join('')}${entity.fields.length>5?`<span class="more-chip">+${entity.fields.length-5}</span>`:''}</div></article>`).join('')}
-          <button id="openSectionComposer" class="add-section-tile"><span>＋</span><strong>Aggiungi una sezione</strong><small>Creala da zero o parti da un modello</small><b>+ ${money(6)}</b></button>
-        </div>
-      </section>
-      ${composer}`;
+    const h=project.hospitality||{}, units=Array.isArray(h.unitTypes)?h.unitTypes:[];
+    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 3</span><h1>Come è fatta la struttura?</h1><p>Non devi creare tabelle. Definisci le tipologie che vendi: Easy Come userà questi dati nel sito, nel booking e nel calendario.</p></div><div class="heading-badge">${Number(h.unitCount||0)} unità</div></div>
+      <section class="unit-builder"><header><div><span>CAMERE / ALLOGGI</span><h2>Le unità che il cliente può prenotare</h2></div><button id="addUnitType" class="btn btn-secondary">+ Tipologia</button></header>
+      <div class="unit-type-grid">${units.map((u,i)=>`<article class="unit-type"><div class="unit-number">${String(i+1).padStart(2,'0')}</div><label><span>Nome</span><input data-unit-index="${i}" data-unit-key="name" value="${esc(u.name||'')}"></label><div class="unit-row"><label><span>Quante</span><input type="number" min="1" data-unit-index="${i}" data-unit-key="count" value="${Number(u.count||1)}"></label><label><span>Ospiti</span><input type="number" min="1" data-unit-index="${i}" data-unit-key="capacity" value="${Number(u.capacity||2)}"></label><label><span>Da € / notte</span><input type="number" min="0" data-unit-index="${i}" data-unit-key="basePrice" value="${Number(u.basePrice||0)}"></label></div><button class="remove-unit-type" data-unit-remove="${i}">Rimuovi</button></article>`).join('')}</div></section>
+      <section class="stay-rules"><div class="section-title"><div><h2>Regole operative</h2><p>Servono al booking e alle attività del giorno.</p></div></div><div class="form-grid two compact"><label class="field"><span>Check-in dalle</span><input id="checkinFrom" type="time" value="${esc(h.checkinFrom||'15:00')}"></label><label class="field"><span>Check-out entro</span><input id="checkoutBy" type="time" value="${esc(h.checkoutBy||'10:30')}"></label><label class="field"><span>Politica cancellazione</span><select id="cancellationPolicy">${['Flessibile','Moderata','Rigida','Personalizzata'].map(v=>`<option ${h.cancellationPolicy===v?'selected':''}>${v}</option>`).join('')}</select></label><label class="field"><span>Caparra standard %</span><input id="hospitalityDeposit" type="number" min="0" max="100" value="${Number(project.pricing.depositPercent||30)}"></label></div></section>`;
   }
 
   function logicStep() {
@@ -337,12 +284,12 @@
     const current=entities.find((item)=>item.key===previewEntityKey)||entities[0];
     const brand=project.company.name||'La tua azienda';
     const body=mode==='workspace'&&current?workspacePreviewBody(current):mode==='calendar'?calendarPreviewBody(entities):dashboardPreviewBody(entities);
-    return `<div class="preview-app layout-${esc(project.company.layout||project.company.style||'studio')}" style="--pv-primary:${esc(project.company.primaryColor)};--pv-accent:${esc(project.company.accentColor)};--pv-surface:${esc(project.company.surfaceColor||'#f7f8fb')}"><div class="pv-mobile-topbar"><span class="pv-mobile-brand">${logoMarkup()}<b>${esc(brand)}</b></span><button type="button" data-preview-mode="hub">EC Hub</button></div><aside class="pv-sidebar"><div class="pv-logo"><span class="pv-logo-mark">${logoMarkup()}</span><div><strong>${esc(brand)}</strong><small>Gestionale aziendale</small></div></div><nav class="pv-nav"><button class="${mode==='dashboard'?'active':''}" data-pv-dashboard>⌂ Panoramica</button>${entities.slice(0,9).map((entity)=>`<button class="${mode==='workspace'&&current?.key===entity.key?'active':''}" data-pv-entity="${entity.key}">${esc(entity.label.slice(0,1))} &nbsp;${esc(entity.label)}</button>`).join('')}</nav><div class="pv-sidebar-system"><button data-preview-mode="hub">EC &nbsp;Easy Come Hub</button><span>Manuale e supporto inclusi</span></div></aside><main class="pv-main">${body}</main></div>`;
+    return `<div class="preview-app layout-${esc(project.company.layout||project.company.style||'studio')}" style="--pv-primary:${esc(project.company.primaryColor)};--pv-accent:${esc(project.company.accentColor)};--pv-surface:${esc(project.company.surfaceColor||'#f7f8fb')}"><div class="pv-mobile-topbar"><span class="pv-mobile-brand">${logoMarkup()}<b>${esc(brand)}</b></span><button type="button" data-preview-mode="hub">EC Hub</button></div><aside class="pv-sidebar"><div class="pv-logo"><span class="pv-logo-mark">${logoMarkup()}</span><div><strong>${esc(brand)}</strong><small>Hospitality OS</small></div></div><nav class="pv-nav"><button class="${mode==='dashboard'?'active':''}" data-pv-dashboard>⌂ Panoramica</button>${entities.slice(0,9).map((entity)=>`<button class="${mode==='workspace'&&current?.key===entity.key?'active':''}" data-pv-entity="${entity.key}">${esc(entity.label.slice(0,1))} &nbsp;${esc(entity.label)}</button>`).join('')}</nav><div class="pv-sidebar-system"><button data-preview-mode="hub">EC &nbsp;Easy Come Hub</button><span>Sito, booking e Hub collegati</span></div></aside><main class="pv-main">${body}</main></div>`;
   }
 
   function dashboardPreviewBody(entities) {
-    const brand=project.company.name||'Azienda';
-    return `<div class="pv-top"><div><h2>Panoramica</h2><p>Oggi · tutto ciò che richiede attenzione</p></div><div class="pv-user"><span>${esc(initials())}</span><div><b>${esc(project.company.email||'titolare@azienda.it')}</b><small>Account Easy Come</small></div></div></div><section class="pv-hero"><span>CENTRO OPERATIVO</span><h3>Buon lavoro, ${esc(brand.split(' ')[0])}.</h3><p>${esc(project.company.description||'Clienti, lavoro e scadenze in un unico spazio semplice.')}</p><div class="pv-hero-actions"><b>+ Nuova operazione</b><i>Vedi agenda</i></div></section><section class="pv-stats"><article class="pv-stat"><span>Da gestire oggi</span><strong>${Math.max(6,entities.length+3)}</strong><small>3 priorità alte</small></article><article class="pv-stat"><span>Attività aperte</span><strong>${Math.max(18,entities.length*5)}</strong><small>Aggiornate adesso</small></article><article class="pv-stat"><span>Clienti attivi</span><strong>128</strong><small>12 nuovi questo mese</small></article><article class="pv-stat"><span>Automazioni</span><strong>${project.automations.length}</strong><small>${project.automations.length?'Flussi configurati':'Aggiungibili in seguito'}</small></article></section><section class="pv-grid"><article class="pv-card"><div class="pv-card-title"><h4>Attività recente</h4><span>Ultimi 7 giorni</span></div><div class="pv-chart">${[42,61,48,77,59,91,72].map((height)=>`<i style="height:${height}%"></i>`).join('')}</div></article><article class="pv-card"><div class="pv-card-title"><h4>Agenda di oggi</h4><span>5 impegni</span></div><div class="pv-list">${entities.slice(0,4).map((entity,index)=>`<div><b>${String(9+index).padStart(2,'0')}:00</b><span><strong>${esc(entity.label)}</strong><small>${4+index*2} elementi da gestire</small></span></div>`).join('')}</div></article></section><section class="pv-bottom-grid"><article><span>SCADENZE</span><strong>3 attività urgenti</strong><small>Apri e assegna al team</small></article><article><span>MANUALE</span><strong>Guida personalizzata</strong><small>Inclusa nel sistema</small></article><article><span>EASY COME HUB</span><strong>Supporto disponibile</strong><small>Richiedi funzioni e assistenza</small></article></section>`;
+    const brand=project.company.name||'La tua struttura', h=project.hospitality||{};
+    return `<div class="pv-top"><div><h2>Oggi</h2><p>${esc(h.city||'La tua destinazione')} · reception e operazioni</p></div><div class="pv-user"><span>${esc(initials())}</span><div><b>${esc(project.company.email||'titolare@struttura.it')}</b><small>Easy Come Hospitality</small></div></div></div><section class="pv-hero"><span>CENTRO OPERATIVO</span><h3>Buongiorno, ${esc(brand.split(' ')[0])}.</h3><p>Arrivi, partenze, camere, pagamenti e priorità nello stesso posto.</p><div class="pv-hero-actions"><b>+ Nuova prenotazione</b><i>Apri calendario</i></div></section><section class="pv-stats"><article class="pv-stat"><span>Arrivi oggi</span><strong>4</strong><small>2 check-in completati</small></article><article class="pv-stat"><span>Partenze</span><strong>3</strong><small>2 camere da pulire</small></article><article class="pv-stat"><span>Occupazione</span><strong>78%</strong><small>${Number(h.unitCount||4)} unità totali</small></article><article class="pv-stat"><span>Da incassare</span><strong>€ 640</strong><small>3 saldi aperti</small></article></section><section class="pv-grid"><article class="pv-card"><div class="pv-card-title"><h4>Prossimi arrivi</h4><span>Oggi</span></div><div class="pv-list">${[['14:30','Giulia Romano','Camera Deluxe'],['16:00','Marco De Luca','Matrimoniale'],['17:30','Anna Klein','Family']].map(x=>`<div><b>${x[0]}</b><span><strong>${x[1]}</strong><small>${x[2]} · check-in da completare</small></span></div>`).join('')}</div></article><article class="pv-card"><div class="pv-card-title"><h4>Da non dimenticare</h4><span>Controllo</span></div><div class="pv-list"><div><b>!</b><span><strong>Saldo €220</strong><small>Prenotazione EC-184</small></span></div><div><b>!</b><span><strong>Camera 3 da pulire</strong><small>Arrivo alle 16:00</small></span></div><div><b>✓</b><span><strong>Nessuna doppia prenotazione</strong><small>Calendario controllato</small></span></div></div></article></section><section class="pv-bottom-grid"><article><span>DIRETTO</span><strong>€ 3.480 questo mese</strong><small>Prenotazioni dal sito collegato</small></article><article><span>ADR</span><strong>€ 118</strong><small>Tariffa media</small></article><article><span>EASY COME HUB</span><strong>Il tuo sistema</strong><small>Manuale e progetto acquistato</small></article></section>`;
   }
 
   function workspacePreviewBody(entity) {
@@ -356,9 +303,9 @@
   }
 
   function calendarPreviewBody(entities) {
-    const resources = ['Risorsa 01','Risorsa 02','Risorsa 03','Risorsa 04','Risorsa 05','Risorsa 06'];
+    const unitNames=(project.hospitality?.unitTypes||[]).flatMap(u=>Array.from({length:Math.max(1,Math.min(Number(u.count||1),4))},(_,i)=>`${u.name} ${i+1}`)).slice(0,6); const resources=unitNames.length?unitNames:['Camera 1','Camera 2','Camera 3','Family 1'];
     const days = Array.from({length:14},(_,index)=>index+3);
-    return `<div class="pv-top"><div><h2>Calendario disponibilità</h2><p>Vista mensile collegata a prenotazioni, appuntamenti e risorse</p></div><div class="pv-calendar-actions"><span>‹ Agosto 2026 ›</span><b>Oggi</b></div></div><section class="pv-calendar-kpis"><div><span>Disponibili oggi</span><strong>18</strong></div><div><span>Occupati</span><strong>7</strong></div><div><span>Richieste in attesa</span><strong>3</strong></div><div><span>Tasso utilizzo</span><strong>72%</strong></div></section><article class="pv-availability"><div class="pv-av-row pv-av-head"><b>Risorsa</b>${days.map((day)=>`<span>${day}<small>${['L','M','M','G','V','S','D'][(day-3)%7]}</small></span>`).join('')}</div>${resources.map((resource,rowIndex)=>`<div class="pv-av-row"><b>${resource}<small>${rowIndex%2?'Standard':'Premium'}</small></b>${days.map((day,colIndex)=>{const busy=(rowIndex*3+colIndex)%5===0||(rowIndex+colIndex)%7===0;const request=(rowIndex+colIndex)%9===0;return `<span class="${busy?'busy':request?'request':'free'}" title="${busy?'Occupato':request?'Richiesta':'Libero'}">${busy?'●':request?'◐':'✓'}</span>`}).join('')}</div>`).join('')}<footer><i class="free">✓ Libero</i><i class="busy">● Occupato</i><i class="request">◐ Richiesta</i></footer></article><section class="pv-calendar-bottom"><article><span>PROSSIMO ARRIVO</span><strong>Mario Rossi · 14:30</strong><small>Risorsa 03 · confermato</small></article><article><span>CONTROLLO AUTOMATICO</span><strong>Nessuna sovrapposizione</strong><small>Disponibilità verificata in tempo reale</small></article></section>`;
+    return `<div class="pv-top"><div><h2>Calendario unico</h2><p>Sito diretto, Airbnb, Booking.com e inserimenti manuali nello stesso quadro</p></div><div class="pv-calendar-actions"><span>‹ Settembre 2026 ›</span><b>Oggi</b></div></div><section class="pv-calendar-kpis"><div><span>Occupazione</span><strong>78%</strong></div><div><span>Dirette</span><strong>11</strong></div><div><span>OTA</span><strong>17</strong></div><div><span>Conflitti</span><strong>0</strong></div></section><article class="pv-availability"><div class="pv-av-row pv-av-head"><b>Alloggio</b>${days.map((day)=>`<span>${day}<small>${['L','M','M','G','V','S','D'][(day-3)%7]}</small></span>`).join('')}</div>${resources.map((resource,rowIndex)=>`<div class="pv-av-row"><b>${esc(resource)}<small>${rowIndex%2?'Diretto + OTA':'Disponibilità live'}</small></b>${days.map((day,colIndex)=>{const busy=(rowIndex*3+colIndex)%5===0||(rowIndex+colIndex)%7===0;const request=(rowIndex+colIndex)%9===0;return `<span class="${busy?'busy':request?'request':'free'}">${busy?'●':request?'◐':'✓'}</span>`}).join('')}</div>`).join('')}<footer><i class="free">✓ Libero</i><i class="busy">● Prenotato</i><i class="request">◐ Opzione</i></footer></article><section class="pv-calendar-bottom"><article><span>PROSSIMO ARRIVO</span><strong>Giulia Romano · 14:30</strong><small>Camera Deluxe · sito diretto</small></article><article><span>CONTROLLO</span><strong>Nessuna sovrapposizione</strong><small>Disponibilità coerente tra canali</small></article></section>`;
   }
 
   function sampleRows(entity) {
@@ -406,7 +353,7 @@
     project.delivery.managedServiceSelected = false;
     project.delivery.implementationPrice = 150;
     project.delivery.managedServicePrice = 0;
-    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 7</span><h1>Hai costruito il tuo Easy Come.</h1><p>Qui non scegli servizi tecnici separati. Il software viene acquistato come pacchetto e l’implementazione Easy Come da €150 è obbligatoria e inclusa nel totale.</p></div><div class="heading-badge ${ready ? 'success' : ''}">${audit.score}/100 · ${esc(audit.grade)}</div></div>
+    return `<div class="panel-heading"><div><span class="eyebrow">Passaggio 7</span><h1>Hai costruito il sistema della tua struttura.</h1><p>Qui non scegli servizi tecnici separati. Sito, booking engine e gestionale vengono acquistati come un unico pacchetto e l’implementazione Easy Come da €150 è obbligatoria e inclusa nel totale.</p></div><div class="heading-badge ${ready ? 'success' : ''}">${audit.score}/100 · ${esc(audit.grade)}</div></div>
       <div class="quality-grid"><article class="quality-card"><span>FILE CONSEGNATI</span><strong>45+</strong></article><article class="quality-card"><span>SEZIONI</span><strong>${entities.length}</strong></article><article class="quality-card"><span>VISTE OPERATIVE</span><strong>6</strong></article><article class="quality-card"><span>FOGLI EXCEL</span><strong>${Math.max(2, entities.length)}</strong></article></div>
       <section class="audit-panel delivery-audit"><div class="audit-score"><strong>${audit.score}</strong><span>/100</span><small>${esc(audit.grade)}</small></div><div><h3>Esito del controllo automatico</h3><div class="audit-list">${audit.blockers.map((item) => `<p class="blocker">✕ ${esc(item)}</p>`).join('')}${audit.warnings.slice(0, 5).map((item) => `<p class="warning">! ${esc(item)}</p>`).join('')}${audit.strengths.slice(0, 5).map((item) => `<p class="passed">✓ ${esc(item)}</p>`).join('')}</div></div></section>
       <div class="delivery-grid"><section class="package-card"><div class="package-icon">PRO</div><div><h2>${esc(project.company.name || 'Gestionale personalizzato')}</h2><p>Il pacchetto software che hai configurato, completo dell’implementazione Easy Come obbligatoria.</p></div><div class="package-files">${['Dashboard con KPI e indicatori', 'Foglio operativo modificabile tipo Excel', 'Calendario disponibilità e risorse', 'Workbook .xlsx già strutturato', 'Tabella, kanban, agenda e schede', 'Import/export, filtri e azioni massive', 'Preventivi, ordini e documenti stampabili', 'Ruoli, audit log e backup', 'Easy Come Hub: guida, assistenza e richieste', 'Database Supabase e automazioni', 'Manuale operativo', project.modules.includes('finance') ? 'Easy Come Finance' : 'Finance selezionabile', project.modules.includes('brain') ? 'Easy Come Brain' : 'Brain selezionabile', project.modules.includes('audit') ? 'Audit & Controlli' : 'Audit selezionabile'].map((item) => `<span>✓ ${item}</span>`).join('')}</div><button id="reviewPreview" class="btn btn-secondary" style="grid-column:1/-1">Rivedi anteprima</button><button id="downloadPackage" class="btn btn-primary download-button" ${ready ? '' : 'disabled'}>${SALES.mode === 'customer' ? 'Prepara il progetto e continua' : 'Prepara e scarica il pacchetto'}</button>${ready ? '' : `<p class="validation-note">Il pacchetto non è ancora consegnabile: risolvi i controlli rossi e approva l’anteprima.</p>`}</section>
@@ -419,7 +366,7 @@
   }
   function renderSummary() {
     const price = G.calculatePrice(project), entities = G.buildEntities(project), audit = G.auditProject(project);
-    $('#summary').innerHTML = `<div class="summary-brand"><span>${logoMarkup()}</span><div><strong>${esc(project.company.name || 'Nuovo gestionale')}</strong><small>${esc(project.company.industry || 'Progetto universale')}</small></div></div><div class="summary-metrics"><div><span>Moduli</span><strong>${project.modules.length}</strong></div><div><span>Sezioni</span><strong>${entities.length}</strong></div><div><span>Qualità</span><strong>${audit.score}</strong></div></div><div class="summary-quality ${audit.ready ? 'ready' : ''}"><span>${audit.ready ? 'PRONTO ALLA CONSEGNA' : 'CONTROLLO IN CORSO'}</span><strong>${esc(audit.grade)}</strong><small>${audit.blockers.length ? `${audit.blockers.length} elementi bloccanti` : 'Nessun blocco rilevato'}</small></div><div class="summary-capabilities"><span>Excel</span><span>Database</span><span>PWA</span><span>Brand kit</span></div><div class="summary-list"><div><span>Software base</span><strong>${money(price.base)}</strong></div><div><span>Extra scelti</span><strong>${money(price.extras)}</strong></div><div><span>Implementazione obbligatoria</span><strong>${money(price.implementation)}</strong></div></div><div class="summary-total"><span>Totale una tantum</span><strong>${money(price.total)}</strong><small>Pagamento unico · implementazione inclusa nel totale</small></div><button id="summaryPreview" class="btn btn-preview summary-cta">Prova l’anteprima</button><button id="resetProject" class="btn btn-ghost">Ricomincia da zero</button>`;
+    $('#summary').innerHTML = `<div class="summary-brand"><span>${logoMarkup()}</span><div><strong>${esc(project.company.name || 'Nuovo gestionale')}</strong><small>${esc(project.hospitality?.type || project.company.industry || 'Hospitality')}</small></div></div><div class="summary-metrics"><div><span>Moduli</span><strong>${project.modules.length}</strong></div><div><span>Sezioni</span><strong>${entities.length}</strong></div><div><span>Qualità</span><strong>${audit.score}</strong></div></div><div class="summary-quality ${audit.ready ? 'ready' : ''}"><span>${audit.ready ? 'PRONTO ALLA CONSEGNA' : 'CONTROLLO IN CORSO'}</span><strong>${esc(audit.grade)}</strong><small>${audit.blockers.length ? `${audit.blockers.length} elementi bloccanti` : 'Nessun blocco rilevato'}</small></div><div class="summary-capabilities"><span>Sito</span><span>Booking</span><span>PMS</span><span>Controllo</span></div><div class="summary-list"><div><span>Software base</span><strong>${money(price.base)}</strong></div><div><span>Extra scelti</span><strong>${money(price.extras)}</strong></div><div><span>Implementazione obbligatoria</span><strong>${money(price.implementation)}</strong></div></div><div class="summary-total"><span>Totale una tantum</span><strong>${money(price.total)}</strong><small>Pagamento unico · implementazione inclusa nel totale</small></div><button id="summaryPreview" class="btn btn-preview summary-cta">Prova l’anteprima</button><button id="resetProject" class="btn btn-ghost">Ricomincia da zero</button>`;
     $('#summaryPreview').onclick = openPreviewOverlay;
     $('#resetProject').onclick = () => { if (confirm('Eliminare la configurazione corrente?')) { project = normalizeProject(G.defaultProject()); currentStep = 0; customFieldDraft = []; render(); } };
   }
@@ -435,13 +382,17 @@
   }
 
   function bindIdea() {
-    $$('.template-card').forEach((card) => card.onclick = () => applyTemplate(card.dataset.template));
-    const bind = (id, setter) => { const input = $('#' + id); input.oninput = () => { setter(input.value); project.delivery.previewApproved = false; saveDraft(); renderSummary(); }; };
+    const bind = (id, setter, eventName='input') => { const input = $('#' + id); if(!input)return; input[eventName==='change'?'onchange':'oninput'] = () => { setter(input.value); project.delivery.previewApproved = false; saveDraft(); renderSummary(); }; };
     bind('companyName', (value) => { project.company.name = value; project.company.slug = G.slugify(value); });
     bind('industry', (value) => project.company.industry = value);
     bind('description', (value) => project.company.description = value);
     bind('companyEmail', (value) => project.company.email = value);
     bind('companyPhone', (value) => project.company.phone = value);
+    bind('hospitalityType', v=>project.hospitality.type=v,'change');
+    bind('hospitalityCity', v=>project.hospitality.city=v);
+    bind('hospitalityAddress', v=>project.hospitality.address=v);
+    bind('unitCount', v=>project.hospitality.unitCount=Math.max(1,Number(v||1)));
+    bind('maxGuests', v=>project.hospitality.maxGuests=Math.max(1,Number(v||1)));
   }
 
   function bindModules() {
@@ -467,62 +418,13 @@
   }
 
   function bindStructure() {
-    const presetToFields = (preset) => preset.fields.map(([label,type,required])=>({
-      key:G.sqlName(label), label, type, required:Boolean(required),
-      options:type==='select'?['Nuovo','In corso','Completato']:undefined,
-    }));
-    const resetComposer = () => { sectionComposerOpen=false; selectedSectionPresetId=''; editingSectionKey=''; customFieldDraft=[]; sectionDraft={label:'',singular:''}; };
-    const openFreshComposer = () => { sectionComposerOpen=true; selectedSectionPresetId=''; editingSectionKey=''; customFieldDraft=[]; sectionDraft={label:'',singular:''}; renderPanel(); };
-    const openButton=$('#openSectionComposer'); if(openButton)openButton.onclick=openFreshComposer;
-    $$('.configure-pricing').forEach((button)=>button.onclick=()=>{currentStep=3;render();window.scrollTo({top:0,behavior:'smooth'});});
-    ['#closeSectionComposer','#cancelSectionComposer'].forEach((selector)=>{const button=$(selector);if(button)button.onclick=()=>{resetComposer();renderPanel();};});
-    $$('.remove-entity').forEach((button)=>button.onclick=()=>{project.customEntities=project.customEntities.filter((entity)=>entity.key!==button.dataset.key);project.delivery.previewApproved=false;render();});
-    $$('.edit-entity').forEach((button)=>button.onclick=()=>{
-      const entity=project.customEntities.find((item)=>item.key===button.dataset.key); if(!entity)return;
-      editingSectionKey=entity.key; sectionComposerOpen=true; selectedSectionPresetId='';
-      sectionDraft={label:entity.label||'',singular:entity.singular||''}; customFieldDraft=JSON.parse(JSON.stringify(entity.fields||[])); renderPanel();
-    });
-    $$('.remove-draft-field').forEach((button)=>button.onclick=()=>{customFieldDraft.splice(Number(button.dataset.index),1);renderPanel();});
-    $$('.move-draft-field').forEach((button)=>button.onclick=()=>{const index=Number(button.dataset.index),next=index+Number(button.dataset.dir);if(next<0||next>=customFieldDraft.length)return;[customFieldDraft[index],customFieldDraft[next]]=[customFieldDraft[next],customFieldDraft[index]];renderPanel();});
-    $$('.required-toggle').forEach((button)=>button.onclick=()=>{const field=customFieldDraft[Number(button.dataset.index)];if(!field)return;field.required=!field.required;renderPanel();});
-    $$('.section-preset').forEach((button)=>button.onclick=()=>{
-      const id=button.dataset.sectionPreset; sectionComposerOpen=true; editingSectionKey=''; selectedSectionPresetId=id;
-      if(id==='blank'){sectionDraft={label:'',singular:''};customFieldDraft=[];renderPanel();return;}
-      const preset=SECTION_PRESETS.find((item)=>item.id===id); if(!preset)return;
-      sectionDraft={label:preset.label,singular:preset.singular}; customFieldDraft=presetToFields(preset); renderPanel();
-    });
-    $$('.quick-field').forEach((button)=>button.onclick=()=>{
-      const label=button.dataset.quickField,type=button.dataset.quickType;
-      if(customFieldDraft.some((field)=>field.label.toLowerCase()===label.toLowerCase()))return toast('Questo campo è già presente.');
-      customFieldDraft.push({key:G.sqlName(label),label,type,required:false,options:type==='select'?['Nuovo','In corso','Completato']:undefined}); renderPanel();
-    });
-    const updateComposerNames = () => {
-      const label=(sectionDraft.label||'').trim()||'Nuova sezione';
-      const singular=(sectionDraft.singular||'').trim()||label;
-      const sidebar=$('.mini-product-sidebar span.active'); if(sidebar)sidebar.textContent=label;
-      const kicker=$('.mini-product-main>small'); if(kicker)kicker.textContent=label.toUpperCase();
-      const title=$('.mini-product-main>h3'); if(title)title.textContent=label;
-      const recordTitle=$('.mini-record-card header strong'); if(recordTitle)recordTitle.textContent=`Nuovo ${singular}`;
-      const saveButton=$('.mini-record-card>button'); if(saveButton)saveButton.textContent=`Salva ${singular}`;
-      const submit=$('#addEntity'); if(submit)submit.textContent=editingSectionKey?'Salva modifiche':`Aggiungi “${label}” al gestionale`;
-    };
-    const entityLabel=$('#entityLabel'); if(entityLabel)entityLabel.oninput=(event)=>{sectionDraft.label=event.target.value;updateComposerNames();};
-    const entitySingular=$('#entitySingular'); if(entitySingular)entitySingular.oninput=(event)=>{sectionDraft.singular=event.target.value;updateComposerNames();};
-    const fieldType=$('#fieldType'); if(fieldType)fieldType.onchange=(event)=>{const wrap=$('#fieldOptionsWrap');if(wrap)wrap.classList.toggle('hidden',event.target.value!=='select');};
-    const addField=$('#addField'); if(addField)addField.onclick=()=>{
-      const input=$('#fieldLabel'); const label=input?.value.trim()||''; if(!label)return toast('Scrivi il nome del campo.');
-      const type=$('#fieldType')?.value||'text'; if(customFieldDraft.some((field)=>field.label.toLowerCase()===label.toLowerCase()))return toast('Esiste già un campo con questo nome.');
-      customFieldDraft.push({key:G.sqlName(label),label,type,required:Boolean($('#fieldRequired')?.checked),options:type==='select'?($('#fieldOptions')?.value||'').split(',').map((item)=>item.trim()).filter(Boolean):undefined}); renderPanel();
-    };
-    const addEntity=$('#addEntity'); if(addEntity)addEntity.onclick=()=>{
-      const label=(sectionDraft.label||'').trim(),singular=(sectionDraft.singular||sectionDraft.label||'').trim();
-      if(!label)return toast('Dai un nome alla sezione.'); if(!customFieldDraft.length)return toast('Aggiungi almeno un campo.');
-      const key=G.sqlName(label); const duplicate=G.buildEntities(project).some((entity)=>entity.key===key && entity.key!==editingSectionKey); if(duplicate)return toast('Esiste già una sezione con questo nome.');
-      const payload={key,label,singular:singular||label,fields:JSON.parse(JSON.stringify(customFieldDraft))};
-      if(editingSectionKey){const index=project.customEntities.findIndex((entity)=>entity.key===editingSectionKey);if(index>=0)project.customEntities[index]=payload;toast('Sezione aggiornata.');}
-      else {project.customEntities.push(payload);toast('Sezione aggiunta al gestionale.');}
-      resetComposer(); project.delivery.previewApproved=false; render();
-    };
+    const h=project.hospitality;
+    $$('#addUnitType').forEach(b=>b.onclick=()=>{});
+    const add=$('#addUnitType'); if(add)add.onclick=()=>{h.unitTypes=h.unitTypes||[];h.unitTypes.push({name:'Nuova tipologia',count:1,capacity:2,basePrice:Number(project.pricing.basePrice||90)});project.delivery.previewApproved=false;render();};
+    $$('[data-unit-index][data-unit-key]').forEach(input=>input.oninput=()=>{const i=Number(input.dataset.unitIndex),k=input.dataset.unitKey;h.unitTypes[i][k]=['count','capacity','basePrice'].includes(k)?Number(input.value||0):input.value;h.unitCount=(h.unitTypes||[]).reduce((sum,u)=>sum+Number(u.count||0),0);project.delivery.previewApproved=false;saveDraft();renderSummary();});
+    $$('[data-unit-remove]').forEach(button=>button.onclick=()=>{h.unitTypes.splice(Number(button.dataset.unitRemove),1);h.unitCount=(h.unitTypes||[]).reduce((sum,u)=>sum+Number(u.count||0),0);project.delivery.previewApproved=false;render();});
+    const bind=(id,setter,event='input')=>{const el=$('#'+id);if(!el)return;el[event==='change'?'onchange':'oninput']=()=>{setter(el.value);project.delivery.previewApproved=false;saveDraft();renderSummary();}};
+    bind('checkinFrom',v=>h.checkinFrom=v);bind('checkoutBy',v=>h.checkoutBy=v);bind('cancellationPolicy',v=>h.cancellationPolicy=v,'change');bind('hospitalityDeposit',v=>project.pricing.depositPercent=Number(v||0));
   }
 
   function bindLogic() {

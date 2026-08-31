@@ -5,49 +5,40 @@
   const IMPLEMENTATION_PRICE = 150;
 
   const MODULES = [
-    { id: 'crm', name: 'Clienti e CRM', category: 'Operatività', price: 0, included: true, description: 'Anagrafiche, contatti, note e storico.', entities: ['customers'] },
-    { id: 'tasks', name: 'Attività e scadenze', category: 'Operatività', price: 0, included: true, description: 'Task, priorità, responsabili e date.', entities: ['tasks'] },
-    { id: 'bookings', name: 'Prenotazioni e risorse', category: 'Vendite', price: 10, description: 'Agenda, risorse e controllo anti-sovrapposizione.', entities: ['bookings', 'resources'] },
-    { id: 'appointments', name: 'Appuntamenti', category: 'Vendite', price: 8, description: 'Agenda, servizi e operatori.', entities: ['appointments', 'services', 'staff'] },
-    { id: 'quotes', name: 'Preventivi', category: 'Vendite', price: 6, description: 'Documenti stampabili, righe, stato, validità e totale.', entities: ['quotes', 'quote_items'] },
-    { id: 'orders', name: 'Ordini', category: 'Vendite', price: 8, description: 'Ordini, righe, totali e avanzamento.', entities: ['orders', 'order_items', 'products'] },
-    { id: 'inventory', name: 'Magazzino', category: 'Operatività', price: 10, description: 'Prodotti, giacenze registrate e movimenti manuali.', entities: ['products', 'stock_movements'] },
-    { id: 'invoices', name: 'Fatture e scadenze', category: 'Amministrazione', price: 12, description: 'Gestione interna di fatture, righe, scadenze e stato. Non sostituisce la fatturazione elettronica.', entities: ['invoices', 'invoice_items'] },
-    { id: 'payments', name: 'Registro pagamenti e caparre', category: 'Amministrazione', price: 8, description: 'Registrazione di incassi, caparre, rimborsi e metodi. Checkout online escluso.', entities: ['payments'] },
-    { id: 'expenses', name: 'Spese e fornitori', category: 'Amministrazione', price: 6, description: 'Costi, fornitori e categorie.', entities: ['suppliers', 'expenses'] },
-    { id: 'projects', name: 'Progetti e commesse', category: 'Operatività', price: 8, description: 'Progetti, fasi, budget e avanzamento.', entities: ['projects', 'tasks'] },
-    { id: 'support', name: 'Ticket e assistenza', category: 'Relazioni', price: 8, description: 'Richieste, priorità, assegnazione e SLA.', entities: ['tickets'] },
-    { id: 'staff', name: 'Personale e turni', category: 'Operatività', price: 8, description: 'Anagrafiche, ruoli, turni e agenda del personale.', entities: ['staff', 'shifts'] },
-    { id: 'documents', name: 'Documenti e allegati', category: 'Operatività', price: 4, description: 'Archivio documentale e scadenze.', entities: ['documents'] },
-    { id: 'assets', name: 'Beni e manutenzioni', category: 'Operatività', price: 10, description: 'Attrezzature, veicoli e manutenzioni.', entities: ['assets', 'maintenance'] },
-    { id: 'reports', name: 'Report e KPI', category: 'Analisi', price: 8, description: 'Dashboard calcolata dai dati, filtri, CSV, backup e grafici.', entities: [] },
-    { id: 'finance', name: 'Easy Come Finance', category: 'Intelligence', price: 18, description: 'Controllo economico-finanziario: ricavi, costi, margini, crediti, cash flow e forecast.', entities: ['invoices','payments','suppliers','expenses'] },
-    { id: 'brain', name: 'Easy Come Brain', category: 'Intelligence', price: 20, description: 'Cervello operativo sui dati aziendali: risposte con evidenze, priorità e azioni approvabili.', entities: ['brain_actions'] },
-    { id: 'audit', name: 'Audit & Controlli', category: 'Intelligence', price: 16, description: 'Controlli automatici su anomalie, scadenze, qualità dati, concentrazione e riconciliazioni.', entities: ['audit_findings','brain_actions'] },
-    { id: 'easycome_hub', name: 'Manuale & Easy Come Hub', category: 'Assistenza', price: 0, included: true, description: 'Manuale personalizzato, onboarding, supporto, bug e richiesta nuove funzioni.', entities: [] },
-    { id: 'dynamic_pricing', name: 'Prezzi dinamici', category: 'Automazioni', price: 12, description: 'Stagioni, giorni, durata, persone, extra e promo.', entities: ['pricing_rules', 'quotes'] },
-    { id: 'automations', name: 'Motore automazioni', category: 'Automazioni', price: 8, description: 'Trigger, email, webhook, task e aggiornamenti.', entities: ['automation_log'] },
-    { id: 'multiuser', name: 'Utenti, ruoli e permessi', category: 'Sicurezza', price: 6, description: 'Accessi separati per titolare e collaboratori.', entities: [] },
-    { id: 'multisite', name: 'Più sedi', category: 'Struttura', price: 10, description: 'Anagrafica sedi e attribuzione della sede ai dati operativi.', entities: ['locations'] },
-    { id: 'ai', name: 'AI tramite integrazione', category: 'Automazioni', price: 15, description: 'Bozze, riepiloghi e classificazione tramite API esterna configurata.', entities: ['ai_requests'] },
-    { id: 'website', name: 'Sito pubblico coordinato', category: 'Canali', price: 12, description: 'Sito vetrina responsive coordinato con il gestionale.', entities: [] },
-    { id: 'mobile_app', name: 'App PWA installabile', category: 'Canali', price: 12, description: 'Web app mobile installabile con accessi rapidi e modalità offline di base.', entities: [] },
-    { id: 'branding', name: 'Brand kit completo', category: 'Identità', price: 6, description: 'Logo vettoriale, varianti, copertina social e guida visiva.', entities: [] },
+    { id: 'hospitality_core', name: 'Core Hospitality', category: 'Incluso', price: 0, included: true, description: 'Ospiti, prenotazioni, camere/alloggi, pagamenti, attività e pulizie nello stesso sistema.', entities: ['customers','bookings','resources','payments','tasks','housekeeping'] },
+    { id: 'direct_booking', name: 'Prenotazioni dirette', category: 'Vendita diretta', price: 0, included: true, description: 'Booking engine collegato al sito: disponibilità, prezzo, caparra/saldo e conferma.', entities: ['booking_extras'] },
+    { id: 'website', name: 'Booking Connector per il sito', category: 'Vendita diretta', price: 0, included: true, description: 'Motore prenotazioni Easy Come integrabile nel sito esistente tramite link, iframe o script.', entities: [] },
+    { id: 'channel_sync', name: 'Calendari Airbnb / Booking', category: 'Canali', price: 12, description: 'Centro canali per import/export iCal e predisposizione a connessioni channel manager.', entities: [] },
+    { id: 'guest_comms', name: 'Messaggi automatici ospite', category: 'Ospite', price: 10, description: 'Conferma, pre-arrivo, check-in, informazioni soggiorno e post check-out.', entities: ['guest_messages'] },
+    { id: 'self_checkin', name: 'Check-in digitale', category: 'Ospite', price: 10, description: 'Raccolta dati pre-arrivo, stato documenti e checklist di ingresso.', entities: ['guest_documents'] },
+    { id: 'tourist_tax', name: 'Tassa di soggiorno', category: 'Operatività', price: 6, description: 'Importi, esenzioni e stato collegati al soggiorno.', entities: ['tourist_tax'] },
+    { id: 'dynamic_pricing', name: 'Tariffe e regole di soggiorno', category: 'Ricavi', price: 12, description: 'Stagioni, giorni, durata, occupazione, extra e promozioni.', entities: ['pricing_rules'] },
+    { id: 'expenses', name: 'Costi e fornitori', category: 'Finance', price: 6, description: 'Utenze, pulizie, manutenzioni, commissioni e altri costi della struttura.', entities: ['suppliers','expenses'] },
+    { id: 'reports', name: 'Performance Hospitality', category: 'Finance', price: 0, included: true, description: 'Occupazione, ADR, RevPAR, ricavi diretti/OTA e andamento della struttura.', entities: [] },
+    { id: 'finance', name: 'Easy Come Finance', category: 'Finance', price: 18, description: 'Ricavi, costi, margine, incassi, forecast e lettura economica della struttura.', entities: ['invoices','payments','suppliers','expenses'] },
+    { id: 'audit', name: 'Controllo', category: 'Controllo', price: 16, description: 'Doppie prenotazioni, saldi mancanti, dati incompleti, pagamenti duplicati e anomalie operative.', entities: ['audit_findings','brain_actions'] },
+    { id: 'brain', name: 'Easy Come Brain', category: 'Controllo', price: 20, description: 'Domande sui dati della struttura, priorità e azioni suggerite con evidenze.', entities: ['brain_actions'] },
+    { id: 'automations', name: 'Automazioni operative', category: 'Automazioni', price: 8, description: 'Trigger su prenotazione, arrivo, partenza, pagamento e pulizia.', entities: ['automation_log'] },
+    { id: 'multiuser', name: 'Team e permessi', category: 'Struttura', price: 6, description: 'Accessi separati per titolare, reception, pulizie e collaboratori.', entities: [] },
+    { id: 'mobile_app', name: 'PWA mobile', category: 'Struttura', price: 12, description: 'Accesso rapido da smartphone a Oggi, calendario, arrivi, partenze e pulizie.', entities: [] },
+    { id: 'branding', name: 'Brand kit struttura', category: 'Identità', price: 6, description: 'Wordmark, favicon, social cover e direzione visiva coordinata al sito.', entities: [] },
+    { id: 'easycome_hub', name: 'Easy Come Hub', category: 'Incluso', price: 0, included: true, description: 'Manuale, progetto acquistato, download e richieste a Easy Come.', entities: [] },
   ];
 
   const ENTITY_PRESETS = {
     customers: {
-      key: 'customers', label: 'Clienti', singular: 'Cliente', icon: 'users',
+      key: 'customers', label: 'Ospiti', singular: 'Ospite', icon: 'users',
       fields: [
-        { key: 'name', label: 'Nome / Ragione sociale', type: 'text', required: true },
+        { key: 'name', label: 'Nome e cognome', type: 'text', required: true },
         { key: 'email', label: 'Email', type: 'email' },
         { key: 'phone', label: 'Telefono', type: 'phone' },
-        { key: 'tax_code', label: 'Codice fiscale / P. IVA', type: 'text' },
+        { key: 'country', label: 'Paese / provenienza', type: 'text' },
+        { key: 'language', label: 'Lingua', type: 'text' },
         { key: 'notes', label: 'Note', type: 'longtext' },
       ],
     },
     tasks: {
-      key: 'tasks', label: 'Attività', singular: 'Attività', icon: 'check-square',
+      key: 'tasks', label: 'Operazioni', singular: 'Operazione', icon: 'check-square',
       fields: [
         { key: 'title', label: 'Titolo', type: 'text', required: true },
         { key: 'status', label: 'Stato', type: 'select', options: ['Da fare', 'In corso', 'Completata'] },
@@ -66,18 +57,84 @@
         { key: 'resource_name', label: 'Risorsa', type: 'text' },
         { key: 'people', label: 'Persone / quantità', type: 'number' },
         { key: 'status', label: 'Stato', type: 'select', options: ['Richiesta', 'Confermata', 'Completata', 'Annullata'] },
-        { key: 'total', label: 'Totale', type: 'currency' },
-        { key: 'notes', label: 'Note', type: 'longtext' },
+        { key: 'total', label: 'Totale soggiorno', type: 'currency' },
+        { key: 'booking_ref', label: 'Codice prenotazione', type: 'text' },
+        { key: 'channel', label: 'Canale', type: 'select', options: ['Sito diretto','Airbnb','Booking.com','Expedia','Telefono','Altro'] },
+        { key: 'adults', label: 'Adulti', type: 'number' },
+        { key: 'children', label: 'Bambini', type: 'number' },
+        { key: 'deposit_due', label: 'Caparra prevista', type: 'currency' },
+        { key: 'balance_due', label: 'Saldo residuo', type: 'currency' },
+        { key: 'payment_status', label: 'Pagamento', type: 'select', options: ['Da pagare','Caparra pagata','Pagata','Rimborsata'] },
+        { key: 'checkin_status', label: 'Check-in', type: 'select', options: ['Da preparare','Pronto','Arrivato','Completato'] },
+        { key: 'notes', label: 'Note soggiorno', type: 'longtext' },
       ],
     },
     resources: {
-      key: 'resources', label: 'Risorse', singular: 'Risorsa', icon: 'grid',
+      key: 'resources', label: 'Camere & alloggi', singular: 'Alloggio', icon: 'grid',
       fields: [
         { key: 'name', label: 'Nome', type: 'text', required: true },
-        { key: 'category', label: 'Categoria', type: 'text' },
+        { key: 'category', label: 'Tipologia', type: 'text' },
         { key: 'capacity', label: 'Capacità', type: 'number' },
-        { key: 'active', label: 'Attiva', type: 'boolean' },
+        { key: 'base_price', label: 'Prezzo base / notte', type: 'currency' },
+        { key: 'cleaning_status', label: 'Stato camera', type: 'select', options: ['Libera','Occupata','Da pulire','Pronta','Fuori servizio'] },
+        { key: 'active', label: 'Attivo', type: 'boolean' },
         { key: 'notes', label: 'Note', type: 'longtext' },
+      ],
+    },
+
+    housekeeping: {
+      key: 'housekeeping', label: 'Pulizie', singular: 'Pulizia', icon: 'sparkles',
+      fields: [
+        { key: 'resource_name', label: 'Camera / alloggio', type: 'text', required: true },
+        { key: 'service_date', label: 'Data', type: 'date', required: true },
+        { key: 'status', label: 'Stato', type: 'select', options: ['Da preparare','In corso','Pronta','Controllata'] },
+        { key: 'assignee', label: 'Responsabile', type: 'text' },
+        { key: 'priority', label: 'Priorità', type: 'select', options: ['Normale','Alta','Urgente'] },
+        { key: 'notes', label: 'Note', type: 'longtext' },
+      ],
+    },
+    tourist_tax: {
+      key: 'tourist_tax', label: 'Tassa di soggiorno', singular: 'Voce tassa', icon: 'landmark',
+      fields: [
+        { key: 'booking_ref', label: 'Prenotazione', type: 'text', required: true },
+        { key: 'guest_name', label: 'Ospite', type: 'text' },
+        { key: 'taxable_guests', label: 'Ospiti soggetti', type: 'number' },
+        { key: 'nights', label: 'Notti imponibili', type: 'number' },
+        { key: 'amount', label: 'Importo', type: 'currency' },
+        { key: 'status', label: 'Stato', type: 'select', options: ['Da riscuotere','Riscossa','Esente','Rendicontata'] },
+        { key: 'notes', label: 'Note / esenzione', type: 'longtext' },
+      ],
+    },
+    guest_messages: {
+      key: 'guest_messages', label: 'Messaggi ospite', singular: 'Messaggio', icon: 'message-circle',
+      fields: [
+        { key: 'booking_ref', label: 'Prenotazione', type: 'text', required: true },
+        { key: 'guest_name', label: 'Ospite', type: 'text' },
+        { key: 'stage', label: 'Momento', type: 'select', options: ['Conferma','Pre-arrivo','Check-in','Durante il soggiorno','Post check-out'] },
+        { key: 'channel', label: 'Canale', type: 'select', options: ['Email','WhatsApp','SMS','OTA'] },
+        { key: 'status', label: 'Stato', type: 'select', options: ['Da inviare','Inviato','Fallito'] },
+        { key: 'message', label: 'Testo', type: 'longtext' },
+      ],
+    },
+    guest_documents: {
+      key: 'guest_documents', label: 'Check-in digitale', singular: 'Check-in', icon: 'id-card',
+      fields: [
+        { key: 'booking_ref', label: 'Prenotazione', type: 'text', required: true },
+        { key: 'guest_name', label: 'Ospite', type: 'text', required: true },
+        { key: 'document_status', label: 'Documenti', type: 'select', options: ['Mancanti','Parziali','Completi','Verificati'] },
+        { key: 'arrival_time', label: 'Ora arrivo prevista', type: 'text' },
+        { key: 'privacy_accepted', label: 'Privacy accettata', type: 'boolean' },
+        { key: 'notes', label: 'Note', type: 'longtext' },
+      ],
+    },
+    booking_extras: {
+      key: 'booking_extras', label: 'Extra prenotazione', singular: 'Extra', icon: 'plus-circle', system: true,
+      fields: [
+        { key: 'booking_ref', label: 'Prenotazione', type: 'text', required: true },
+        { key: 'name', label: 'Extra', type: 'text', required: true },
+        { key: 'quantity', label: 'Quantità', type: 'number' },
+        { key: 'unit_price', label: 'Prezzo unitario', type: 'currency' },
+        { key: 'total', label: 'Totale', type: 'currency' },
       ],
     },
     appointments: {
@@ -420,18 +477,19 @@
 
   function defaultProject() {
     return {
-      version: '10.4.0',
+      version: '1.0.0-hospitality',
       generatedAt: new Date().toISOString(),
       organizationId: uuidv4(),
       company: {
         name: '', slug: '', industry: '', description: '', email: '', phone: '',
         primaryColor: '#275dff', accentColor: '#17213b', surfaceColor: '#f7f8fb', currency: 'EUR', locale: 'it-IT', logoData: '', style: 'studio', layout: 'studio',
       },
-      modules: ['crm', 'tasks', 'easycome_hub'],
+      modules: ['hospitality_core','direct_booking','website','reports','easycome_hub'],
       customEntities: [],
       automations: [],
       hub: { enabled: true, manual: true, support: true, featureRequests: true, onboarding: true, updates: true },
-      pricing: { mode: 'none', enabled: false, basePrice: 0, unit: 'servizio', taxPerPerson: 0, depositPercent: 0, minimumUnits: 1, renewalNoticeDays: 15, rules: [], extras: [] },
+      pricing: { mode: 'dynamic', enabled: true, basePrice: 90, unit: 'notte', taxPerPerson: 0, depositPercent: 30, minimumUnits: 1, renewalNoticeDays: 15, rules: [], extras: [] },
+      hospitality: { type: 'B&B', city: '', address: '', unitCount: 4, maxGuests: 10, checkinFrom: '15:00', checkoutBy: '10:30', directBooking: true, paymentsEnabled: true, depositMode: 'percentage', cancellationPolicy: 'Flessibile', airbnbIcal: '', bookingIcal: '', connectorMode: 'overlay' },
       identity: { provider: 'easycome', supabaseUrl: '', supabaseAnonKey: '', ownerUserId: '', ownerEmail: '', easycomeBaseUrl: 'https://easy-come.it', dataMode: 'local' },
       delivery: { packagePrice: BASE_PRICE, implementationPrice: IMPLEMENTATION_PRICE, implementationSelected: true, managedServiceSelected: false, managedServicePrice: 0, notes: '', supportDays: 30, previewApproved: false },
     };
@@ -451,6 +509,7 @@
       const existing = merged.find((item) => item.key === entity.key);
       if (!existing) merged.push(entity);
       else {
+        if (entity.custom || entity.label) { existing.label = entity.label || existing.label; existing.singular = entity.singular || existing.singular; existing.icon = entity.icon || existing.icon; }
         entity.fields.forEach((field) => {
           if (!existing.fields.some((item) => item.key === field.key)) existing.fields.push(field);
         });
@@ -2027,19 +2086,12 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
     return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Brand kit — ${name}</title><style>body{margin:0;background:#eee8de;color:${accent};font-family:Arial,sans-serif}.wrap{max-width:1050px;margin:auto;padding:60px 24px}.hero{background:#fff;border:1px solid ${accent};padding:54px;box-shadow:14px 14px 0 #0001}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.18em;color:${primary}}h1{font:700 64px/1 Georgia,serif;margin:18px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:30px}.card{background:#fff;border:1px solid #bdb4a7;padding:24px}.swatch{height:130px;border:1px solid #0002;margin-bottom:16px}.type-serif{font:700 42px Georgia,serif}.type-sans{font:700 28px Arial,sans-serif}.rules{line-height:1.7}.logo{width:100%;background:#fff;border:1px solid #ddd}</style></head><body><main class="wrap"><section class="hero"><span class="eyebrow">IDENTITÀ VISIVA</span><h1>${name}</h1><p>${escapeHtml(project.company.description || 'Sistema visivo coordinato per comunicare in modo chiaro e riconoscibile.')}</p><div class="grid"><div class="card"><div class="swatch" style="background:${primary}"></div><strong>Colore principale</strong><p>${primary}</p></div><div class="card"><div class="swatch" style="background:${accent}"></div><strong>Colore scuro</strong><p>${accent}</p></div><div class="card"><div class="type-serif">Titoli</div><p>Georgia / serif editoriale</p></div><div class="card"><div class="type-sans">Testi e interfaccia</div><p>Arial / sans-serif funzionale</p></div></div><h2>Regole essenziali</h2><div class="rules"><p>Usa il colore principale per azioni, stati positivi e dettagli riconoscibili. Mantieni ampi spazi bianchi. Non alterare proporzioni e contrasto del logo. Per testi lunghi usa sempre il colore scuro su fondo chiaro.</p></div><img class="logo" src="logo-wordmark.svg" alt="Logo ${name}"></section></main></body></html>`;
   }
 
-  function generatedPublicSite(project) {
-    const modules = (project.modules || []).map((id)=>MODULES.find((item)=>item.id===id)?.name).filter(Boolean).slice(0,8);
-    const name = escapeHtml(project.company.name || 'La tua impresa');
-    const primary = project.company.primaryColor || '#ff6b35';
-    const accent = project.company.accentColor || '#151515';
-    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${name}</title><meta name="description" content="${escapeHtml(project.company.description || '')}"><style>*{box-sizing:border-box}body{margin:0;background:#f5efe6;color:${accent};font-family:Arial,sans-serif}a{color:inherit}.nav{display:flex;justify-content:space-between;align-items:center;padding:26px 5vw;border-bottom:1px solid ${accent}}.brand{font:700 25px Georgia,serif}.nav a{font-size:13px;font-weight:800;text-decoration:none}.hero{min-height:72vh;padding:8vw 5vw;display:grid;grid-template-columns:1.2fr .8fr;gap:4vw;align-items:center}.k{color:${primary};font-size:12px;font-weight:900;letter-spacing:.18em}h1{font:700 clamp(58px,8vw,128px)/.88 Georgia,serif;letter-spacing:-.06em;margin:22px 0}.lead{max-width:700px;font-size:20px;line-height:1.55}.cta{display:inline-block;margin-top:24px;padding:17px 25px;background:${primary};color:#fff;text-decoration:none;font-weight:800}.art{height:520px;border:1px solid ${accent};position:relative;overflow:hidden;background:#fff}.art:before{content:'';position:absolute;width:420px;height:420px;border-radius:50%;background:${primary};right:-120px;top:-90px}.art:after{content:'';position:absolute;width:520px;height:320px;background:${accent};left:-80px;bottom:-180px;transform:rotate(-12deg)}.services{padding:80px 5vw;background:#fff}.services h2{font:700 54px Georgia,serif}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:${accent};border:1px solid ${accent}}.card{background:#fff;padding:28px;min-height:170px}.card b{display:block;color:${primary};font-size:12px;margin-bottom:18px}.footer{padding:42px 5vw;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}@media(max-width:800px){.hero{grid-template-columns:1fr}.art{height:330px}}</style></head><body><nav class="nav"><div class="brand">${name}</div><a href="mailto:${escapeHtml(project.company.email || '')}">CONTATTI →</a></nav><main><section class="hero"><div><span class="k">${escapeHtml(project.company.industry || 'SERVIZI DIGITALI').toUpperCase()}</span><h1>${name}</h1><p class="lead">${escapeHtml(project.company.description || 'Un servizio costruito con attenzione, processi chiari e strumenti digitali semplici da usare.')}</p><a class="cta" href="mailto:${escapeHtml(project.company.email || '')}">Contatta ${name}</a></div><div class="art" aria-hidden="true"></div></section><section class="services"><span class="k">COSA GESTIAMO</span><h2>Un’esperienza più semplice, dall’inizio alla fine.</h2><div class="grid">${modules.map((module,index)=>`<article class="card"><b>${String(index+1).padStart(2,'0')}</b><h3>${escapeHtml(module)}</h3><p>Processo coordinato con il gestionale e aggiornabile dal tuo team.</p></article>`).join('')}</div></section></main><footer class="footer"><strong>${name}</strong><span>${escapeHtml(project.company.email || '')}</span></footer></body></html>`;
-  }
 
   function generatedMobileApp(project, entities) {
     const name = escapeHtml(project.company.name || 'La tua impresa');
     const primary = project.company.primaryColor || '#ff6b35';
     const quick = entities.filter((entity)=>!entity.system).slice(0,6);
-    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="${primary}"><link rel="manifest" href="manifest.webmanifest"><title>${name} App</title><style>*{box-sizing:border-box}body{margin:0;background:#f3f1ed;color:#161616;font-family:Arial,sans-serif;padding-bottom:90px}.top{padding:calc(25px + env(safe-area-inset-top)) 22px 22px;background:${project.company.accentColor || '#151515'};color:#fff}.top span{font-size:11px;letter-spacing:.14em;color:${primary};font-weight:900}.top h1{margin:9px 0 0;font:700 34px Georgia,serif}.content{padding:20px}.hero{background:${primary};color:#fff;border-radius:26px;padding:25px;min-height:180px;display:flex;flex-direction:column;justify-content:space-between}.hero strong{font:700 30px Georgia,serif}.hero button{border:0;background:#fff;color:#111;padding:13px 16px;border-radius:14px;font-weight:800}.label{font-size:11px;font-weight:900;letter-spacing:.12em;margin:28px 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tile{border:0;background:#fff;border-radius:20px;padding:20px;text-align:left;min-height:125px;box-shadow:0 8px 30px #00000008}.tile b{display:block;font-size:20px;margin-bottom:20px}.tile span{font-weight:800}.offline{background:#fff4d8;border-radius:18px;padding:17px;margin-top:16px;font-size:13px}.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:12px 10px calc(12px + env(safe-area-inset-bottom));font-size:11px;font-weight:800}.nav a{text-decoration:none;color:#222}</style></head><body><header class="top"><span>APP OPERATIVA</span><h1>${name}</h1></header><main class="content"><section class="hero"><div><small>OGGI</small><strong>Il lavoro importante, a portata di mano.</strong></div><button onclick="location.href='../index.html'">Apri il gestionale completo</button></section><div class="label">ACCESSI RAPIDI</div><section class="grid">${quick.map((entity,index)=>`<button class="tile" onclick="location.href='../index.html#${escapeHtml(entity.key)}'"><b>${['◎','▦','◇','✓','⌁','◷'][index%6]}</b><span>${escapeHtml(entity.label)}</span></button>`).join('')}</section><div class="offline"><strong>Modalità mobile</strong><br>La shell resta disponibile anche con connessione instabile; i dati cloud richiedono il collegamento a Supabase.</div></main><nav class="nav"><a href="../index.html">Gestionale</a><a href="../easycome-hub.html">Easy Come Hub</a>${(project.modules || []).some(id=>['finance','brain','audit'].includes(id)) ? '<a href="../intelligence.html">Intelligence</a>' : ''}${(project.modules || []).includes('website') ? '<a href="../public-site/index.html">Sito</a>' : ''}</nav><script>if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');</script></body></html>`;
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="${primary}"><link rel="manifest" href="manifest.webmanifest"><title>${name} App</title><style>*{box-sizing:border-box}body{margin:0;background:#f3f1ed;color:#161616;font-family:Arial,sans-serif;padding-bottom:90px}.top{padding:calc(25px + env(safe-area-inset-top)) 22px 22px;background:${project.company.accentColor || '#151515'};color:#fff}.top span{font-size:11px;letter-spacing:.14em;color:${primary};font-weight:900}.top h1{margin:9px 0 0;font:700 34px Georgia,serif}.content{padding:20px}.hero{background:${primary};color:#fff;border-radius:26px;padding:25px;min-height:180px;display:flex;flex-direction:column;justify-content:space-between}.hero strong{font:700 30px Georgia,serif}.hero button{border:0;background:#fff;color:#111;padding:13px 16px;border-radius:14px;font-weight:800}.label{font-size:11px;font-weight:900;letter-spacing:.12em;margin:28px 0 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tile{border:0;background:#fff;border-radius:20px;padding:20px;text-align:left;min-height:125px;box-shadow:0 8px 30px #00000008}.tile b{display:block;font-size:20px;margin-bottom:20px}.tile span{font-weight:800}.offline{background:#fff4d8;border-radius:18px;padding:17px;margin-top:16px;font-size:13px}.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:12px 10px calc(12px + env(safe-area-inset-bottom));font-size:11px;font-weight:800}.nav a{text-decoration:none;color:#222}</style></head><body><header class="top"><span>APP OPERATIVA</span><h1>${name}</h1></header><main class="content"><section class="hero"><div><small>OGGI</small><strong>Il lavoro importante, a portata di mano.</strong></div><button onclick="location.href='../index.html'">Apri il gestionale completo</button></section><div class="label">ACCESSI RAPIDI</div><section class="grid">${quick.map((entity,index)=>`<button class="tile" onclick="location.href='../index.html#${escapeHtml(entity.key)}'"><b>${['◎','▦','◇','✓','⌁','◷'][index%6]}</b><span>${escapeHtml(entity.label)}</span></button>`).join('')}</section><div class="offline"><strong>Modalità mobile</strong><br>La shell resta disponibile anche con connessione instabile; i dati cloud richiedono il collegamento a Supabase.</div></main><nav class="nav"><a href="../index.html">Gestionale</a><a href="../easycome-hub.html">Easy Come Hub</a>${(project.modules || []).some(id=>['finance','brain','audit'].includes(id)) ? '<a href="../intelligence.html">Intelligence</a>' : ''}${(project.modules || []).includes('website') ? '<a href="../booking-connector/booking.html">Booking</a>' : ''}</nav><script>if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');</script></body></html>`;
   }
 
   function generatedMobileManifest(project) {
@@ -2123,7 +2175,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
   function generatedPackageJson(project) {
     return JSON.stringify({
       name: slugify(project.company.name || 'easycome-gestionale'),
-      version: '10.4.0',
+      version: '1.0.0',
       private: true,
       scripts: { dev: 'npx serve .', preview: 'npx serve .', 'deploy:supabase': 'supabase db push' },
     }, null, 2);
@@ -2165,7 +2217,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
       { name: 'package.json', data: generatedPackageJson(project) },
       { name: '.gitignore', data: '.env\n.env.local\n.DS_Store\nnode_modules/\n' },
       { name: '.env.example', data: 'SUPABASE_URL=\nSUPABASE_ANON_KEY=\nEASYCOME_BASE_URL=https://easy-come.it\nAUTOMATION_CRON_SECRET=\nRESEND_API_KEY=\nEMAIL_FROM=\nAI_API_URL=\nAI_API_KEY=\nAI_MODEL=\n' },
-      { name: 'index.html', data: generatedIndexHtml(project) },
+      { name: ((project.templateId==='hospitality'||(project.modules||[]).includes('hospitality_core')) ? 'gestionale.html' : 'index.html'), data: generatedIndexHtml(project) },
       { name: 'easycome-hub.html', data: generatedHubHtml(project) },
       { name: 'intelligence.html', data: generatedIntelligenceHtml(project) },
       { name: 'manuale.html', data: generatedManualHtml(project, entities) },
@@ -2185,10 +2237,6 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
       { name: 'supabase/functions/invite-member/index.ts', data: generatedInviteFunction(project) },
       { name: 'automations/automation-plan.json', data: JSON.stringify(project.automations || [], null, 2) },
       { name: 'pricing/pricing-rules.json', data: JSON.stringify(project.pricing || {}, null, 2) },
-      ...((project.modules || []).includes('website') ? [
-        { name: 'public-site/index.html', data: generatedPublicSite(project) },
-        { name: 'public-site/README.md', data: '# Sito pubblico\n\nPagina vetrina coordinata con il gestionale. Personalizza testi, immagini, privacy e dati legali prima della pubblicazione.\n' },
-      ] : []),
       ...((project.modules || []).includes('mobile_app') ? [
         { name: 'mobile/index.html', data: generatedMobileApp(project, entities) },
         { name: 'mobile/manifest.webmanifest', data: generatedMobileManifest(project) },
@@ -2205,10 +2253,11 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
         { name: 'automations/n8n-workflow.json', data: generatedN8nWorkflow(project) },
         { name: 'automations/make-scenario-plan.json', data: generatedMakePlan(project) },
       ] : []),
+      ...((global.ECHospitalityTemplates && global.ECHospitalityTemplates.files) ? global.ECHospitalityTemplates.files(project) : []),
       { name: 'vercel.json', data: JSON.stringify({ cleanUrls: true, trailingSlash: false }, null, 2) },
       { name: 'netlify.toml', data: '[build]\n  publish = "."\n\n[[headers]]\n  for = "/*"\n  [headers.values]\n    X-Frame-Options = "DENY"\n    X-Content-Type-Options = "nosniff"\n' },
     ];
-    return { project: configObject, entities, price, files, filename: `${project.company.slug || 'gestionale'}-easycome-v10-4.zip` };
+    return { project: configObject, entities, price, files, filename: `${project.company.slug || 'gestionale'}-easycome-hospitality-v1.zip` };
   }
 
   function escapeHtml(value) {
