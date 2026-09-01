@@ -481,7 +481,7 @@
 
   function defaultProject() {
     return {
-      version: '3.0.0-hospitality',
+      version: '4.0.0-hospitality',
       generatedAt: new Date().toISOString(),
       organizationId: uuidv4(),
       company: {
@@ -2265,7 +2265,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
     const dedupedFiles = [...new Map(files.map((file) => [file.name, file])).values()];
     const obsoleteHospitalityUi = new Set(['assets/styles.css','assets/intelligence.css','assets/onboarding.css','js/app.js','js/intelligence.js','js/onboarding.js','js/hub.js']);
     const finalFiles = isHospitality ? dedupedFiles.filter((file) => !obsoleteHospitalityUi.has(file.name)) : dedupedFiles;
-    return { project: configObject, entities, price, files: finalFiles, filename: `${project.company.slug || 'gestionale'}-easycome-hospitality-v3-premium.zip` };
+    return { project: configObject, entities, price, files: finalFiles, filename: `${project.company.slug || 'gestionale'}-easycome-hospitality-v4-master.zip` };
   }
 
   function escapeHtml(value) {
