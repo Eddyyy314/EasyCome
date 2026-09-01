@@ -8,16 +8,16 @@ const global = { EasyZip: { createZipBytes }, ECProductTemplates, ECHospitalityT
   const IMPLEMENTATION_PRICE = 150;
 
   const MODULES = [
-    { id: 'hospitality_core', name: 'Core Hospitality', category: 'Incluso', price: 0, included: true, description: 'Ospiti, prenotazioni, camere/alloggi, pagamenti, attività e pulizie nello stesso sistema.', entities: ['customers','bookings','resources','payments','tasks','housekeeping','guest_documents'] },
+    { id: 'hospitality_core', name: 'Core Hospitality', category: 'Incluso', price: 0, included: true, description: 'Ospiti, prenotazioni, camere/alloggi, pagamenti, attività e pulizie nello stesso sistema.', entities: ['customers','bookings','resources','payments','tasks','housekeeping','guest_documents','guest_messages','tourist_tax'] },
     { id: 'channel_sync', name: 'Calendari dei portali', category: 'Canali', price: 12, description: 'Centro canali per import/export iCal e predisposizione a connessioni channel manager.', entities: [] },
-    { id: 'guest_comms', name: 'Messaggi ospite', category: 'Ospite', price: 10, description: 'Conferma, pre-arrivo, check-in, informazioni soggiorno e post check-out.', entities: ['guest_messages'] },
+    { id: 'guest_comms', name: 'Messaggi ospite', category: 'Incluso', price: 0, included: true, description: 'Conferma, pre-arrivo, check-in, informazioni soggiorno e post check-out.', entities: ['guest_messages'] },
     { id: 'self_checkin', name: 'Dati pre-arrivo', category: 'Ospite', price: 10, description: 'Raccolta dati pre-arrivo, stato documenti e checklist di ingresso.', entities: ['guest_documents'] },
-    { id: 'tourist_tax', name: 'Tassa di soggiorno', category: 'Operatività', price: 6, description: 'Importi, esenzioni e stato collegati al soggiorno.', entities: ['tourist_tax'] },
+    { id: 'tourist_tax', name: 'Tassa di soggiorno', category: 'Incluso', price: 0, included: true, description: 'Importi, esenzioni e stato collegati al soggiorno.', entities: ['tourist_tax'] },
     { id: 'dynamic_pricing', name: 'Tariffe e regole di soggiorno', category: 'Ricavi', price: 12, description: 'Stagioni, giorni, durata, occupazione, extra e promozioni.', entities: ['pricing_rules'] },
     { id: 'expenses', name: 'Costi e fornitori', category: 'Finance', price: 6, description: 'Utenze, pulizie, manutenzioni, commissioni e altri costi della struttura.', entities: ['suppliers','expenses'] },
     { id: 'reports', name: 'Numeri Hospitality', category: 'Finance', price: 0, included: true, description: 'Occupazione, ADR, RevPAR, ricavi diretti/OTA e andamento della struttura.', entities: [] },
     { id: 'finance', name: 'Costi e margini', category: 'Finance', price: 18, description: 'Ricavi, costi, margine, incassi, forecast e lettura economica della struttura.', entities: ['invoices','payments','suppliers','expenses'] },
-    { id: 'audit', name: 'Controllo automatico', category: 'Controllo', price: 16, description: 'Doppie prenotazioni, saldi mancanti, dati incompleti, pagamenti duplicati e anomalie operative.', entities: ['audit_findings','brain_actions'] },
+    { id: 'audit', name: 'Controllo automatico', category: 'Incluso', price: 0, included: true, description: 'Doppie prenotazioni, saldi mancanti, dati incompleti, pagamenti duplicati e anomalie operative.', entities: ['audit_findings','brain_actions'] },
     { id: 'brain', name: 'Easy Come Brain', category: 'Controllo', price: 20, description: 'Domande sui dati della struttura, priorità e azioni suggerite con evidenze.', entities: ['brain_actions'] },
     { id: 'automations', name: 'Automazioni operative', category: 'Automazioni', price: 8, description: 'Trigger su prenotazione, arrivo, partenza, pagamento e pulizia.', entities: ['automation_log'] },
     { id: 'multiuser', name: 'Team e permessi', category: 'Struttura', price: 6, description: 'Accessi separati per titolare, reception, pulizie e collaboratori.', entities: [] },
@@ -491,7 +491,7 @@ const global = { EasyZip: { createZipBytes }, ECProductTemplates, ECHospitalityT
         name: '', slug: '', industry: '', description: '', email: '', phone: '',
         primaryColor: '#275dff', accentColor: '#17213b', surfaceColor: '#f7f8fb', currency: 'EUR', locale: 'it-IT', logoData: '', style: 'studio', layout: 'studio',
       },
-      modules: ['hospitality_core','reports','easycome_hub'],
+      modules: ['hospitality_core','reports','guest_comms','tourist_tax','easycome_hub'],
       customEntities: [],
       automations: [],
       hub: { enabled: true, manual: true, support: true, featureRequests: true, onboarding: true, updates: true },
@@ -550,7 +550,7 @@ const global = { EasyZip: { createZipBytes }, ECProductTemplates, ECHospitalityT
     const bundleDiscount = Math.round(modulesTotal * discountRate * 100) / 100;
     const extras = modulesTotal + customEntitiesTotal + customFieldsTotal + automationTotal + pricingRulesTotal - bundleDiscount;
     const isHospitalityProject = project.templateId === 'hospitality' || (project.modules || []).includes('hospitality_core');
-    const base = Number(project.delivery.packagePrice || (isHospitalityProject ? 183 : BASE_PRICE));
+    const base = Number(project.delivery.packagePrice || (isHospitalityProject ? 199 : BASE_PRICE));
     const implementationSelected = true;
     const implementation = Number(project.delivery?.implementationPrice || IMPLEMENTATION_PRICE);
     return {
@@ -1484,7 +1484,7 @@ Deno.serve(async (req) => {
     const hospitality = project.templateId === 'hospitality' || (project.modules || []).includes('hospitality_core');
     const standard = hospitality ? 199 : price.base;
     const optional = hospitality ? Math.max(0, price.total - price.implementation - 199) : price.extras;
-    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Offerta ${escapeHtml(project.company.name||'')}</title><style>body{font-family:Arial,sans-serif;background:#f5f1e9;color:#171717;margin:0;padding:50px}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:24px;padding:45px;box-shadow:0 25px 80px #0001}h1{font:500 42px Georgia,serif;margin:12px 0}.muted{color:#6f6b65;line-height:1.55}.row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee;font-size:15px}.total{background:#171717;color:#fff;border-radius:18px;padding:22px;margin-top:20px}.total strong{font:500 38px Georgia,serif;display:block;margin-top:5px}.pill{display:inline-block;background:#fff0e9;color:#ff5a36;padding:8px 11px;border-radius:999px;font-weight:bold;font-size:12px}</style></head><body><div class="sheet"><span class="pill">EASY COME HOSPITALITY</span><h1>${escapeHtml(project.company.name||'Gestionale personalizzato')}</h1><p class="muted">${escapeHtml(project.company.description||'Gestionale Hospitality personalizzato per semplificare il lavoro quotidiano.')}</p><h2>Investimento</h2><div class="row"><span>${hospitality?'Easy Come Hospitality standard':'Pacchetto software'}</span><strong>€${standard.toFixed(2)}</strong></div><div class="row"><span>Funzioni aggiuntive</span><strong>€${optional.toFixed(2)}</strong></div><div class="row"><span>Implementazione Easy Come · obbligatoria</span><strong>€${price.implementation.toFixed(2)}</strong></div><div class="total"><span>Totale una tantum</span><strong>€${price.total.toFixed(2)}</strong><small>Nessun canone Easy Come obbligatorio.</small></div><h2>Cosa ricevi</h2><p>${hospitality?'Oggi, Calendario, Prenotazioni, Operazioni e Numeri in un’unica applicazione, con ospiti, pagamenti, pulizie e controllo operativo integrati.':'Gestionale responsive e manuale personalizzato.'} L’implementazione Easy Come è inclusa nel totale e serve a configurare il prodotto sui dati e sui flussi reali della struttura.</p></div></body></html>`;
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Offerta ${escapeHtml(project.company.name||'')}</title><style>body{font-family:Arial,sans-serif;background:#f5f1e9;color:#171717;margin:0;padding:50px}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:24px;padding:45px;box-shadow:0 25px 80px #0001}h1{font:500 42px Georgia,serif;margin:12px 0}.muted{color:#6f6b65;line-height:1.55}.row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee;font-size:15px}.total{background:#171717;color:#fff;border-radius:18px;padding:22px;margin-top:20px}.total strong{font:500 38px Georgia,serif;display:block;margin-top:5px}.pill{display:inline-block;background:#fff0e9;color:#ff5a36;padding:8px 11px;border-radius:999px;font-weight:bold;font-size:12px}</style></head><body><div class="sheet"><span class="pill">EASY COME HOSPITALITY</span><h1>${escapeHtml(project.company.name||'Gestionale personalizzato')}</h1><p class="muted">${escapeHtml(project.company.description||'Gestionale Hospitality personalizzato per semplificare il lavoro quotidiano.')}</p><h2>Investimento</h2><div class="row"><span>${hospitality?'Easy Come Hospitality standard':'Pacchetto software'}</span><strong>€${standard.toFixed(2)}</strong></div><div class="row"><span>Funzioni aggiuntive</span><strong>€${optional.toFixed(2)}</strong></div><div class="row"><span>Implementazione Easy Come · obbligatoria</span><strong>€${price.implementation.toFixed(2)}</strong></div><div class="total"><span>Totale una tantum</span><strong>€${price.total.toFixed(2)}</strong><small>Nessun canone Easy Come obbligatorio.</small></div><h2>Cosa ricevi</h2><p>${hospitality?'Oggi, Calendario, Prenotazioni, Ospiti, Camere, Pulizie, Pagamenti, Messaggi, Adempimenti, Canali, Report e Impostazioni, ciascuno in una sezione dedicata.':'Gestionale responsive e manuale personalizzato.'} L’implementazione Easy Come è inclusa nel totale e serve a configurare il prodotto sui dati e sui flussi reali della struttura.</p></div></body></html>`;
   }
 
   function generatedQualityReport(project, entities, price, quality) {
@@ -2274,7 +2274,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
     const dedupedFiles = [...new Map(files.map((file) => [file.name, file])).values()];
     const obsoleteHospitalityUi = new Set(['assets/styles.css','assets/intelligence.css','assets/onboarding.css','js/app.js','js/intelligence.js','js/onboarding.js','js/hub.js']);
     const finalFiles = isHospitality ? dedupedFiles.filter((file) => !obsoleteHospitalityUi.has(file.name)) : dedupedFiles;
-    return { project: configObject, entities, price, files: finalFiles, filename: `${project.company.slug || 'gestionale'}-easycome-hospitality-v8-factory-first.zip` };
+    return { project: configObject, entities, price, files: finalFiles, filename: `${project.company.slug || 'gestionale'}-easycome-hospitality-v9-sections.zip` };
   }
 
   function escapeHtml(value) {

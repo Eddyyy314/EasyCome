@@ -1,7 +1,7 @@
 export const MODULE_PRICES = Object.freeze({
-  hospitality_core: 0, reports: 0, easycome_hub: 0,
-  channel_sync: 12, guest_comms: 10, self_checkin: 10, tourist_tax: 6, dynamic_pricing: 12,
-  expenses: 6, finance: 18, audit: 16, brain: 20, automations: 8, multiuser: 6, mobile_app: 12,
+  hospitality_core: 0, reports: 0, guest_comms: 0, tourist_tax: 0, audit: 0, easycome_hub: 0,
+  channel_sync: 12, self_checkin: 10, dynamic_pricing: 12,
+  expenses: 6, finance: 18, brain: 20, automations: 8, multiuser: 6, mobile_app: 12,
 });
 
 const LEGACY_MODULE_ALIASES = Object.freeze({
@@ -41,7 +41,7 @@ export function calculateServerPrice(project = {}) {
   const discountRate = paidModuleCount >= 8 ? 0.20 : paidModuleCount >= 5 ? 0.10 : 0;
   const bundleDiscount = Math.round(modulesTotal * discountRate * 100) / 100;
   const base = modules.includes('hospitality_core')
-    ? numberEnv('EASYCOME_HOSPITALITY_BASE_PRICE', 183)
+    ? numberEnv('EASYCOME_HOSPITALITY_BASE_PRICE', 199)
     : numberEnv('EASYCOME_BASE_PRICE', 99);
   const implementationSelected = true;
   const implementation = numberEnv('EASYCOME_IMPLEMENTATION_PRICE', 150);
