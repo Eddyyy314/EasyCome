@@ -29,7 +29,7 @@ export function buildDemoModel(_templateId,placeId){const t=HOSPITALITY_TEMPLATE
 function inferredUnits(place){const seed=hashSeed(place.id||place.displayName?.text||'hospitality');return 3+(seed%6)}
 export function buildProject(place,_templateId='hospitality',ownerEmail=''){
   const p=ECGenerator.defaultProject(), units=inferredUnits(place), name=place.displayName?.text||'La tua struttura', city=String(place.formattedAddress||'').split(',').slice(-2,-1)[0]?.trim()||'';
-  p.version='2.0.0-hospitality-demo';p.templateId='hospitality';
+  p.version='3.0.0-hospitality-demo';p.templateId='hospitality';
   p.company.name=name;p.company.industry='B&B · Affittacamere · Case vacanza';p.company.description=`Gestionale Easy Come Hospitality per ${name}: Oggi, calendario, prenotazioni, operazioni e numeri in un'unica applicazione. I dati della demo sono fittizi.`;p.company.email=ownerEmail||'';p.company.primaryColor='#416a54';p.company.accentColor='#171815';p.company.surfaceColor='#f3efe7';p.company.style='studio';p.company.layout='studio';
   p.modules=['hospitality_core','dynamic_pricing','reports','audit','finance','easycome_hub','automations','channel_sync'];
   p.hospitality={...(p.hospitality||{}),type:'B&B / Affittacamere',city,address:place.formattedAddress||'',unitCount:units,maxGuests:units*2,checkinFrom:'15:00',checkoutBy:'10:30',paymentsEnabled:true,depositMode:'percentage',cancellationPolicy:'Flessibile',channels:['booking','airbnb','direct'],teamSize:'small',unitTypes:[{name:'Camera Matrimoniale',count:Math.max(1,units-2),capacity:2,basePrice:95},{name:'Camera Deluxe',count:1,capacity:2,basePrice:125},{name:'Family',count:1,capacity:4,basePrice:155}]};
