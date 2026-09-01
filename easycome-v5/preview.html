@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171713">
+<title>Demo completa · Easy Come Hospitality</title>
+<style>
+:root{--ink:#171713;--paper:#f5f1e9;--line:#dcd4ca;--orange:#ff5b35;--muted:#716a62}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171713;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+.viewer{height:100%;display:grid;grid-template-rows:64px minmax(0,1fr)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 18px;background:#fffdf9;border-bottom:1px solid var(--line);z-index:5}.left,.right{display:flex;align-items:center;gap:12px;min-width:0}.logo{width:36px;height:36px;border-radius:10px;background:var(--orange);color:white;display:grid;place-items:center;font-weight:950;font-size:11px}.brand{min-width:0}.brand b{display:block;font:500 17px Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:2px}.status{display:flex;align-items:center;gap:7px;color:#496852;font-size:12px;font-weight:800}.status:before{content:"";width:8px;height:8px;border-radius:50%;background:#48a46d}.btn{height:40px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 14px;font-size:12px;font-weight:850;cursor:pointer}.btn.dark{background:#171713;color:#fff;border-color:#171713}.stage{min-height:0;background:#f3efe7}.stage iframe{display:block;width:100%;height:100%;border:0;background:#f3efe7}.loading{height:100%;display:grid;place-items:center;background:#f3efe7;color:var(--muted);font-size:15px}.mobile-title{display:none}
+@media(max-width:720px){.viewer{grid-template-rows:56px minmax(0,1fr)}.bar{padding:0 10px}.brand b{font-size:15px}.brand small,.status,.back-label{display:none}.btn{height:36px;padding:0 10px}.right{gap:6px}.mobile-title{display:inline}}
+</style>
+</head>
+<body>
+<div class="viewer">
+<header class="bar">
+<div class="left"><span class="logo">EC</span><span class="brand"><b id="previewName">Easy Come Hospitality</b><small>Demo completa · tutte le sezioni sono navigabili</small></span></div>
+<div class="right"><span class="status">Demo live</span><button class="btn" id="backBtn"><span class="back-label">← Torna alla configurazione</span><span class="mobile-title">← Indietro</span></button><button class="btn dark" id="configureBtn">Personalizza</button></div>
+</header>
+<main class="stage" id="stage"><div class="loading">Sto aprendo il gestionale…</div></main>
+</div>
+<script src="js/hospitality-templates.js"></script>
+<script>
+(()=>{
+ const T=window.ECHospitalityTemplates, params=new URLSearchParams(location.search), demo=params.get('demo')||'';
+ const fallback={organizationId:'preview-v12',templateId:'hospitality',version:'12.0.0',company:{name:'Dimora Aurora',email:'demo@easy-come.it'},hospitality:{type:'B&B',city:'Palinuro',unitCount:6,channels:['booking','airbnb','direct'],bookingVolume:'medium',teamSize:'small',checkinMode:'in_person',cleaningMode:'internal'},modules:['hospitality_core','reports','guest_comms','tourist_tax','audit','easycome_hub'],delivery:{packagePrice:199,implementationSelected:true,implementationPrice:150}};
+ function readSaved(){try{const raw=sessionStorage.getItem('easycome_hospitality_preview_project');if(raw)return JSON.parse(raw)}catch(_){}try{const raw=localStorage.getItem('easycome_hospitality_v10');if(raw)return JSON.parse(raw)}catch(_){}return null}
+ async function project(){const saved=readSaved();if(saved)return saved;if(demo){try{const r=await fetch(`/api/demo-public?slug=${encodeURIComponent(demo)}`);const d=await r.json();if(r.ok&&d.project)return d.project}catch(_){}}return fallback}
+ function render(p){document.getElementById('previewName').textContent=(p.company&&p.company.name)||'Easy Come Hospitality';const frame=document.createElement('iframe');frame.title='Easy Come Hospitality · demo completa';frame.setAttribute('allow','clipboard-write');frame.srcdoc=T.previewHtml(p);const stage=document.getElementById('stage');stage.innerHTML='';stage.appendChild(frame)}
+ const back=`studio.html${demo?`?demo=${encodeURIComponent(demo)}`:''}`;document.getElementById('backBtn').onclick=()=>location.href=back;document.getElementById('configureBtn').onclick=()=>location.href=back;
+ project().then(render).catch(()=>render(fallback));
+})();
+</script>
+</body>
+</html>

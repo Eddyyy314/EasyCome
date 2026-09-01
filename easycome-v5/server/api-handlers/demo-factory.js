@@ -32,16 +32,18 @@ export default async function handler(req,res){
       return res.status(200).json({places:details});
     }
     if(action!=='generate')return res.status(400).json({error:'Azione non valida.'});
-    const limit=Math.max(1,Math.min(100,Number(req.body?.limit)||100));
+    const limit=Math.max(5,Math.min(100,Number(req.body?.limit)||5));
     const existing=await seenPlaceIds();
     const campaignId=crypto.randomUUID();
     const campaign=await createCampaign({id:campaignId,requested_count:limit,status:'running',source:'google_places',created_at:new Date().toISOString()});
-    const plan=buildQueryPlan(`${existing.size}:${campaignId}`,240); const selected=[]; const inBatch=new Set(); const templateCounts=new Map(); const maxPerTemplate=Math.max(2,Math.ceil(limit*0.20)); const perQueryCap=limit<=10?1:2; let queriesRun=0; let rawSeen=0; let failedQueries=0; let firstGoogleError='';
+    // Vertical Factory: every accepted lead is hospitality, so do not cap results per template.
+    // The previous generic balancing rule effectively capped a 5-result hospitality batch at 2 leads.
+    const plan=buildQueryPlan(`${existing.size}:${campaignId}`,520); const selected=[]; const inBatch=new Set(); const perQueryCap=limit<=10?4:3; let queriesRun=0; let rawSeen=0; let failedQueries=0; let firstGoogleError='';
     try{
-      const concurrency=6;
+      const concurrency=8;
       for(let offset=0;offset<plan.length && selected.length<limit;offset+=concurrency){
         const wave=plan.slice(offset,offset+concurrency);
-        const settled=await Promise.allSettled(wave.map(query=>textSearch(query,8)));
+        const settled=await Promise.allSettled(wave.map(query=>textSearch(query,20)));
         queriesRun+=wave.length;
         for(const result of settled){
           if(result.status!=='fulfilled'){ failedQueries++; if(!firstGoogleError) firstGoogleError=String(result.reason?.message||result.reason||'Errore Google Places'); continue; }
@@ -49,8 +51,7 @@ export default async function handler(req,res){
           for(const p of result.value.places||[]){
             rawSeen++; if(!p.id||p.businessStatus==='CLOSED_PERMANENTLY'||existing.has(p.id)||inBatch.has(p.id))continue;
             const templateId=classifyPlace(p);
-            if((templateCounts.get(templateId)||0)>=maxPerTemplate)continue;
-            inBatch.add(p.id); templateCounts.set(templateId,(templateCounts.get(templateId)||0)+1); acceptedFromQuery++;
+            inBatch.add(p.id); acceptedFromQuery++;
             const slug=demoSlug(p.id); const model=buildDemoModel(templateId,p.id); const quotedPrice=demoPrice(p,templateId); const snap=publicPlace(p); const now=new Date(); const expires=new Date(now.getTime()+7*86400000);
             const demoConfig={...model,quotedPrice,placeSnapshot:{id:snap.id,name:snap.name,address:snap.address,category:snap.category,primaryType:snap.primaryType,types:snap.types}};
             selected.push({place:p, row:{campaign_id:campaignId,place_id:p.id,demo_slug:slug,template_id:templateId,demo_config:demoConfig,status:'generated',expires_at:expires.toISOString(),created_at:now.toISOString()}});
@@ -63,13 +64,13 @@ export default async function handler(req,res){
         if(rawSeen===0 && failedQueries===queriesRun && queriesRun>=concurrency){
           throw new Error(firstGoogleError || 'Google Places non ha restituito alcuna risposta valida. Controlla API key, Places API (New) e fatturazione Google Cloud.');
         }
-        if(queriesRun>=96&&selected.length<limit)break;
+        if(queriesRun>=240&&selected.length<limit)break;
       }
       await insertTargets(selected.map(x=>x.row));
       await markCampaign(campaignId,{status:selected.length===limit?'completed':'partial',generated_count:selected.length,queries_run:queriesRun,finished_at:new Date().toISOString()});
       const origin=baseUrl(req);
       const targets=selected.map(({place,row})=>{const detail=publicPlace(place);const demoUrl=`${origin}/demo.html?d=${encodeURIComponent(row.demo_slug)}`;const price=Number(row.demo_config?.quotedPrice||demoPrice(place,row.template_id));return {...detail,id:row.place_id,demoSlug:row.demo_slug,demoUrl,templateId:row.template_id,templateLabel:row.demo_config?.label||row.template_id,expiresAt:row.expires_at,price,subject:outreachSubject(place),message:outreachMessage(place,demoUrl,price)}});
-      return res.status(200).json({campaign:{...campaign,status:selected.length===limit?'completed':'partial',generated_count:selected.length,queries_run:queriesRun},targets,stats:{requested:limit,generated:selected.length,alreadySeen:existing.size,queriesRun,rawSeen,failedQueries},warning:selected.length<limit?`Trovate ${selected.length} nuove attività prima del limite di sicurezza delle query. Premi di nuovo Genera: i Place ID già usati resteranno esclusi.`:''});
+      return res.status(200).json({campaign:{...campaign,status:selected.length===limit?'completed':'partial',generated_count:selected.length,queries_run:queriesRun},targets,stats:{requested:limit,generated:selected.length,alreadySeen:existing.size,queriesRun,rawSeen,failedQueries},warning:selected.length<limit?`Ricerca estesa completata: trovate ${selected.length} nuove strutture non ancora usate. Easy Come ha già ampliato automaticamente query e città; puoi rilanciare il batch per continuare con altre zone.`:''});
     }catch(error){await markCampaign(campaignId,{status:'failed',generated_count:selected.length,queries_run:queriesRun,finished_at:new Date().toISOString(),error_message:String(error.message||error).slice(0,800)}).catch(()=>{});throw error}
   }catch(error){console.error(error);return res.status(400).json({error:error.message||'Errore Demo Factory.'})}
 }

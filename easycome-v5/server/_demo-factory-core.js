@@ -2,7 +2,8 @@ import crypto from 'node:crypto';
 import { ECGenerator } from './_generator-node.js';
 
 export const ITALY_CITIES = [
-  'Roma','Firenze','Venezia','Milano','Napoli','Bologna','Verona','Torino','Genova','Palermo','Catania','Bari','Lecce','Salerno','Sorrento','Amalfi','Matera','Perugia','Siena','Lucca','Pisa','Rimini','Ravenna','Trieste','Cagliari','Alghero','Olbia','Taormina','Siracusa','Cefalù','Como','Bergamo','Trento','Bolzano','Merano','La Spezia','Monterosso al Mare','Sanremo','Orvieto','Assisi'
+  'Roma','Firenze','Venezia','Milano','Napoli','Bologna','Verona','Torino','Genova','Palermo','Catania','Bari','Lecce','Salerno','Sorrento','Amalfi','Matera','Perugia','Siena','Lucca','Pisa','Rimini','Ravenna','Trieste','Cagliari','Alghero','Olbia','Taormina','Siracusa','Cefalù','Como','Bergamo','Trento','Bolzano','Merano','La Spezia','Monterosso al Mare','Sanremo','Orvieto','Assisi',
+  'Palinuro','Marina di Camerota','Tropea','Positano','Praiano','Ravello','Capri','Anacapri','Ischia','Procida','Gallipoli','Otranto','Santa Maria di Leuca','Polignano a Mare','Monopoli','Alberobello','Ostuni','Vieste','Peschici','San Vito Lo Capo','Castellammare del Golfo','Scopello','Noto','Ragusa','Modica','Scicli','Marzamemi','Cefalù','Castelsardo','Santa Teresa Gallura','Villasimius','San Teodoro','Bosa','Orgosolo','Arezzo','Cortona','San Gimignano','Pienza','Montepulciano','Montalcino','Volterra','Spoleto','Gubbio','Todi','Viterbo','Gaeta','Sperlonga','Ponza','Vieste','Otranto','Polignano a Mare','Maratea','Scalea','Diamante','Scilla','Pizzo','Civita','Alberobello','Locorotondo'
 ];
 
 export const SEARCH_KEYWORDS = [
