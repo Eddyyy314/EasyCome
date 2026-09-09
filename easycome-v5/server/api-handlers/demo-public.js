@@ -18,6 +18,6 @@ export default async function handler(req,res){
     const price=Number(target.demo_config?.quotedPrice||demoPrice(raw,target.template_id));
     project.demoSource={...(project.demoSource||{}),quotedPrice:price,slug,place,publicDataPrefill:true};
     res.setHeader('cache-control','private, no-store, max-age=0');
-    return res.status(200).json({slug,place,model,project,price,startingPrice:349,expiresAt:target.expires_at,views:count,templateLabel:t.label,googleMapsAttribution:true});
+    return res.status(200).json({slug,place,model,project,price,startingPrice:249,expiresAt:target.expires_at,views:count,templateLabel:t.label,googleMapsAttribution:true});
   }catch(error){console.error(error);return res.status(400).json({error:error.message||'Errore caricamento demo.'})}
 }

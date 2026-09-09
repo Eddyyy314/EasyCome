@@ -550,7 +550,7 @@ const global = { EasyZip: { createZipBytes }, ECProductTemplates, ECHospitalityT
     const bundleDiscount = Math.round(modulesTotal * discountRate * 100) / 100;
     const extras = modulesTotal + customEntitiesTotal + customFieldsTotal + automationTotal + pricingRulesTotal - bundleDiscount;
     const isHospitalityProject = project.templateId === 'hospitality' || (project.modules || []).includes('hospitality_core');
-    const base = Number(project.delivery.packagePrice || (isHospitalityProject ? 199 : BASE_PRICE));
+    const base = Number(project.delivery.packagePrice || (isHospitalityProject ? 99 : BASE_PRICE));
     const implementationSelected = true;
     const implementation = Number(project.delivery?.implementationPrice || IMPLEMENTATION_PRICE);
     return {
@@ -1483,8 +1483,8 @@ Deno.serve(async (req) => {
   function generatedOffer(project, price) {
     const hospitality = project.templateId === 'hospitality' || (project.modules || []).includes('hospitality_core');
     const standard = hospitality ? 199 : price.base;
-    const optional = hospitality ? Math.max(0, price.total - price.implementation - 199) : price.extras;
-    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Offerta ${escapeHtml(project.company.name||'')}</title><style>body{font-family:Arial,sans-serif;background:#f5f1e9;color:#171717;margin:0;padding:50px}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:24px;padding:45px;box-shadow:0 25px 80px #0001}h1{font:500 42px Georgia,serif;margin:12px 0}.muted{color:#6f6b65;line-height:1.55}.row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee;font-size:15px}.total{background:#171717;color:#fff;border-radius:18px;padding:22px;margin-top:20px}.total strong{font:500 38px Georgia,serif;display:block;margin-top:5px}.pill{display:inline-block;background:#fff0e9;color:#ff5a36;padding:8px 11px;border-radius:999px;font-weight:bold;font-size:12px}</style></head><body><div class="sheet"><span class="pill">EASY COME HOSPITALITY</span><h1>${escapeHtml(project.company.name||'Gestionale personalizzato')}</h1><p class="muted">${escapeHtml(project.company.description||'Gestionale Hospitality personalizzato per semplificare il lavoro quotidiano.')}</p><h2>Investimento</h2><div class="row"><span>${hospitality?'Easy Come Hospitality standard':'Pacchetto software'}</span><strong>€${standard.toFixed(2)}</strong></div><div class="row"><span>Funzioni aggiuntive</span><strong>€${optional.toFixed(2)}</strong></div><div class="row"><span>Implementazione Easy Come · obbligatoria</span><strong>€${price.implementation.toFixed(2)}</strong></div><div class="total"><span>Totale una tantum</span><strong>€${price.total.toFixed(2)}</strong><small>Nessun canone Easy Come obbligatorio.</small></div><h2>Cosa ricevi</h2><p>${hospitality?'Oggi, Calendario, Prenotazioni, Ospiti, Camere, Pulizie, Pagamenti, Messaggi, Adempimenti, Canali, Report e Impostazioni, ciascuno in una sezione dedicata.':'Gestionale responsive e manuale personalizzato.'} L’implementazione Easy Come è inclusa nel totale e serve a configurare il prodotto sui dati e sui flussi reali della struttura.</p></div></body></html>`;
+    const optional = hospitality ? Math.max(0, price.total - price.implementation - 99) : price.extras;
+    return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Offerta ${escapeHtml(project.company.name||'')}</title><style>body{font-family:Arial,sans-serif;background:#f5f1e9;color:#171717;margin:0;padding:50px}.sheet{max-width:820px;margin:auto;background:#fff;border-radius:24px;padding:45px;box-shadow:0 25px 80px #0001}h1{font:500 42px Georgia,serif;margin:12px 0}.muted{color:#6f6b65;line-height:1.55}.row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee;font-size:15px}.total{background:#171717;color:#fff;border-radius:18px;padding:22px;margin-top:20px}.total strong{font:500 38px Georgia,serif;display:block;margin-top:5px}.pill{display:inline-block;background:#fff0e9;color:#ff5a36;padding:8px 11px;border-radius:999px;font-weight:bold;font-size:12px}</style></head><body><div class="sheet"><span class="pill">EASY COME HOSPITALITY</span><h1>${escapeHtml(project.company.name||'Gestionale personalizzato')}</h1><p class="muted">${escapeHtml(project.company.description||'Gestionale Hospitality personalizzato per semplificare il lavoro quotidiano.')}</p><h2>Investimento</h2><div class="row"><span>${hospitality?'Easy Come Zero-touch':'Pacchetto software'}</span><strong>€${standard.toFixed(2)}</strong></div><div class="row"><span>Funzioni aggiuntive</span><strong>€${optional.toFixed(2)}</strong></div><div class="row"><span>Implementazione Easy Come · obbligatoria</span><strong>€${price.implementation.toFixed(2)}</strong></div><div class="total"><span>Totale una tantum</span><strong>€${price.total.toFixed(2)}</strong><small>Nessun canone Easy Come obbligatorio.</small></div><h2>Cosa ricevi</h2><p>${hospitality?'Control Room delle eccezioni, Stay Readiness a 6 dimensioni, Stay Pack per ogni soggiorno, chiusura mensile e regole operative personalizzate.':'Gestionale responsive e manuale personalizzato.'} L’implementazione Easy Come è inclusa nel totale e serve a configurare il prodotto sui dati e sui flussi reali della struttura.</p></div></body></html>`;
   }
 
   function generatedQualityReport(project, entities, price, quality) {
@@ -1665,8 +1665,8 @@ Accedi all’indirizzo ${project.identity?.easycomeBaseUrl || 'https://easy-come
 
 ## Prezzo Easy Come configurato
 
-${(project.templateId === 'hospitality' || (project.modules || []).includes('hospitality_core')) ? `- Easy Come Hospitality standard: €199.00
-- Funzioni aggiuntive: €${Math.max(0, price.total - price.implementation - 199).toFixed(2)}
+${(project.templateId === 'hospitality' || (project.modules || []).includes('hospitality_core')) ? `- Easy Come Zero-touch: €99.00
+- Funzioni aggiuntive: €${Math.max(0, price.total - price.implementation - 99).toFixed(2)}
 - Implementazione assistita obbligatoria: €${price.implementation.toFixed(2)}
 - Nessun canone Easy Come obbligatorio · acquisto una tantum
 - **Totale da pagare ora: €${price.total.toFixed(2)}**` : `- Pacchetto base: €${price.base.toFixed(2)}
@@ -2274,7 +2274,7 @@ Registrati dal gestionale con l’email del titolare configurata nel progetto: *
     const dedupedFiles = [...new Map(files.map((file) => [file.name, file])).values()];
     const obsoleteHospitalityUi = new Set(['assets/styles.css','assets/intelligence.css','assets/onboarding.css','js/app.js','js/intelligence.js','js/onboarding.js','js/hub.js']);
     const finalFiles = isHospitality ? dedupedFiles.filter((file) => !obsoleteHospitalityUi.has(file.name)) : dedupedFiles;
-    return { project: configObject, entities, price, files: finalFiles, filename: `${project.company.slug || 'gestionale'}-easycome-hospitality-v9-sections.zip` };
+    return { project: configObject, entities, price, files: finalFiles, filename: `${project.company.slug || 'gestionale'}-easycome-zero-touch-v14.zip` };
   }
 
   function escapeHtml(value) {

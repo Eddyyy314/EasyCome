@@ -41,7 +41,7 @@ export function calculateServerPrice(project = {}) {
   const discountRate = paidModuleCount >= 8 ? 0.20 : paidModuleCount >= 5 ? 0.10 : 0;
   const bundleDiscount = Math.round(modulesTotal * discountRate * 100) / 100;
   const base = modules.includes('hospitality_core')
-    ? numberEnv('EASYCOME_HOSPITALITY_BASE_PRICE', 199)
+    ? numberEnv('EASYCOME_HOSPITALITY_BASE_PRICE', 99)
     : numberEnv('EASYCOME_BASE_PRICE', 99);
   const implementationSelected = true;
   const implementation = numberEnv('EASYCOME_IMPLEMENTATION_PRICE', 150);
