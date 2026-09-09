@@ -1,0 +1,11 @@
+{
+  "name": "easycome-v14-zero-touch",
+  "version": "14.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx vercel dev",
+    "static": "npx serve .",
+    "build": "node scripts/build-public.mjs"
+  }
+}
