@@ -1,7 +1,8 @@
 export const MODULE_PRICES = Object.freeze({
-  hospitality_core: 0, reports: 0, guest_comms: 0, tourist_tax: 0, audit: 0, easycome_hub: 0,
-  channel_sync: 12, self_checkin: 10, dynamic_pricing: 12,
-  expenses: 6, finance: 18, brain: 20, automations: 8, multiuser: 6, mobile_app: 12,
+  crm: 0, tasks: 0, bookings: 10, appointments: 8, quotes: 6, orders: 8,
+  inventory: 10, invoices: 12, payments: 8, expenses: 6, projects: 8,
+  support: 8, staff: 8, documents: 4, assets: 10, reports: 8, finance: 18, brain: 20, audit: 16, easycome_hub: 0,
+  dynamic_pricing: 12, automations: 8, multiuser: 6, multisite: 10, ai: 15, website: 12, mobile_app: 12, branding: 6,
 });
 
 const LEGACY_MODULE_ALIASES = Object.freeze({
@@ -40,9 +41,7 @@ export function calculateServerPrice(project = {}) {
   const paidModuleCount = modules.filter((id) => MODULE_PRICES[id] > 0).length;
   const discountRate = paidModuleCount >= 8 ? 0.20 : paidModuleCount >= 5 ? 0.10 : 0;
   const bundleDiscount = Math.round(modulesTotal * discountRate * 100) / 100;
-  const base = modules.includes('hospitality_core')
-    ? numberEnv('EASYCOME_HOSPITALITY_BASE_PRICE', 99)
-    : numberEnv('EASYCOME_BASE_PRICE', 99);
+  const base = numberEnv('EASYCOME_BASE_PRICE', 99);
   const implementationSelected = true;
   const implementation = numberEnv('EASYCOME_IMPLEMENTATION_PRICE', 150);
   const extras = modulesTotal + customEntitiesTotal + customFieldsTotal + automationTotal + pricingRulesTotal - bundleDiscount;
@@ -53,7 +52,7 @@ export function calculateServerPrice(project = {}) {
 export function compactProject(project = {}) {
   const company = project.company || {};
   return {
-    version: project.version || '1.0.0-hospitality',
+    version: project.version || '10.2.0',
     organizationId: project.organizationId || '',
     company: {
       name: String(company.name || '').slice(0, 160),
@@ -75,13 +74,12 @@ export function compactProject(project = {}) {
     customEntities: Array.isArray(project.customEntities) ? project.customEntities.slice(0, 30) : [],
     automations: Array.isArray(project.automations) ? project.automations.slice(0, 40) : [],
     pricing: project.pricing || {},
-    hospitality: project.hospitality || {},
     hub: project.hub || { enabled: true },
     delivery: {
       previewApproved: Boolean(project.delivery?.previewApproved),
       implementationSelected: true,
-      managedServiceSelected: false,
-      managedServicePrice: 0,
+      managedServiceSelected: true,
+      managedServicePrice: 150,
       notes: String(project.delivery?.notes || '').slice(0, 2500),
     },
   };

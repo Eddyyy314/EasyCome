@@ -29,10 +29,6 @@
   "outputDirectory": "dist-public",
   "rewrites": [
     {
-      "source": "/anteprima",
-      "destination": "/ANTEPRIMA-SICURA.html"
-    },
-    {
       "source": "/api/admin-tools",
       "destination": "/api/router?route=admin-tools"
     },

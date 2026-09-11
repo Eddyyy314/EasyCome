@@ -12,7 +12,7 @@ export default async function handler(req,res){
     if(order.status!=='paid') throw new Error('Il pagamento non risulta confermato.');
     if(!order.project||typeof order.project!=='object') throw new Error('Configurazione del progetto non disponibile.');
     const project=structuredClone(order.project);project.identity={...(project.identity||{}),supabaseUrl:String(process.env.SUPABASE_URL||''),supabaseAnonKey:String(process.env.SUPABASE_ANON_KEY||''),ownerUserId:order.user_id,ownerEmail:order.customer_email,easycomeBaseUrl:String(process.env.APP_URL||'https://easy-come.it').replace(/\/$/,''),dataMode:'local'};project.organizationId=project.organizationId||order.id;project.delivery={...(project.delivery||{}),previewApproved:true};
-    const generated=ECGenerator.generatePackage(project);const zip=createZipBytes(generated.files);const filename=`${safeName(order.company_name||project.company?.name)}-easycome-zero-touch-v14.zip`;const now=new Date().toISOString();
+    const generated=ECGenerator.generatePackage(project);const zip=createZipBytes(generated.files);const filename=`${safeName(order.company_name||project.company?.name)}-easycome-studio-v8.zip`;const now=new Date().toISOString();
     await updateOrderById(order.id,{prepared_filename:filename,download_count:Number(order.download_count||0)+1,last_downloaded_at:now,updated_at:now});
     res.setHeader('content-type','application/zip');res.setHeader('content-disposition',`attachment; filename="${filename}"`);res.setHeader('cache-control','private,no-store,max-age=0');return res.status(200).send(Buffer.from(zip));
   }catch(error){console.error(error);return res.status(400).json({error:error.message||'Impossibile scaricare il pacchetto.'})}
