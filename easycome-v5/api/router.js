@@ -1,3 +1,4 @@
+import adminSession from '../server/api-handlers/admin-session.js';
 import adminTools from '../server/api-handlers/admin-tools.js';
 import checkoutStatus from '../server/api-handlers/checkout-status.js';
 import createBillingPortal from '../server/api-handlers/create-billing-portal.js';
@@ -16,6 +17,7 @@ import withdrawalRequest from '../server/api-handlers/withdrawal-request.js';
 import { json } from '../server/_responses.js';
 
 const handlers = {
+  'admin-session': adminSession,
   'admin-tools': adminTools,
   'checkout-status': checkoutStatus,
   'create-billing-portal': createBillingPortal,

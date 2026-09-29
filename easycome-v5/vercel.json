@@ -29,6 +29,10 @@
   "outputDirectory": "dist-public",
   "rewrites": [
     {
+      "source": "/api/admin-session",
+      "destination": "/api/router?route=admin-session"
+    },
+    {
       "source": "/api/admin-tools",
       "destination": "/api/router?route=admin-tools"
     },
